@@ -1,0 +1,123 @@
+﻿@page
+@model RegisterModel
+@{
+    ViewData["Title"] = "Registro de Usuario";
+    Layout = "/Views/Shared/_Layout.cshtml";
+}
+
+<div class="container">
+    <div class="row justify-content-center align-items-center" style="min-height: 80vh;">
+        <div class="col-md-6 col-lg-5">
+            <div class="card shadow-lg border-0" style="border-radius: 20px; overflow: hidden;">
+                @* Cabecera con Degradado *@
+                <div class="bg-success bg-gradient py-4 text-center">
+                    <i class="bi bi-person-plus-fill text-white" style="font-size: 2.5rem;"></i>
+                    <h3 class="text-white fw-bold mt-2">Únete a BaraTickets</h3>
+                </div>
+
+                <div class="card-body p-4 p-md-5">
+                    <div class="text-center mb-4">
+                        <h4 class="fw-bold">Crear Cuenta</h4>
+                        <p class="text-muted small">Completa tus datos para empezar a comprar tickets</p>
+                    </div>
+
+                    <form id="registerForm" asp-route-returnUrl="@Model.ReturnUrl" method="post">
+                        @* Cambiado a "All" para que veas cualquier error oculto *@
+                        <div asp-validation-summary="All" class="text-danger small mb-3"></div>
+
+                        @* 1. CAMPO DE NOMBRE (Ahora dentro del form) *@
+                        <div class="form-floating mb-3">
+                            <input asp-for="Input.NombreCompleto" class="form-control border-0 bg-light" placeholder="Tu nombre completo" style="border-radius: 12px;" />
+                            <label asp-for="Input.NombreCompleto" class="text-muted">Nombre Completo</label>
+                            <span asp-validation-for="Input.NombreCompleto" class="text-danger small"></span>
+                        </div>
+
+                        @* 2. EMAIL *@
+                        <div class="form-floating mb-3">
+                            <input asp-for="Input.Email" class="form-control border-0 bg-light" autocomplete="username" aria-required="true" placeholder="correo@ejemplo.com" style="border-radius: 12px;" />
+                            <label asp-for="Input.Email" class="text-muted">Correo electrónico</label>
+                            <span asp-validation-for="Input.Email" class="text-danger small"></span>
+                        </div>
+                        @* Password *@
+                        <div class="form-floating mb-3 position-relative">
+                            <input asp-for="Input.Password" type="password" class="form-control border-0 bg-light" id="regPass" autocomplete="new-password" aria-required="true" placeholder="Contraseña" style="border-radius: 12px; padding-right: 45px;" />
+                            <label asp-for="Input.Password" class="text-muted">Contraseña</label>
+                            <button type="button" id="toggleRegPass" class="btn position-absolute top-50 end-0 translate-middle-y border-0 text-muted" style="z-index: 10; margin-right: 10px;">
+                                <i class="bi bi-eye" id="eyeIconReg"></i>
+                            </button>
+                            <span asp-validation-for="Input.Password" class="text-danger small"></span>
+                        </div>
+
+                        @* Confirm Password *@
+                        <div class="form-floating mb-4 position-relative">
+                            <input asp-for="Input.ConfirmPassword" type="password" class="form-control border-0 bg-light" id="confirmPass" autocomplete="new-password" aria-required="true" placeholder="Confirmar Contraseña" style="border-radius: 12px; padding-right: 45px;" />
+                            <label asp-for="Input.ConfirmPassword" class="text-muted">Confirmar Contraseña</label>
+                            <button type="button" id="toggleConfirmPass" class="btn position-absolute top-50 end-0 translate-middle-y border-0 text-muted" style="z-index: 10; margin-right: 10px;">
+                                <i class="bi bi-eye" id="eyeIconConfirm"></i>
+                            </button>
+                            <span asp-validation-for="Input.ConfirmPassword" class="text-danger small"></span>
+                        </div>
+
+                        @* Botón de Registro *@
+                        <button id="registerSubmit" type="submit" class="btn btn-success w-100 py-3 fw-bold shadow-sm" style="border-radius: 12px; transition: 0.3s;">
+                            Registrarme ahora
+                        </button>
+
+                        <div class="text-center mt-4 pt-2">
+                            <p class="small text-muted mb-0">¿Ya tienes una cuenta?</p>
+                            <a asp-page="./Login" asp-route-returnUrl="@Model.ReturnUrl" class="text-success fw-bold text-decoration-none">Inicia Sesión aquí</a>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+
+
+<style>
+    .form-control:focus {
+        background-color: #fff !important;
+        box-shadow: 0 0 0 0.25rem rgba(25, 135, 84, 0.1);
+        border: 1px solid #198754 !important;
+    }
+
+    .btn-success:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 5px 15px rgba(25, 135, 84, 0.3) !important;
+        transition: all 0.3s ease;
+    }
+
+    .bg-gradient {
+        background: linear-gradient(45deg, #198754, #0b5134) !important;
+    }
+
+    .card {
+        transition: all 0.4s ease;
+    }
+</style>
+@section Scripts {
+    <partial name="_ValidationScriptsPartial" />
+
+    <script>
+        function setupToggle(buttonId, inputId, iconId) {
+            document.getElementById(buttonId).addEventListener('click', function () {
+                const input = document.getElementById(inputId);
+                const icon = document.getElementById(iconId);
+
+                if (input.type === 'password') {
+                    input.type = 'text';
+                    icon.classList.replace('bi-eye', 'bi-eye-slash');
+                } else {
+                    input.type = 'password';
+                    icon.classList.replace('bi-eye-slash', 'bi-eye');
+                }
+            });
+        }
+
+        // Configuramos ambos campos
+        setupToggle('toggleRegPass', 'regPass', 'eyeIconReg');
+        setupToggle('toggleConfirmPass', 'confirmPass', 'eyeIconConfirm');
+    </script>
+}

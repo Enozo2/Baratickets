@@ -1,0 +1,144 @@
+﻿<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>@ViewData["Title"] - Baratickets 2.0</title>
+    <link rel="stylesheet" href="~/lib/bootstrap/dist/css/bootstrap.min.css" />
+    <link rel="stylesheet" href="~/css/site.css" asp-append-version="true" />
+    <link rel="stylesheet" href="~/Baratickets2._0.styles.css" asp-append-version="true" />
+    @* Iconos de Bootstrap mejorados *@
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.2/font/bootstrap-icons.min.css">
+    @* Google Fonts para un look más moderno *@
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600;700&display=swap" rel="stylesheet">
+
+    <style>
+        body {
+            font-family: 'Inter', sans-serif;
+            background-color: #f8f9fa;
+        }
+
+        .navbar {
+            border-radius: 0 0 15px 15px;
+        }
+
+        .nav-link:hover {
+            color: #0d6efd !important;
+            transition: 0.3s;
+        }
+    </style>
+</head>
+<body>
+    <header>
+        <nav class="navbar navbar-expand-sm navbar-toggleable-sm navbar-light bg-white border-bottom shadow-sm mb-4 py-3">
+            <div class="container-fluid">
+                <a class="navbar-brand text-primary fw-bold" asp-area="" asp-controller="Home" asp-action="Index">
+                    <i class="bi bi-ticket-perforated-fill"></i> Baratickets 2.0
+                </a>
+                <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target=".navbar-collapse">
+                    <span class="navbar-toggler-icon"></span>
+                </button>
+                <div class="navbar-collapse collapse d-sm-inline-flex justify-content-between">
+                    <ul class="navbar-nav flex-grow-1">
+                        
+                        @* PROTECCIÓN: Solo visible si el usuario inició sesión *@
+                        @if (User.IsInRole("Cliente"))
+                        {
+                            <li class="nav-item">
+                                <a class="nav-link text-dark" asp-controller="Tickets" asp-action="MisTickets">
+                                    <i class="bi bi-ticket-detailed"></i> Mis Tickets
+                                </a>
+                            </li>
+                        }
+
+                        @* MENÚ DE VALIDACIÓN *@
+                        @if (User.IsInRole("Validador"))
+                        {
+                            <li class="nav-item">
+                                <a class="nav-link text-dark" asp-area="" asp-controller="Tickets" asp-action="Escanear">
+                                    <i class="bi bi-qr-code-scan"></i> EscanearTicket
+                                </a>
+                            </li>
+                        }
+
+                        @if (User.IsInRole("Admin"))
+                        {
+                            <li class="nav-item">
+                                <a class="nav-link text-danger fw-600" asp-controller="Usuarios" asp-action="Index">
+                                    <i class="bi bi-shield-lock"></i> Usuarios
+                                </a>
+                            </li>
+                        }
+
+                        @if (User.IsInRole("Organizador") || User.IsInRole("Admin"))
+                        {
+                            <li class="nav-item">
+                                <a class="nav-link text-success fw-600" asp-controller="Eventos" asp-action="Index">
+                                    <i class="bi bi-calendar-check"></i> Mis Eventos
+                                </a>
+                            </li>
+                        }
+                    </ul>
+
+                    <div class="navbar-collapse collapse d-sm-inline-flex justify-content-between">
+    <ul class="navbar-nav flex-grow-1">
+        @* Aquí van tus links protegidos (Mis Tickets, Escanear, etc.) *@
+    </ul>
+
+    @* Esta línea llamará al archivo que SÍ sabe cuándo mostrar el botón o tu nombre *@
+    <div class="d-flex align-items-center">
+        @await Html.PartialAsync("_LoginPartial")
+    </div>
+</div>
+                </div>
+            </div>
+        </nav>
+    </header>
+
+    <div class="container">
+        <main role="main" class="pb-5">
+            @RenderBody()
+        </main>
+    </div>
+
+    <footer class="border-top footer text-muted mt-auto bg-white py-4">
+        <div class="container text-center">
+            &copy; 2026 - <span class="fw-bold text-primary">Baratickets 2.0</span> - <a asp-area="" asp-controller="Home" asp-action="Privacy" class="text-decoration-none">Privacidad</a>
+        </div>
+    </footer>
+
+    <script src="~/lib/jquery/dist/jquery.min.js"></script>
+    <script src="~/lib/bootstrap/dist/js/bootstrap.bundle.min.js"></script>
+    <script src="~/js/site.js" asp-append-version="true"></script>
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+
+    <script>
+        $(document).ready(function () {
+            @if (TempData["Success"] != null)
+            {
+                    <text>
+                    Swal.fire({
+                        icon: 'success',
+                        title: '¡Éxito!',
+                        text: '@TempData["Success"]',
+                        confirmButtonColor: '#0d6efd'
+                    });
+                    </text>
+            }
+            @if (TempData["Error"] != null)
+            {
+                    <text>
+                    Swal.fire({
+                        icon: 'error',
+                        title: 'Hubo un problema',
+                        text: '@TempData["Error"]',
+                        confirmButtonColor: '#0d6efd'
+                    });
+                    </text>
+            }
+        });
+    </script>
+
+    @await RenderSectionAsync("Scripts", required: false)
+</body>
+</html>>

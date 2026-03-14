@@ -1,0 +1,51 @@
+﻿@model Baratickets2._0.Models.ApplicationUser
+@{
+    ViewData["Title"] = "Crear Nuevo Usuario";
+}
+
+<div class="container mt-4">
+    <div class="row justify-content-center">
+        <div class="col-md-6">
+            <div class="card shadow border-0">
+                <div class="card-header bg-dark text-white text-center py-3">
+                    <h4 class="mb-0"><i class="bi bi-person-plus-fill me-2"></i>Registrar Nuevo Usuario</h4>
+                </div>
+                <div class="card-body p-4">
+                    <form asp-action="Crear" method="post">
+                        <div asp-validation-summary="ModelOnly" class="text-danger"></div>
+
+                        <div class="mb-3">
+                            <label class="form-label fw-bold">Nombre Completo</label>
+                            <input name="nombreCompleto" class="form-control" placeholder="Ej: Juan Pérez" required />
+                        </div>
+
+                        <div class="mb-3">
+                            <label class="form-label fw-bold">Correo Electrónico</label>
+                            <input name="email" type="email" class="form-control" placeholder="correo@ejemplo.com" required />
+                        </div>
+
+                        <div class="mb-3">
+                            <label class="form-label fw-bold">Contraseña Temporal</label>
+                            <input name="password" type="password" class="form-control" required />
+                        </div>
+
+                        <div class="mb-4">
+                            <label class="form-label fw-bold">Asignar Rol</label>
+                            <select name="rol" class="form-select border-primary">
+                                <option value="Cliente">Cliente</option>
+                                <option value="Organizador">Organizador</option>
+                                <option value="Validador">Validador</option>
+                                <option value="Admin">Administrador</option>
+                            </select>
+                        </div>
+
+                        <div class="d-grid gap-2">
+                            <button type="submit" class="btn btn-primary btn-lg rounded-pill">Crear Usuario</button>
+                            <a asp-action="Index" class="btn btn-link text-muted">Volver a la lista</a>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>

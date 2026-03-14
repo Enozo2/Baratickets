@@ -1,0 +1,72 @@
+﻿@{
+    ViewData["Title"] = "Escanear Entradas";
+}
+
+<div class="container mt-5 text-center">
+    <h2 class="mb-4 text-primary"><i class="bi bi-qr-code-scan"></i> Validador BaraTickets</h2>
+    <p class="text-muted">Apunta la cámara al código QR del cliente</p>
+
+    <div class="row justify-content-center">
+        <div class="col-md-6">
+            <div id="reader" style="width: 100%; min-height: 350px;" class="bg-light border rounded shadow-sm"></div>
+        </div>
+    </div>
+
+    <div class="mt-4">
+        <a asp-controller="Home" asp-action="Index" class="btn btn-outline-secondary">
+            Volver al Inicio
+        </a>
+    </div>
+</div>
+
+@section Scripts {
+    <script src="https://unpkg.com/html5-qrcode"></script>
+    <script>
+        document.addEventListener("DOMContentLoaded", function () {
+
+            function onScanSuccess(decodedText, decodedResult) {
+                // Detener cámara al detectar
+                html5QrcodeScanner.clear();
+
+                console.log("Código detectado: " + decodedText);
+
+                // Limpiamos el ID si viene en una URL
+                let ticketId = decodedText.includes("id=") ? decodedText.split("id=")[1] : decodedText;
+
+                // Enviamos al servidor
+                fetch('/Tickets/ProcesarEscaneo', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
+                    body: `id=${ticketId}`
+                })
+                .then(response => response.json())
+                .then(data => {
+                    if (data.success) {
+                        alert("✅ " + data.message + "\nEvento: " + data.evento);
+                    } else {
+                        alert("❌ " + data.message);
+                    }
+                    // Reiniciar para el siguiente ticket
+                    setTimeout(() => location.reload(), 2000);
+                })
+                .catch(err => {
+                    console.error(err);
+                    alert("Error de conexión con el servidor.");
+                });
+            }
+
+            // Configuramos e iniciamos el escáner
+              let html5QrcodeScanner = new Html5QrcodeScanner(
+        "reader",
+        {
+            fps: 30, // Más cuadros por segundo para captar el enfoque rápido
+            qrbox: { width: 300, height: 300 }, // Área de lectura más grande
+            aspectRatio: 1.0,
+            disableFlip: false // Ayuda si la cámara web invierte la imagen
+        },
+        false);
+
+            html5QrcodeScanner.render(onScanSuccess);
+        });
+    </script>
+}

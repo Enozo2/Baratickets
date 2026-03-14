@@ -1,0 +1,13 @@
+﻿@{
+    ViewData["Title"] = "Error de Validación";
+}
+
+<div class="container text-center mt-5">
+    <div class="alert alert-danger">
+        <h1 class="display-4">❌ Ticket Inválido</h1>
+        <p class="lead">@ViewBag.Mensaje</p>
+        <hr>
+        <p>El código escaneado no existe en el sistema de **BaraTickets** o el ID es incorrecto.</p>
+        <a href="@Url.Action("Index", "Home")" class="btn btn-outline-danger">Volver al Inicio</a>
+    </div>
+</div>

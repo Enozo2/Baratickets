@@ -1,0 +1,109 @@
+﻿@model IEnumerable<Baratickets2._0.Models.Evento>
+
+@{
+    ViewData["Title"] = "Panel de Eventos";
+}
+
+<div class="container mt-4">
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <div>
+            <h1 class="text-primary fw-bold mb-0">Gestión de Eventos</h1>
+            <p class="text-muted">Explora o administra los eventos dinámicos de BaraTickets 2.0</p>
+        </div>
+
+        @if (User.IsInRole("Organizador") || User.IsInRole("Admin"))
+        {
+            <a asp-action="Create" class="btn btn-success shadow-sm rounded-pill px-4">
+                <i class="bi bi-plus-circle-fill me-2"></i> Crear Nuevo Evento
+            </a>
+        }
+    </div>
+
+    <div class="row">
+        @foreach (var item in Model)
+        {
+            <div class="col-md-4 mb-4">
+                <div class="card h-100 shadow border-0" style="border-radius: 20px; overflow: hidden;">
+                    <div class="card-body">
+                        <div class="d-flex justify-content-between align-items-start mb-2">
+                            <h5 class="card-title fw-bold text-dark mb-0">@item.Nombre</h5>
+                            <span class="badge bg-light text-primary border">ID: @item.Id</span>
+                        </div>
+                        <p class="card-text text-muted small" style="min-height: 40px;">@item.Descripcion</p>
+
+                        <p class="mb-2 text-danger fw-bold">
+                            <i class="bi bi-calendar-check-fill me-1"></i> @item.FechaEvento.ToString("dd/MM/yyyy HH:mm")
+                        </p>
+
+                        @* SECCIÓN DE PRECIOS DINÁMICOS *@
+                        <div class="bg-light p-2 rounded mb-3 border">
+                            <small class="text-muted d-block mb-1 fw-bold text-uppercase" style="font-size: 0.65rem;">Precios Disponibles</small>
+                            <div class="d-flex flex-wrap gap-1">
+                                @if (item.CategoriasTickets != null && item.CategoriasTickets.Any())
+                                {
+                                    @foreach (var cat in item.CategoriasTickets.OrderBy(c => c.Precio).Take(2))
+                                    {
+                                        <span class="badge @(cat.Nombre.ToLower().Contains("vip") ? "bg-warning text-dark" : "bg-primary")" style="font-size: 0.75rem;">
+                                            @cat.Nombre: RD$ @cat.Precio.ToString("N0")
+                                        </span>
+                                    }
+                                    @if (item.CategoriasTickets.Count() > 2)
+                                    {
+                                        <span class="badge bg-secondary">+@(item.CategoriasTickets.Count() - 2) más</span>
+                                    }
+                                }
+                                else
+                                {
+                                    <span class="text-muted small italic">Sin boletas configuradas</span>
+                                }
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="card-footer bg-white border-0 pb-4">
+                        <div class="d-grid gap-2 mb-3">
+                            @if (User.IsInRole("Cliente"))
+                            {
+                                <a asp-action="Details" asp-route-id="@item.Id" class="btn btn-success rounded-pill fw-bold shadow-sm py-2">
+                                    <i class="bi bi-cart-plus-fill me-2"></i> Adquirir Entrada
+                                </a>
+                            }
+                            else
+                            {
+                                <a asp-action="Details" asp-route-id="@item.Id" class="btn btn-outline-primary rounded-pill fw-bold py-2">
+                                    <i class="bi bi-eye-fill me-2"></i> Ver Detalles
+                                </a>
+                            }
+                        </div>
+
+                        @if (User.IsInRole("Admin") || User.IsInRole("Organizador"))
+                        {
+                            <div class="pt-3 border-top text-center">
+                                <p class="small text-muted mb-2 fw-bold text-uppercase" style="font-size: 0.7rem;">Herramientas Administrativas</p>
+                                <div class="btn-group shadow-sm" style="border-radius: 10px; overflow: hidden;">
+                                    <a asp-action="Dashboard" asp-route-id="@item.Id" class="btn btn-info text-white btn-sm" title="Dashboard de Ventas">
+                                        <i class="bi bi-graph-up-arrow"></i>
+                                    </a>
+
+                                    @if (User.IsInRole("Organizador"))
+                                    {
+                                        <a asp-action="Edit" asp-route-id="@item.Id" class="btn btn-secondary btn-sm" title="Editar">
+                                            <i class="bi bi-pencil-square"></i>
+                                        </a>
+                                    }
+
+                                    <button type="button" class="btn btn-danger btn-sm" onclick="confirmarEliminar('@item.Id', '@item.Nombre')" title="Eliminar">
+                                        <i class="bi bi-trash3-fill"></i>
+                                    </button>
+                                </div>
+                            </div>
+                        }
+                    </div>
+                </div>
+            </div>
+        }
+    </div>
+</div>
+
+@* Modal de confirmación (Partial View) *@
+<partial name="_ModalEliminar" />

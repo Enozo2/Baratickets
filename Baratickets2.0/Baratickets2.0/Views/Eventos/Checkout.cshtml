@@ -1,0 +1,71 @@
+﻿@model Baratickets2._0.Models.Evento
+
+@{
+    ViewData["Title"] = "Finalizar Compra";
+    // Evitamos el error de binding convirtiendo los ViewBag a variables locales seguras
+    var tipoTicket = ViewBag.Tipo as string ?? "Normal";
+    var precioTicket = ViewBag.Precio != null ? Convert.ToDecimal(ViewBag.Precio) : 0;
+}
+
+<div class="container mt-5">
+    @if (Model == null)
+    {
+        <div class="alert alert-danger">Error: No se encontró la información del evento.</div>
+    }
+    else
+    {
+        <div class="row justify-content-center">
+            <div class="col-md-6">
+                <div class="card shadow">
+                    <div class="card-header bg-dark text-white text-center">
+                        <h4>Pagar Entrada @tipoTicket</h4>
+                    </div>
+                    <div class="card-body">
+                        <p><strong>Evento:</strong> @Model.Nombre</p>
+                        <p class="fs-4"><strong>Total:</strong> RD$ @precioTicket.ToString("N0")</p>
+                        <hr />
+
+                        <form asp-controller="Tickets" asp-action="ComprarTicket" method="post">
+                            <input type="hidden" name="eventoId" value="@Model.Id" />
+                            <input type="hidden" name="tipoTicket" value="@tipoTicket" />
+
+                            <div class="mb-3">
+                                <label class="form-label">Nombre en Tarjeta</label>
+                                <input type="text" class="form-control" required />
+                            </div>
+                            <div class="mb-3">
+                                <label class="form-label">Número de Tarjeta</label>
+                                <input type="text" class="form-control" placeholder="0000 0000 0000 0000" required />
+                            </div>
+
+                            <button type="submit" class="btn btn-success w-100 btn-lg">Pagar Ahora</button>
+                        </form>
+                    </div>
+                </div>
+            </div>
+        </div>
+    }
+</div>
+
+@section Scripts {
+    <script>
+        const form = document.getElementById('paymentForm');
+        const btn = document.getElementById('btnPagar');
+        const texto = document.getElementById('textoBoton');
+        const spinner = document.getElementById('spinner');
+        const mensaje = document.getElementById('mensajeProcesando');
+
+        form.addEventListener('submit', function (e) {
+            e.preventDefault();
+            btn.disabled = true;
+            texto.innerText = "Procesando Pago...";
+            spinner.classList.remove('d-none');
+            mensaje.classList.remove('d-none');
+
+            setTimeout(() => {
+                form.submit();
+            }, 3000);
+        });
+    </script>
+}
+}

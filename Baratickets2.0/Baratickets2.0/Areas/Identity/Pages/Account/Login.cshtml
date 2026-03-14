@@ -1,0 +1,110 @@
+﻿@page
+@model LoginModel
+
+@{
+    ViewData["Title"] = "Acceso Seguro";
+    Layout = "/Views/Shared/_Layout.cshtml";
+}
+
+<div class="container">
+    <div class="row justify-content-center align-items-center" style="min-height: 75vh;">
+        <div class="col-md-5">
+            <div class="card shadow-lg border-0" style="border-radius: 20px; overflow: hidden;">
+                @* Cabecera con Degradado *@
+                <div class="bg-primary bg-gradient py-4 text-center">
+                    <i class="bi bi-shield-lock-fill text-white" style="font-size: 2.5rem;"></i>
+                    <h3 class="text-white fw-bold mt-2">BaraTickets 2.0</h3>
+                </div>
+
+                <div class="card-body p-4 p-md-5">
+                    <div class="text-center mb-4">
+                        <h4 class="fw-bold">Iniciar Sesión</h4>
+                        <p class="text-muted small">Usa tu cuenta local para ingresar</p>
+                    </div>
+
+                    <form id="account" method="post">
+                        <div asp-validation-summary="ModelOnly" class="alert alert-danger border-0 small py-2" role="alert"></div>
+
+                        @* Email *@
+                        <div class="form-floating mb-3">
+                            <input asp-for="Input.Email" class="form-control border-0 bg-light" autocomplete="username" aria-required="true" placeholder="correo@ejemplo.com" style="border-radius: 12px;" />
+                            <label asp-for="Input.Email" class="text-muted">Correo electrónico</label>
+                            <span asp-validation-for="Input.Email" class="text-danger small"></span>
+                        </div>
+
+                        @* Password con botón de mostrar/ocultar *@
+                        <div class="form-floating mb-3 position-relative">
+                            <input asp-for="Input.Password" type="password" class="form-control border-0 bg-light" id="loginPass" autocomplete="current-password" aria-required="true" placeholder="contraseña" style="border-radius: 12px; padding-right: 45px;" />
+                            <label asp-for="Input.Password" class="text-muted">Contraseña</label>
+
+                            @* Icono del Ojo *@
+                            <button type="button" id="togglePass" class="btn position-absolute top-50 end-0 translate-middle-y border-0 text-muted" style="z-index: 10; margin-right: 10px;">
+                                <i class="bi bi-eye" id="eyeIcon"></i>
+                            </button>
+
+                            <span asp-validation-for="Input.Password" class="text-danger small"></span>
+                        </div>
+
+                        <div class="d-flex justify-content-between align-items-center mb-4">
+                            <div class="checkbox">
+                                <label asp-for="Input.RememberMe" class="form-label small text-muted">
+                                    <input class="form-check-input" asp-for="Input.RememberMe" />
+                                    Recordarme
+                                </label>
+                            </div>
+                            <a id="forgot-password" asp-page="./ForgotPassword" class="small text-primary text-decoration-none fw-bold">¿Olvidaste tu clave?</a>
+                        </div>
+
+                        @* Botón de Acción *@
+                        <button id="login-submit" type="submit" class="btn btn-primary w-100 py-3 fw-bold shadow-sm" style="border-radius: 12px; transition: 0.3s;">
+                            Iniciar sesión
+                        </button>
+
+                        <div class="text-center mt-4 pt-2">
+                            <p class="small text-muted mb-0">¿Eres nuevo en BaraTickets?</p>
+                            <a asp-page="./Register" asp-route-returnUrl="@Model.ReturnUrl" class="text-primary fw-bold text-decoration-none">Regístrate como nuevo usuario</a>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<style>
+    .form-control:focus {
+        background-color: #fff !important;
+        box-shadow: 0 0 0 0.25rem rgba(13, 110, 253, 0.1);
+        border: 1px solid #0d6efd !important;
+    }
+
+    .btn-primary:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 5px 15px rgba(13, 110, 253, 0.3) !important;
+    }
+
+    .bg-gradient {
+        background: linear-gradient(45deg, #0d6efd, #0043a8) !important;
+    }
+</style>
+
+@section Scripts {
+    <partial name="_ValidationScriptsPartial" />
+
+    <script>
+        document.getElementById('togglePass').addEventListener('click', function () {
+            const passInput = document.getElementById('loginPass');
+            const eyeIcon = document.getElementById('eyeIcon');
+
+            if (passInput.type === 'password') {
+                passInput.type = 'text';
+                eyeIcon.classList.remove('bi-eye');
+                eyeIcon.classList.add('bi-eye-slash');
+            } else {
+                passInput.type = 'password';
+                eyeIcon.classList.remove('bi-eye-slash');
+                eyeIcon.classList.add('bi-eye');
+            }
+        });
+    </script>
+}

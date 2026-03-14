@@ -1,0 +1,70 @@
+﻿@page
+@model IndexModel
+@{
+    ViewData["Title"] = "Perfil de Usuario";
+    ViewData["ActivePage"] = ManageNavPages.Index;
+}
+
+<div class="container mt-4">
+    <div class="row justify-content-center">
+        <div class="col-md-8">
+            <div class="card shadow-sm border-0">
+                <div class="card-header bg-white py-3">
+                    <h4 class="mb-0 fw-bold text-primary"><i class="bi bi-person-circle me-2"></i>@ViewData["Title"]</h4>
+                </div>
+                <div class="card-body p-4">
+                    <partial name="_StatusMessage" for="StatusMessage" />
+
+                    <form id="profile-form" method="post">
+                        <div asp-validation-summary="ModelOnly" class="text-danger" role="alert"></div>
+
+                        @* Campo de Usuario (Solo lectura) *@
+                        <div class="form-floating mb-4">
+                            <input asp-for="Username" class="form-control bg-light" placeholder="Usuario" disabled />
+                            <label asp-for="Username" class="form-label">Correo Electrónico</label>
+                        </div>
+
+                        @* Campo de Nombre Completo - Diseño Mejorado *@
+                        <div class="form-floating mb-4">
+                            <input asp-for="Input.NombreCompleto" class="form-control border-primary" placeholder="Nombre completo" />
+                            <label asp-for="Input.NombreCompleto" class="form-label text-primary">Nombre Completo</label>
+                            <span asp-validation-for="Input.NombreCompleto" class="text-danger small"></span>
+                        </div>
+
+                        @* Campo de Teléfono *@
+                        <div class="form-floating mb-4">
+                            <input asp-for="Input.PhoneNumber" class="form-control" placeholder="Número de teléfono" />
+                            <label asp-for="Input.PhoneNumber" class="form-label">Número de Teléfono</label>
+                            <span asp-validation-for="Input.PhoneNumber" class="text-danger small"></span>
+                        </div>
+
+                        <div class="d-grid gap-2 d-md-flex justify-content-md-end">
+                            <a asp-controller="Usuarios" asp-action="MiCuenta" class="btn btn-outline-secondary px-4 rounded-pill">
+                                Cancelar
+                            </a>
+                            <button id="update-profile-button" type="submit" class="btn btn-primary px-5 rounded-pill shadow-sm">
+                                Guardar Cambios
+                            </button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+    <partial name="_ValidationScriptsPartial" />
+
+    <script>
+        // Si el mensaje de éxito existe en la pantalla
+        const statusMessage = document.querySelector('.alert-success');
+
+        if (statusMessage) {
+            // Esperar 2 segundos y luego redirigir a Mi Cuenta
+            setTimeout(function() {
+                window.location.href = '/Usuarios/MiCuenta';
+            }, 2000);
+        }
+    </script>
+}

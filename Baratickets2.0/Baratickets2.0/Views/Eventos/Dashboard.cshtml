@@ -1,0 +1,186 @@
+﻿@model Baratickets2._0.Models.Evento
+
+@{
+    ViewData["Title"] = "Dashboard del Evento";
+}
+
+<div class="container mt-4">
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <div>
+            <h2 class="fw-bold text-dark">Dashboard de Control</h2>
+            <span class="badge bg-primary">@Model.Nombre</span>
+        </div>
+        <a asp-action="Index" class="btn btn-outline-secondary btn-sm shadow-sm">
+            <i class="bi bi-arrow-left"></i> Volver a mis eventos
+        </a>
+    </div>
+
+    @* --- TARJETAS DE MÉTRICAS PRINCIPALES --- *@
+    <div class="row">
+        <div class="col-md-3">
+            <div class="card bg-primary text-white shadow mb-4 border-0">
+                <div class="card-body text-center">
+                    <h6 class="text-uppercase small opacity-75">Ingresos Netos</h6>
+                    <h3 class="fw-bold">RD$ @ViewBag.TotalVendido.ToString("N0")</h3>
+                    <i class="bi bi-cash-stack fs-1 opacity-25"></i>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-md-2">
+            <div class="card bg-success text-white shadow mb-4 border-0">
+                <div class="card-body text-center">
+                    <h6 class="text-uppercase small opacity-75">Tickets Activos</h6>
+                    <h3 class="fw-bold">@ViewBag.TicketsVendidos</h3>
+                    <i class="bi bi-ticket-perforated fs-1 opacity-25"></i>
+                </div>
+            </div>
+        </div>
+
+        @* --- NUEVA TARJETA DE DEVOLUCIONES --- *@
+        <div class="col-md-2">
+            <div class="card bg-danger text-white shadow mb-4 border-0">
+                <div class="card-body text-center">
+                    <h6 class="text-uppercase small opacity-75">Devoluciones</h6>
+                    <h3 class="fw-bold">@ViewBag.TotalDevueltos</h3>
+                    <div class="small">- RD$ @ViewBag.DineroDevuelto.ToString("N0")</div>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-md-2">
+            <div class="card bg-info text-white shadow mb-4 border-0">
+                <div class="card-body text-center">
+                    <h6 class="text-uppercase small opacity-75">En el Recinto</h6>
+                    <h3 class="fw-bold">@ViewBag.AsistenciaReal</h3>
+                    <i class="bi bi-people fs-1 opacity-25"></i>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-md-3">
+            <div class="card bg-warning text-dark shadow mb-4 border-0">
+                <div class="card-body text-center">
+                    <h6 class="text-uppercase small opacity-75">Por Llegar</h6>
+                    <h3 class="fw-bold">@ViewBag.Pendientes</h3>
+                    <i class="bi bi-clock-history fs-1 opacity-25"></i>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="row mt-2">
+        @* --- GRÁFICO DE ASISTENCIA Y CATEGORÍAS --- *@
+        <div class="col-md-4">
+            <div class="card shadow border-0 h-100">
+                <div class="card-header bg-white fw-bold"><i class="bi bi-pie-chart"></i> Ventas por Categoría</div>
+                <ul class="list-group list-group-flush">
+                    @if (ViewBag.VentasPorCategoria != null)
+                    {
+                        foreach (var item in ViewBag.VentasPorCategoria)
+                        {
+                            <li class="list-group-item d-flex justify-content-between align-items-center">
+                                @item.Nombre
+                                <div>
+                                    <span class="badge @(item.Nombre.ToLower().Contains("vip") ? "bg-warning text-dark" : "bg-primary") rounded-pill">
+                                        @item.Cantidad
+                                    </span>
+                                </div>
+                            </li>
+                        }
+                    }
+                </ul>
+                <div class="card-body">
+                    <label class="small fw-bold mb-2">Progreso de Asistencia Real:</label>
+                    <div class="progress" style="height: 25px; border-radius: 15px;">
+                        <div class="progress-bar progress-bar-striped progress-bar-animated bg-success"
+                             role="progressbar"
+                             style="width: @ViewBag.PorcentajeAsistencia.ToString("0").Replace(",", ".")%"
+                             aria-valuenow="@ViewBag.AsistenciaReal"
+                             aria-valuemin="0"
+                             aria-valuemax="@ViewBag.TicketsVendidos">
+                            @ViewBag.PorcentajeAsistencia.ToString("0")% Asistencia
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        @* --- LISTADO DETALLADO DE COMPRADORES (Incluye Devoluciones) --- *@
+        <div class="col-md-8">
+            <div class="card shadow border-0 h-100" style="border-radius: 15px;">
+                <div class="card-header bg-white fw-bold text-primary d-flex justify-content-between align-items-center py-3">
+                    <span><i class="bi bi-journal-text"></i> Historial de Ventas y Devoluciones</span>
+                    <span class="badge bg-primary rounded-pill">Total: @(Model.Tickets?.Count ?? 0)</span>
+                </div>
+                <div class="table-responsive">
+                    <table class="table table-hover align-middle mb-0">
+                        <thead class="table-light">
+                            <tr>
+                                <th>Cliente</th>
+                                <th>Categoría</th>
+                                <th class="text-center">Estado</th>
+                                <th class="text-center">Fecha</th>
+                                <th class="text-end">Monto</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            @if (Model.Tickets != null && Model.Tickets.Any())
+                            {
+                                @foreach (var ticket in Model.Tickets.OrderByDescending(t => t.FechaCompra))
+                                {
+                                    <tr class="@(ticket.Estado == "Devuelto" ? "table-light text-muted" : "")">
+                                        <td>
+                                            <div class="d-flex align-items-center @(ticket.Estado == "Devuelto" ? "text-decoration-line-through opacity-50" : "")">
+                                                <div class="rounded-circle @(ticket.Estado == "Devuelto" ? "bg-secondary" : "bg-primary") text-white d-flex align-items-center justify-content-center me-2" style="width: 32px; height: 32px; font-size: 0.8rem; font-weight: bold;">
+                                                    @(ticket.Usuario?.UserName?.Substring(0, 1).ToUpper() ?? "U")
+                                                </div>
+                                                <div class="d-flex flex-column">
+                                                    <span class="small fw-bold">@ticket.Usuario?.UserName</span>
+                                                    <span class="text-muted" style="font-size: 0.65rem;">ID: @ticket.Id.ToString().Substring(0, 8)</span>
+                                                </div>
+                                            </div>
+                                        </td>
+                                        <td>
+                                            @* Lógica de color dinámica: VIP siempre amarillo, otros azul claro *@
+                                            <span class="badge @(ticket.Tipo.ToLower().Contains("vip") ? "bg-warning text-dark" : "bg-info bg-opacity-10 text-info border border-info")" style="font-size: 0.7rem;">
+                                                <i class="bi bi-tag-fill me-1"></i> @ticket.Tipo
+                                            </span>
+                                        </td>
+                                        <td class="text-center">
+                                            @if (ticket.Estado == "Devuelto")
+                                            {
+                                                <span class="badge rounded-pill bg-danger shadow-sm" style="font-size: 0.7rem;">Devuelto</span>
+                                            }
+                                            else if (ticket.FueUsado)
+                                            {
+                                                <span class="badge rounded-pill bg-success shadow-sm" style="font-size: 0.7rem;">Validado</span>
+                                            }
+                                            else
+                                            {
+                                                <span class="badge rounded-pill bg-light text-primary border shadow-sm" style="font-size: 0.7rem;">Pendiente</span>
+                                            }
+                                        </td>
+                                        <td class="small text-muted text-center">@ticket.FechaCompra.ToString("dd MMM, HH:mm")</td>
+                                        <td class="text-end fw-bold @(ticket.Estado == "Devuelto" ? "text-muted text-decoration-line-through" : "text-dark")">
+                                            @* USAMOS EL PRECIO PAGADO REAL GUARDADO EN EL TICKET *@
+                                            RD$ @ticket.PrecioPagado.ToString("N0")
+                                        </td>
+                                    </tr>
+                                }
+                            }
+                            else
+                            {
+                                <tr>
+                                    <td colspan="5" class="text-center py-5">
+                                        <i class="bi bi-inbox text-muted d-block mb-2" style="font-size: 2rem;"></i>
+                                        <p class="text-muted">No hay movimientos registrados para este evento.</p>
+                                    </td>
+                                </tr>
+                            }
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>

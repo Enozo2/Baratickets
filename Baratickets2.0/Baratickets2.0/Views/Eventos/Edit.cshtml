@@ -1,0 +1,168 @@
+﻿@model Baratickets2._0.Models.Evento
+
+@{
+    ViewData["Title"] = "Editar Evento";
+}
+
+<div class="container mt-4">
+    <div class="d-flex justify-content-between align-items-center mb-3">
+        <div>
+            <h1 class="text-primary fw-bold mb-0">Gestionar Evento</h1>
+            <p class="text-muted">Actualiza los detalles del evento y sus categorías de boletas.</p>
+        </div>
+        <span class="badge bg-light text-dark border">ID Evento: @Model.Id</span>
+    </div>
+    <hr />
+
+    <form asp-action="Edit">
+        <div asp-validation-summary="ModelOnly" class="text-danger"></div>
+        <input type="hidden" asp-for="Id" />
+        <input type="hidden" asp-for="OrganizadorId" />
+
+        <div class="row">
+            @* --- COLUMNA IZQUIERDA: DATOS BÁSICOS --- *@
+            <div class="col-md-6">
+                <div class="card shadow-sm border-0 p-4 mb-4" style="border-radius: 15px;">
+                    <h5 class="fw-bold mb-3 text-secondary">Información Principal</h5>
+
+                    <div class="form-group mb-3">
+                        <label asp-for="Nombre" class="control-label fw-bold small"></label>
+                        <input asp-for="Nombre" class="form-control" />
+                        <span asp-validation-for="Nombre" class="text-danger"></span>
+                    </div>
+                    <div class="form-group mb-3">
+                        <label asp-for="Organizacion" class="control-label fw-bold">Institución / Organizador</label>
+                        <input asp-for="Organizacion" class="form-control" />
+                        <span asp-validation-for="Organizacion" class="text-danger"></span>
+                    </div>
+                    <div class="form-group mb-3">
+                        <label asp-for="Descripcion" class="control-label fw-bold small"></label>
+                        <textarea asp-for="Descripcion" class="form-control" rows="3">@Model.Descripcion</textarea>
+                    </div>
+
+                    <div class="form-group mb-3">
+                        <label asp-for="Direccion" class="control-label fw-bold small"></label>
+                        <input asp-for="Direccion" class="form-control" />
+                    </div>
+
+                    <div class="form-group mb-3">
+                        <label asp-for="FechaEvento" class="control-label fw-bold small"></label>
+                        <input asp-for="FechaEvento" class="form-control" />
+                    </div>
+
+                    <div class="form-group">
+                        <label asp-for="ImagenUrl" class="control-label fw-bold small">URL del Flyer</label>
+                        <input asp-for="ImagenUrl" class="form-control" id="urlInputEdit" />
+                        <div class="mt-3 text-center">
+                            <img id="previewImagenEdit" src="@Model.ImagenUrl" class="img-fluid rounded shadow-sm" style="max-height: 200px; object-fit: cover;" />
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            @* --- COLUMNA DERECHA: CATEGORÍAS DINÁMICAS --- *@
+            <div class="col-md-6">
+                <div class="card shadow-sm border-0 p-4" style="border-radius: 15px; background-color: #f8f9fa;">
+                    <div class="d-flex justify-content-between align-items-center mb-3">
+                        <h5 class="fw-bold mb-0 text-secondary">Categorías de Boletas</h5>
+                        <button type="button" id="btnAddCategoryEdit" class="btn btn-sm btn-dark rounded-pill">
+                            <i class="bi bi-plus-circle me-1"></i> Agregar
+                        </button>
+                    </div>
+
+                    <div id="categoriesContainerEdit">
+                        @* Renderizamos las categorías que YA existen en la base de datos *@
+                        @if (Model.CategoriasTickets != null)
+                        {
+                            var index = 0;
+                            foreach (var cat in Model.CategoriasTickets)
+                            {
+                                <div class="row g-2 mb-2 category-row animate__animated animate__fadeIn">
+                                    <input type="hidden" name="CategoriasTickets[@index].Id" value="@cat.Id" />
+                                    <div class="col-md-5">
+                                        <input name="CategoriasTickets[@index].Nombre" class="form-control form-control-sm" value="@cat.Nombre" placeholder="Nombre" required />
+                                    </div>
+                                    <div class="col-md-3">
+                                        <input name="CategoriasTickets[@index].Precio" type="number" class="form-control form-control-sm" value="@cat.Precio" placeholder="Precio" required />
+                                    </div>
+                                    <div class="col-md-3">
+                                        <input name="CategoriasTickets[@index].Capacidad" type="number" class="form-control form-control-sm" value="@cat.Capacidad" placeholder="Cant." required />
+                                    </div>
+                                    <div class="col-md-1">
+                                        <button type="button" class="btn btn-sm btn-outline-danger border-0" onclick="this.parentElement.parentElement.remove()">
+                                            <i class="bi bi-trash"></i>
+                                        </button>
+                                    </div>
+                                </div>
+                                index++;
+                            }
+                        }
+                    </div>
+                    <p class="small text-muted mt-2"><i class="bi bi-info-circle me-1"></i> Puedes modificar nombres, precios o añadir nuevas secciones.</p>
+                </div>
+
+                <div class="d-grid gap-2 mt-4">
+                    <button type="submit" class="btn btn-primary btn-lg rounded-pill shadow">Actualizar Evento</button>
+                    <a asp-action="Index" class="btn btn-light rounded-pill">Cancelar y Volver</a>
+                </div>
+            </div>
+        </div>
+    </form>
+</div>
+
+@section Scripts {
+    @* 1. Cargamos las validaciones de jQuery (necesarias para formularios) *@
+    @{
+        await Html.RenderPartialAsync("_ValidationScriptsPartial");
+    }
+
+    <script>
+        // 2. Lógica de Categorías Dinámicas
+        let categoryIndex = @(Model.CategoriasTickets?.Count ?? 0);
+
+        document.getElementById('btnAddCategoryEdit').addEventListener('click', function () {
+            const container = document.getElementById('categoriesContainerEdit');
+
+            const html = `
+                <div class="row g-2 mb-2 category-row animate__animated animate__fadeIn">
+                    <div class="col-md-5">
+                        <input name="CategoriasTickets[${categoryIndex}].Nombre" class="form-control form-control-sm" placeholder="Nombre" required />
+                    </div>
+                    <div class="col-md-3">
+                        <input name="CategoriasTickets[${categoryIndex}].Precio" type="number" class="form-control form-control-sm" placeholder="Precio" required />
+                    </div>
+                    <div class="col-md-3">
+                        <input name="CategoriasTickets[${categoryIndex}].Capacidad" type="number" class="form-control form-control-sm" placeholder="Cant." required />
+                    </div>
+                    <div class="col-md-1">
+                        <button type="button" class="btn btn-sm btn-outline-danger border-0" onclick="this.parentElement.parentElement.remove()">
+                            <i class="bi bi-trash"></i>
+                        </button>
+                    </div>
+                </div>
+            `;
+
+            container.insertAdjacentHTML('beforeend', html);
+            categoryIndex++;
+        });
+
+        // 3. Lógica de Preview de Imagen con validación de error
+        const inputUrl = document.getElementById('urlInputEdit');
+        const preview = document.getElementById('previewImagenEdit');
+
+        if (inputUrl && preview) {
+            inputUrl.addEventListener('input', function () {
+                let url = this.value;
+                if (url) {
+                    preview.src = url;
+                    preview.style.display = "block";
+                    preview.onerror = function() {
+                        this.style.display = "none";
+                    };
+                } else {
+                    preview.style.display = "none";
+                }
+            });
+        }
+    </script>
+}

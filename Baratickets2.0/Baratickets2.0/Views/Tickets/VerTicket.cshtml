@@ -1,0 +1,54 @@
+﻿@model Baratickets2._0.Models.Ticket
+
+@{
+    ViewData["Title"] = "Tu Ticket Digital";
+}
+
+<div class="container mt-5">
+    <div class="row justify-content-center">
+        <div class="col-md-6">
+            <div class="card shadow-lg border-0" style="border-radius: 20px; overflow: hidden;">
+                <div class="bg-primary text-white text-center py-4">
+                    <h2 class="mb-0">BARATICKETS</h2>
+                    <small>Entrada Oficial Digital</small>
+                </div>
+
+                <div class="card-body text-center">
+                    <h4 class="card-title text-uppercase font-weight-bold">@Model.Evento?.Nombre</h4>
+                    <p class="text-muted">
+                        <i class="bi bi-calendar-event"></i> @Model.Evento?.FechaEvento.ToString("f")
+                        <i class="bi bi-geo-alt-fill text-danger"></i> @Model.Evento.Direccion
+                    </p>
+
+                    <hr />
+
+                    <div class="my-4">
+                        <h6 class="text-muted mb-3">Escanea este código en la entrada</h6>
+                        <img src="@ViewBag.QrCode" class="img-fluid border p-2 shadow-sm" style="width: 250px; background-color: white;" />
+                    </div>
+
+                    <div class="row bg-light p-3 mx-1 rounded">
+                        <div class="col-6 text-left">
+                            <small class="text-muted d-block">Tipo de Entrada</small>
+                            <strong>@Model.Tipo</strong>
+                        </div>
+                        <div class="col-6 text-right">
+                            <small class="text-muted d-block">Precio</small>
+                            <strong>RD$ @Model.PrecioPagado</strong>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="card-footer bg-dark text-white text-center py-3">
+                    <small>ID del Ticket: @Model.Id</small>
+                </div>
+            </div>
+
+            <div class="text-center mt-4">
+                <button onclick="window.print()" class="btn btn-outline-secondary">
+                    <i class="bi bi-printer"></i> Imprimir o Guardar PDF
+                </button>
+            </div>
+        </div>
+    </div>
+</div>

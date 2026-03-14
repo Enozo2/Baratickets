@@ -1,0 +1,101 @@
+﻿@model IEnumerable<Baratickets2._0.Models.Ticket>
+
+@{
+    ViewData["Title"] = "Mis Entradas";
+}
+
+<div class="container mt-5">
+    <h2 class="mb-4"><i class="bi bi-ticket-perforated"></i> Mis Entradas Compradas</h2>
+
+    @if (!Model.Any())
+    {
+        <div class="alert alert-info text-center">
+            <h4>Aún no tienes entradas.</h4>
+            <p>¡Ve a la cartelera y elige tu próximo evento!</p>
+            <a asp-controller="Home" asp-action="Index" class="btn btn-primary">Ver Eventos</a>
+        </div>
+    }
+    else
+    {
+        <div class="row">
+            <div class="row">
+                @foreach (var ticket in Model)
+                {
+                    <div class="col-md-6 col-lg-4 mb-4">
+                        <div class="card h-100 shadow-sm border-@(ticket.FueUsado ? "secondary" : "success")">
+                            <div class="card-body">
+                                <h5 class="card-title">@ticket.Evento?.Nombre</h5>
+                                <p class="card-text text-muted small">
+                                    <i class="bi bi-calendar"></i> @ticket.Evento?.FechaEvento.ToString("f")
+                                    <br />
+                                    <i class="bi bi-tag"></i> Tipo: <strong>@ticket.Tipo</strong>
+                                </p>
+                                <hr />
+                                <div class="d-flex justify-content-between align-items-center">
+                                    <div>
+                                        <span class="badge @(ticket.FueUsado ? "bg-secondary" : "bg-success")">
+                                            @(ticket.FueUsado ? "Ya utilizado" : "Válido")
+                                        </span>
+                                    </div>
+
+                                    <div class="btn-group">
+                                        <a asp-action="VerTicket" asp-route-id="@ticket.Id" class="btn btn-outline-primary btn-sm">
+                                            <i class="bi bi-qr-code"></i> Ver QR
+                                        </a>
+
+                                        @if (!ticket.FueUsado)
+                                        {
+                                            <form id="form-devolver-@ticket.Id" asp-action="DevolverTicket" asp-controller="Tickets" method="post" style="display:inline;">
+                                                @Html.AntiForgeryToken()
+                                                <input type="hidden" name="id" value="@ticket.Id" />
+
+                                                <button type="button"
+                                                        class="btn btn-outline-secondary btn-sm border-start-0 shadow-sm"
+                                                        onclick="confirmarDevolucion('@ticket.Id')"
+                                                        title="Devolver ticket"
+                                                        style="border-radius: 0 8px 8px 0; padding: 5px 10px; transition: all 0.3s;">
+                                                    <i class="bi bi-arrow-return-left text-danger"></i>
+                                                </button>
+                                            </form>
+                                        }
+                                    </div>
+                                </div>
+                            </div>
+                            @if (ticket.FueUsado)
+                            {
+                                <div class="card-footer bg-light text-center py-1">
+                                    <small class="text-muted">No permite devoluciones</small>
+                                </div>
+                            }
+                        </div>
+                    </div>
+                }
+            </div>
+        </div>
+
+@section Scripts {
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+
+    <script>
+        function confirmarDevolucion(ticketId) {
+            Swal.fire({
+                title: '¿Deseas devolver este ticket?',
+                text: "Se liberará el cupo para que otra persona pueda asistir.",
+                icon: 'warning',
+                showCancelButton: true,
+                confirmButtonColor: '#d33',
+                cancelButtonColor: '#6c757d',
+                confirmButtonText: 'Sí, devolver',
+                cancelButtonText: 'Cancelar',
+                background: '#fff',
+                borderRadius: '15px'
+            }).then((result) => {
+                if (result.isConfirmed) {
+                    // Si el usuario confirma, enviamos el formulario correspondiente
+                    document.getElementById('form-devolver-' + ticketId).submit();
+                }
+            })
+        }
+    </script>
+}
+}

@@ -1,0 +1,50 @@
+﻿@model Baratickets2._0.Models.Evento
+
+@{
+    ViewData["Title"] = "Eliminar Evento";
+}
+
+<div class="container mt-5">
+    <div class="row justify-content-center">
+        <div class="col-md-6 text-center">
+            @* Tarjeta de Alerta Crítica *@
+            <div class="card shadow-lg border-0 animate__animated animate__shakeX" style="border-radius: 20px;">
+                <div class="card-header bg-danger text-white py-4" style="border-radius: 20px 20px 0 0;">
+                    <i class="bi bi-exclamation-octagon-fill d-block mb-2" style="font-size: 3rem;"></i>
+                    <h3 class="fw-bold mb-0">¿Eliminar este evento?</h3>
+                </div>
+
+                <div class="card-body p-5">
+                    <p class="text-muted fs-5 mb-4">Esta acción es irreversible y cancelará todas las categorías y tickets asociados.</p>
+
+                    <div class="bg-light p-3 rounded-3 mb-4 border-start border-danger border-4 text-start">
+                        <h4 class="fw-bold text-dark mb-1">@Html.DisplayFor(model => model.Nombre)</h4>
+                        <p class="text-secondary small mb-2"><i class="bi bi-calendar-event me-2"></i>@Model.FechaEvento.ToString("f")</p>
+
+                        <div class="mt-2">
+                            <span class="badge bg-secondary">Segmentos: @Model.CategoriasTickets?.Count</span>
+                            <span class="badge bg-dark">Organizador: @Model.Organizador?.UserName</span>
+                        </div>
+                    </div>
+
+                    @* Formulario de Eliminación *@
+                    <form asp-action="Delete">
+                        <input type="hidden" asp-for="Id" />
+                        <div class="d-grid gap-2">
+                            <button type="submit" class="btn btn-danger btn-lg rounded-pill fw-bold shadow">
+                                <i class="bi bi-trash3-fill me-2"></i>Confirmar Eliminación
+                            </button>
+                            <a asp-action="Index" class="btn btn-outline-secondary rounded-pill">
+                                Cancelar y regresar
+                            </a>
+                        </div>
+                    </form>
+                </div>
+
+                <div class="card-footer bg-white border-0 py-3">
+                    <small class="text-danger fw-bold"><i class="bi bi-shield-lock me-1"></i> Solo personal autorizado</small>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>

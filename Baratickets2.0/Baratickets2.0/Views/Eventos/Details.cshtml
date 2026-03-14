@@ -1,0 +1,173 @@
+﻿@model Baratickets2._0.Models.Evento
+@using Microsoft.AspNetCore.Identity
+@inject UserManager<ApplicationUser> UserManager
+
+@{
+    ViewData["Title"] = "Detalles del Evento";
+}
+
+<style>
+    .event-hero {
+        position: relative;
+        height: 400px;
+        background: url('@Model.ImagenUrl') no-repeat center center;
+        background-size: cover;
+        border-radius: 0 0 30px 30px;
+    }
+
+    .event-hero-overlay {
+        position: absolute;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        background: linear-gradient(to bottom, rgba(0,0,0,0.2), rgba(0,0,0,0.8));
+        border-radius: 0 0 30px 30px;
+    }
+
+    .content-card {
+        border-radius: 20px;
+        border: none;
+    }
+
+    .ticket-card {
+        background: #fff;
+        border-radius: 15px;
+        transition: transform 0.2s;
+        border: 1px solid #eee;
+    }
+
+        .ticket-card:hover {
+            transform: scale(1.02);
+        }
+
+        .ticket-card.vip {
+            border-left: 5px solid #ffc107;
+            background: #fffdf5;
+        }
+
+    .sticky-shop {
+        position: sticky;
+        top: 20px;
+    }
+</style>
+
+@* --- HERO SECTION --- *@
+<div class="event-hero shadow-lg">
+    <div class="event-hero-overlay d-flex align-items-end pb-4">
+        <div class="container">
+            <span class="badge bg-info text-dark mb-2 px-3 rounded-pill">Evento Verificado</span>
+            <h1 class="display-4 fw-bold text-white">@Model.Nombre</h1>
+            <p class="text-white-50 fs-5"><i class="bi bi-geo-alt-fill text-danger"></i> @Model.Direccion</p>
+        </div>
+    </div>
+</div>
+
+<div class="container mt-5">
+    <div class="row g-4">
+
+        @* --- COLUMNA IZQUIERDA: INFORMACIÓN --- *@
+        <div class="col-lg-7">
+            @* Tarjeta Descripción *@
+            <div class="card content-card shadow-sm p-4 mb-4">
+                <h4 class="fw-bold mb-3"><i class="bi bi-card-text text-primary me-2"></i>Sobre el Evento</h4>
+                <p class="text-secondary fs-5" style="line-height: 1.6;">@Model.Descripcion</p>
+            </div>
+
+            @* Tarjeta Detalles Rápidos *@
+            <div class="row g-3">
+                <div class="col-md-6">
+                    <div class="card content-card shadow-sm p-3 h-100">
+                        <label class="text-muted small fw-bold text-uppercase">Fecha y Hora</label>
+                        <div class="d-flex align-items-center mt-2">
+                            <i class="bi bi-calendar-event fs-3 text-danger me-3"></i>
+                            <span class="fw-bold">@Model.FechaEvento.ToString("f")</span>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-md-6">
+                    <div class="card content-card shadow-sm p-3 h-100">
+                        <label class="text-muted small fw-bold text-uppercase">Organizado por</label>
+                        <div class="d-flex align-items-center mt-2">
+                            <i class="bi bi-building fs-3 text-success me-3"></i>
+                            <span class="fw-bold">@(string.IsNullOrEmpty(Model.Organizacion) ? Model.Organizador?.UserName : Model.Organizacion)</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            @* Botón Mapa *@
+            <div class="mt-4 text-center">
+                <a href="https://www.google.com/maps/search/?api=1&query=@Model.Direccion" target="_blank" class="btn btn-outline-dark rounded-pill px-5 shadow-sm">
+                    <i class="bi bi-map-fill me-2"></i>Ver ubicación en el mapa
+                </a>
+            </div>
+        </div>
+
+        @* --- COLUMNA DERECHA: TICKET SHOP --- *@
+        <div class="col-lg-5">
+            <div class="sticky-shop">
+                <div class="card content-card shadow-lg p-4 border-0 bg-light">
+                    <div class="d-flex align-items-center mb-4">
+                        <div class="bg-dark text-white p-2 rounded-circle me-3">
+                            <i class="bi bi-ticket-perforated fs-4"></i>
+                        </div>
+                        <h4 class="fw-bold mb-0">Ticket Shop</h4>
+                    </div>
+
+                    @if (Model.CategoriasTickets == null || !Model.CategoriasTickets.Any())
+                    {
+                        <div class="alert alert-warning rounded-4 border-0 shadow-sm">
+                            <i class="bi bi-exclamation-triangle me-2"></i> No hay boletas disponibles.
+                        </div>
+                    }
+                    else
+                    {
+                        @foreach (var cat in Model.CategoriasTickets)
+                        {
+                            <div class="ticket-card p-3 mb-3 shadow-sm @(cat.Nombre.ToLower().Contains("vip") ? "vip" : "")">
+                                <div class="d-flex justify-content-between align-items-center">
+                                    <div>
+                                        <h6 class="fw-bold mb-1">@cat.Nombre</h6>
+                                        <span class="text-success fw-bold">RD$ @cat.Precio.ToString("N0")</span>
+                                        <br />
+                                        <small class="text-muted"><i class="bi bi-person"></i> @cat.Capacidad Ticket</small>
+                                    </div>
+                                    <div>
+                                        @if (cat.Capacidad <= 0)
+                                        {
+                                            <button class="btn btn-secondary btn-sm disabled rounded-pill" disabled>Agotado</button>
+                                        }
+                                        else if (!User.Identity.IsAuthenticated)
+                                        {
+                                            <a asp-area="Identity" asp-page="/Account/Login" asp-route-returnUrl="@Context.Request.Path" class="btn btn-outline-primary btn-sm rounded-pill px-3">Comprar</a>
+                                        }
+                                        else
+                                        {
+                                            <form asp-controller="Tickets" asp-action="ProcesarPago" method="get">
+                                                <input type="hidden" name="eventoId" value="@Model.Id" />
+                                                <input type="hidden" name="categoriaId" value="@cat.Id" />
+                                                <button type="submit" class="btn btn-primary btn-sm rounded-pill px-3">Comprar</button>
+                                            </form>
+                                        }
+                                    </div>
+                                </div>
+                            </div>
+                        }
+                    }
+
+                    @* Solo mostramos el panel de gestión si es Admin u Organizador *@
+                    @if (User.IsInRole("Admin") || User.IsInRole("Organizador"))
+                    {
+                        <div class="mt-4 p-3 bg-white rounded-4 border text-center">
+                            <i class="bi bi-shield-lock text-muted fs-3"></i>
+                            <h6 class="fw-bold mt-2">Modo Administración</h6>
+                            <p class="small text-muted mb-0">Puedes supervisar este evento desde tu panel principal.</p>
+                        </div>
+                    }
+                </div>
+            </div>
+        </div>
+
+    </div>
+</div>
