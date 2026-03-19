@@ -21,5 +21,6 @@
         public bool CuponUsado { get; set; } = false;
         public decimal MontoOriginal { get; set; }
         public decimal MontoRestante { get; set; } // Por si usa 50 de los 100
+        public DateTime? FechaExpiracion { get; set; }
     }
 }

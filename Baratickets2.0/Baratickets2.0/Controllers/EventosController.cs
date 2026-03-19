@@ -114,12 +114,15 @@ namespace Baratickets2._0.Controllers
             // Esto es mucho mejor porque si el precio cambió después de la compra, el histórico se mantiene
             decimal totalVendido = ticketsActivos.Sum(t => t.PrecioPagado);
             decimal dineroPerdidoDevoluciones = ticketsDevueltos.Sum(t => t.PrecioPagado);
+            // Obtener nombres de usuarios de las devoluciones
+         
 
             // 3. Pasar datos básicos a la vista
             ViewBag.TotalVendido = totalVendido;
             ViewBag.TicketsVendidos = ticketsActivos.Count;
             ViewBag.TotalDevueltos = ticketsDevueltos.Count;
             ViewBag.DineroDevuelto = dineroPerdidoDevoluciones;
+         
 
             // 4. Estadísticas de validación (Asistencia)
             ViewBag.AsistenciaReal = ticketsActivos.Count(t => t.FueUsado);
@@ -140,6 +143,39 @@ namespace Baratickets2._0.Controllers
                 }).ToList();
 
             ViewBag.VentasPorCategoria = ventasPorCategoria;
+            // 6. Historial de devoluciones con cupones
+            var devoluciones = await _context.Devoluciones
+               .Include(d => d.Ticket)
+               .Where(d => d.Ticket.EventoId == id)
+               .OrderByDescending(d => d.FechaSolicitud)
+               .Select(d => new {
+                   UsuarioId = d.UsuarioId,
+                   FechaSolicitud = d.FechaSolicitud,
+                   TipoDevolucion = d.TipoDevolucion,
+                   MontoOriginal = d.MontoOriginal,
+                   MontoRestante = d.MontoRestante,
+                   CodigoCupon = d.CodigoCupon,
+                   CuponUsado = d.CuponUsado,
+                   // ✅ Convertir a string directamente — evita el problema de .Value en Razor
+                   FechaExpiracionStr = d.FechaExpiracion.HasValue
+                       ? d.FechaExpiracion.Value.ToString("dd/MM/yyyy")
+                       : "—",
+                   FechaExpiracionEsPasada = d.FechaExpiracion.HasValue
+                       ? d.FechaExpiracion.Value < DateTime.Now
+                       : false,
+                   Estado = d.Estado
+               })
+               .ToListAsync();
+            // Obtener nombres de usuarios
+            var usuarioIds = devoluciones.Select(d => d.UsuarioId).Distinct().ToList();
+            var usuarios = await _context.Users
+                .Where(u => usuarioIds.Contains(u.Id))
+                .ToListAsync();
+
+            var usuariosDict = usuarios.ToDictionary(u => u.Id, u => u.NombreCompleto);
+
+            ViewBag.Devoluciones = devoluciones;
+            ViewBag.UsuariosDevoluciones = usuariosDict;
 
             return View(evento);
         }

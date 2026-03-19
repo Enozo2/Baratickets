@@ -52,7 +52,7 @@ namespace Baratickets2._0.Controllers
                 if (esCupon)
                 {
                     var cupon = await _context.Devoluciones
-                        .FirstOrDefaultAsync(c => c.CodigoCupon == tokenSeguridad && !c.CuponUsado);
+                        .FirstOrDefaultAsync(c => c.CodigoCupon == tokenSeguridad && c.MontoRestante > 0);
 
                     if (cupon == null)
                     {
@@ -61,26 +61,25 @@ namespace Baratickets2._0.Controllers
                         return RedirectToAction("MisTickets");
                     }
 
-                    // ✅ Validación de monto también en el backend
-                    if (categoria.Precio > cupon.MontoOriginal)
+                    // ✅ Validar expiración en backend también
+                    if (cupon.FechaExpiracion.HasValue && cupon.FechaExpiracion < DateTime.Now)
                     {
-                        TempData["Error"] = $"El cupón (RD$ {cupon.MontoOriginal:N0}) no cubre el precio de esta boleta (RD$ {categoria.Precio:N0}).";
+                        TempData["Error"] = $"Este cupón expiró el {cupon.FechaExpiracion.Value:dd/MM/yyyy}.";
                         await transaction.RollbackAsync();
                         return RedirectToAction("MisTickets");
                     }
 
-                    int filasAfectadas = await _context.Devoluciones
-                        .Where(c => c.Id == cupon.Id && !c.CuponUsado)
-                        .ExecuteUpdateAsync(s => s.SetProperty(c => c.CuponUsado, true));
 
-                    if (filasAfectadas == 0)
-                    {
-                        TempData["Error"] = "Cupón ya utilizado o inválido.";
-                        await transaction.RollbackAsync();
-                        return RedirectToAction("MisTickets");
-                    }
+                    // ✅ Descuenta solo lo que cubre el cupón
+                    montoDescuento = Math.Min(cupon.MontoRestante, categoria.Precio);
+                    decimal nuevoSaldo = cupon.MontoRestante - montoDescuento;
 
-                    montoDescuento = cupon.MontoOriginal;
+                    await _context.Devoluciones
+                        .Where(c => c.Id == cupon.Id)
+                        .ExecuteUpdateAsync(s => s
+                            .SetProperty(c => c.MontoRestante, nuevoSaldo)
+                            .SetProperty(c => c.CuponUsado, nuevoSaldo <= 0)
+                        );
                 }
 
                 decimal precioFinal = Math.Max(0, categoria.Precio - montoDescuento);
@@ -123,22 +122,37 @@ namespace Baratickets2._0.Controllers
             if (cupon == null)
                 return Json(new { valido = false, mensaje = "Cupón no encontrado." });
 
+            // ✅ Validar que no esté marcado como usado
             if (cupon.CuponUsado)
                 return Json(new { valido = false, mensaje = "Este cupón ya fue utilizado." });
 
-            // ✅ Validar que el cupón alcanza para esta boleta
+            // ✅ Validar expiración
+            if (cupon.FechaExpiracion.HasValue && cupon.FechaExpiracion < DateTime.Now)
+                return Json(new { valido = false, mensaje = $"Este cupón expiró el {cupon.FechaExpiracion.Value:dd/MM/yyyy}." });
+
+            // ✅ Validar saldo restante
+            if (cupon.MontoRestante <= 0)
+                return Json(new { valido = false, mensaje = "Este cupón no tiene saldo disponible." });
+
             var categoria = await _context.CategoriasTickets.FindAsync(categoriaId);
             if (categoria == null)
                 return Json(new { valido = false, mensaje = "Categoría no encontrada." });
 
-            if (categoria.Precio > cupon.MontoOriginal)
-                return Json(new
-                {
-                    valido = false,
-                    mensaje = $"Este cupón es por RD$ {cupon.MontoOriginal:N0} y no cubre esta boleta de RD$ {categoria.Precio:N0}."
-                });
 
-            return Json(new { valido = true, mensaje = "Cupón válido.", monto = cupon.MontoOriginal });
+            // ✅ Calcular cuánto cubre el cupón y cuánto falta pagar
+            decimal descuento = Math.Min(cupon.MontoRestante, categoria.Precio);
+            decimal restaPagar = categoria.Precio - descuento;
+
+            return Json(new
+            {
+                valido = true,
+                monto = cupon.MontoRestante,
+                descuento = descuento,
+                restaPagar = restaPagar,
+                mensaje = restaPagar > 0
+                    ? $"Cupón aplica RD$ {descuento:N0}. Resta pagar RD$ {restaPagar:N0} con tarjeta."
+                    : "Cupón cubre el total."
+            });
         }
         [HttpPost]
         public async Task<IActionResult> SolicitarDevolucion(Guid ticketId, string tipoDevolucion)
@@ -191,6 +205,8 @@ namespace Baratickets2._0.Controllers
             {
                 devolucion.CodigoCupon = "REFUND-" + Guid.NewGuid().ToString().Substring(0, 8).ToUpper();
                 devolucion.MontoOriginal = ticket.PrecioPagado;
+                devolucion.MontoRestante = ticket.PrecioPagado;  // ✅ Saldo inicial = precio pagado
+                devolucion.FechaExpiracion = DateTime.Now.AddDays(30); // ✅ Expira en 30 días
             }
 
             _context.Devoluciones.Add(devolucion);

@@ -69,10 +69,27 @@
                                                 <i class="bi bi-clipboard"></i>
                                             </button>
                                         </div>
+                                        @* ✅ Saldo restante y expiración *@
+                                        <div class="mt-1">
+                                            @if (ticket.Devolucion.MontoRestante > 0)
+                                            {
+                                                <span class="badge bg-success">Saldo: RD$ @ticket.Devolucion.MontoRestante.ToString("N0")</span>
+                                            }
+                                            else
+                                            {
+                                                <span class="badge bg-secondary">Sin saldo</span>
+                                            }
+                                            @if (ticket.Devolucion.FechaExpiracion.HasValue)
+                                            {
+                                                <br />
+                                                <small class="text-muted" style="font-size: 0.65rem;">
+                                                    Expira: @ticket.Devolucion.FechaExpiracion.Value.ToString("dd/MM/yyyy")
+                                                </small>
+                                            }
+                                        </div>
                                     </div>
                                 </div>
                             }
-
                             <div class="d-flex justify-content-between align-items-center">
                                 <div>
                                     @if (ticket.Estado == "Devuelto")
@@ -86,7 +103,6 @@
                                         </span>
                                     }
                                 </div>
-
                                 <div class="btn-group">
                                     @if (ticket.Estado != "Devuelto")
                                     {
@@ -94,7 +110,6 @@
                                             <i class="bi bi-qr-code"></i> Ver QR
                                         </a>
                                     }
-
                                     @if (esDevolvible)
                                     {
                                         <button type="button" class="btn btn-outline-danger btn-sm" onclick="solicitarDevolucionElegante('@ticket.Id')">
@@ -108,7 +123,6 @@
                                 </div>
                             </div>
                         </div>
-
                         @if (horasDesdeCompra > 24 && !ticket.FueUsado && ticket.Estado != "Devuelto")
                         {
                             <div class="card-footer bg-light text-center py-1">

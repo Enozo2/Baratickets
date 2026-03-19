@@ -118,52 +118,72 @@
     const precioDisplay = document.getElementById('precioDisplay');
 
     // --- LÓGICA DE CUPONES ---
-       async function aplicarCupon() {
-    const cupon = document.getElementById('inputCupon').value.trim().toUpperCase();
-    const msj = document.getElementById('msjCupon');
-    const categoriaId = document.querySelector('input[name="categoriaId"]').value;
+    async function aplicarCupon() {
+        const cupon = document.getElementById('inputCupon').value.trim().toUpperCase();
+        const msj = document.getElementById('msjCupon');
+            const categoriaId = document.querySelector('input[name="categoriaId"]').value;
+    console.log('categoriaId:', categoriaId); // ← agrega esto temporalmente
 
-    if (!cupon.startsWith("REFUND-")) {
-        document.getElementById('tokenSeguridad').value = '';
-        msj.innerText = "Cupón no válido o formato incorrecto.";
-        msj.className = "small mt-1 text-danger fw-bold";
+        if (!cupon.startsWith("REFUND-")) {
+            document.getElementById('tokenSeguridad').value = '';
+            msj.innerText = "Cupón no válido o formato incorrecto.";
+            msj.className = "small mt-1 text-danger fw-bold";
+            msj.style.display = "block";
+            Swal.fire('Error', 'El código ingresado no es válido.', 'error');
+            return;
+        }
+
+        const respuesta = await fetch(`/Tickets/ValidarCupon?codigo=${cupon}&categoriaId=${categoriaId}`);
+        const data = await respuesta.json();
+
+        if (!data.valido) {
+            document.getElementById('tokenSeguridad').value = '';
+            msj.innerText = data.mensaje;
+            msj.className = "small mt-1 text-danger fw-bold";
+            msj.style.display = "block";
+            Swal.fire('Error', data.mensaje, 'error');
+            return;
+        }
+
+        document.getElementById('tokenSeguridad').value = cupon;
+        msj.className = "small mt-1 text-success fw-bold";
         msj.style.display = "block";
-        Swal.fire('Error', 'El código ingresado no es válido.', 'error');
-        return;
-    }
 
-    const respuesta = await fetch(`/Tickets/ValidarCupon?codigo=${cupon}&categoriaId=${categoriaId}`);
-    const data = await respuesta.json();
-
-    if (!data.valido) {
-        document.getElementById('tokenSeguridad').value = '';
-        msj.innerText = data.mensaje;
-        msj.className = "small mt-1 text-danger fw-bold";
-        msj.style.display = "block";
-        Swal.fire('Error', data.mensaje, 'error');
-        return;
-    }
-
-    document.getElementById('tokenSeguridad').value = cupon;
-    msj.innerHTML = "<i class='bi bi-check-circle-fill'></i> ¡Cupón aplicado! Total a pagar: RD$ 0";
-    msj.className = "small mt-1 text-success fw-bold";
-    msj.style.display = "block";
-
-    precioDisplay.style.textDecoration = "line-through";
-    precioDisplay.style.opacity = "0.5";
-
-    btnPagar.disabled = false;
-    btnPagar.style.opacity = "1";
-    btnPagar.style.filter = "none";
-    btnPagar.innerHTML = "Confirmar y Canjear Cupón (RD$ 0)";
-
-    Swal.fire({
-        title: '¡Cupón Válido!',
-        text: 'Se ha aplicado el descuento total por devolución.',
-        icon: 'success',
-        confirmButtonColor: '#0d6efd'
-        });
-    }
+        if (data.restaPagar > 0) {
+            // Saldo parcial — mostrar cuánto resta y pedir tarjeta
+            msj.innerHTML = `<i class='bi bi-check-circle-fill'></i> Cupón aplica RD$ ${data.descuento.toLocaleString()}. Resta pagar RD$ ${data.restaPagar.toLocaleString()} con tarjeta.`;
+            precioDisplay.innerText = `RD$ ${data.restaPagar.toLocaleString()}`;
+            precioDisplay.style.textDecoration = "none";
+            precioDisplay.style.opacity = "1";
+            btnPagar.innerHTML = `Confirmar y Pagar RD$ ${data.restaPagar.toLocaleString()}`;
+            btnPagar.disabled = false;
+            btnPagar.style.opacity = "1";
+            btnPagar.style.filter = "none";
+            document.getElementById('tokenSeguridad').dataset.restaPagar = data.restaPagar;
+            Swal.fire({
+                title: '¡Cupón Aplicado!',
+                text: `El cupón cubre RD$ ${data.descuento.toLocaleString()}. Debes pagar RD$ ${data.restaPagar.toLocaleString()} con tarjeta.`,
+                icon: 'info',
+                confirmButtonColor: '#0d6efd'
+            });
+        } else {
+            // Cubre el total — no pide tarjeta
+            msj.innerHTML = "<i class='bi bi-check-circle-fill'></i> ¡Cupón cubre el total! RD$ 0";
+            precioDisplay.style.textDecoration = "line-through";
+            precioDisplay.style.opacity = "0.5";
+            btnPagar.disabled = false;
+            btnPagar.style.opacity = "1";
+            btnPagar.style.filter = "none";
+            btnPagar.innerHTML = "Confirmar y Canjear Cupón (RD$ 0)";
+            document.getElementById('tokenSeguridad').dataset.restaPagar = 0;
+            Swal.fire({
+                title: '¡Cupón Válido!',
+                text: 'El cupón cubre el total de la compra.',
+                icon: 'success',
+                confirmButtonColor: '#0d6efd'
+            });
+        }
+    } // ✅ Cierre correcto de aplicarCupon
 
     // --- 1. DETECCIÓN DE FRANQUICIA ---
     function detectarFranquicia(numero) {
@@ -209,10 +229,8 @@
             const mes = parseInt(partes[0]);
             const anio = parseInt(partes[1]);
             const anioActual = 26;
-
             const mesValido = (mes >= 1 && mes <= 12);
             const anioValido = (anio >= anioActual);
-
             if (mesValido && anioValido) {
                 fechaEscritaOk = true;
                 errorSpan.style.display = 'none';
@@ -225,7 +243,7 @@
             errorSpan.style.display = 'none';
         }
 
-        // Si el cupón ya está aplicado, no bloqueamos el botón por falta de tarjeta
+        // Si el cupón ya está aplicado, no bloqueamos el botón
         const msjCupon = document.getElementById('msjCupon');
         if (msjCupon.style.display === 'block' && msjCupon.classList.contains('text-success')) {
             return;
@@ -248,7 +266,6 @@
         let franquicia = detectarFranquicia(value);
         marcaLabel.innerText = franquicia.nombre;
         marcaLabel.style.color = franquicia.color;
-
         let formatted = value.match(/.{1,4}/g)?.join(' ') || '';
         e.target.value = formatted.substring(0, 19);
         validarFormulario();
@@ -273,11 +290,12 @@
         e.preventDefault();
         if (yaSeEnvio) return;
 
-        // --- NUEVA LÓGICA: SI HAY CUPÓN, PASA DIRECTO ---
         const msjCupon = document.getElementById('msjCupon');
         const cuponValido = msjCupon.style.display === 'block' && msjCupon.classList.contains('text-success');
+        const restaPagar = parseFloat(document.getElementById('tokenSeguridad').dataset.restaPagar || '0');
 
-        if (cuponValido) {
+        if (cuponValido && restaPagar === 0) {
+            // Cupón cubre el total — no pide tarjeta
             yaSeEnvio = true;
             Swal.fire({
                 title: 'Procesando Cupón...',
@@ -290,7 +308,7 @@
             return;
         }
 
-        // --- SI NO HAY CUPÓN: VALIDACIÓN NORMAL DE TARJETA ---
+        // Sin cupón o saldo parcial — validación normal de tarjeta
         if (!validarTarjetaLuhn(inputTarjeta.value)) {
             Swal.fire('Seguridad', 'Número de tarjeta inválido o fraudulento.', 'error');
             return;
