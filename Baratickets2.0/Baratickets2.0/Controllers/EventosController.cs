@@ -69,42 +69,29 @@ namespace Baratickets2._0.Controllers
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> Create(Evento evento)
         {
-            // 1. Asignamos el ID del usuario actual como organizador
+            // 1. Asignamos el ID del organizador
             var userId = _userManager.GetUserId(User);
             evento.OrganizadorId = userId;
 
-            // 2. Limpieza de validaciones: 
-            // Removemos los objetos de navegación para que el ModelState no dé error 
-            // si esos campos vienen nulos desde el formulario.
+            // 2. Limpieza de validaciones
             ModelState.Remove("Organizador");
             ModelState.Remove("Tickets");
             ModelState.Remove("OrganizadorId");
 
-            // NOTA: Si agregaste 'Institucion' al modelo Evento.cs, 
-            // el objeto 'evento' ya trae ese valor automáticamente aquí.
-
             if (ModelState.IsValid)
             {
-                // 3. Guardamos el evento principal (incluyendo el nuevo campo Institucion)
-                _context.Add(evento);
-                await _context.SaveChangesAsync(); // Genera el ID del evento en la DB
+                // --- 🟢 LA SOLUCIÓN ESTÁ AQUÍ ---
+                // Al agregar el 'evento', EF detecta automáticamente las 'CategoriasTickets'
+                // que vienen dentro del objeto y les asigna el EventoId solo.
 
-                // 4. Guardamos las categorías de tickets si existen
-                if (evento.CategoriasTickets != null && evento.CategoriasTickets.Any())
-                {
-                    foreach (var cat in evento.CategoriasTickets)
-                    {
-                        cat.Id = 0; // SQL generará el ID automáticamente
-                        cat.EventoId = evento.Id; // Vinculamos la boleta con el evento recién creado
-                        _context.CategoriasTickets.Add(cat);
-                    }
-                    await _context.SaveChangesAsync(); // Guardamos los segmentos de boletas
-                }
+                _context.Add(evento);
+
+                // Un solo SaveChanges para todo el paquete (Evento + Categorías)
+                await _context.SaveChangesAsync();
 
                 return RedirectToAction(nameof(Index));
             }
 
-            // Si hubo un error de validación, volvemos a la vista con los datos
             return View(evento);
         }
         [Authorize(Roles = "Organizador,Admin")]

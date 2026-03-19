@@ -4,6 +4,7 @@ using Baratickets2._0.Data;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 
 #nullable disable
@@ -11,9 +12,11 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace Baratickets2._0.Migrations
 {
     [DbContext(typeof(ApplicationDbContext))]
-    partial class ApplicationDbContextModelSnapshot : ModelSnapshot
+    [Migration("20260319014140_cuponusado")]
+    partial class cuponusado
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -148,12 +151,6 @@ namespace Baratickets2._0.Migrations
 
                     b.Property<DateTime>("FechaSolicitud")
                         .HasColumnType("datetime2");
-
-                    b.Property<decimal>("MontoOriginal")
-                        .HasColumnType("decimal(18,2)");
-
-                    b.Property<decimal>("MontoRestante")
-                        .HasColumnType("decimal(18,2)");
 
                     b.Property<string>("Motivo")
                         .IsRequired()

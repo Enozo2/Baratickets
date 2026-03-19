@@ -4,6 +4,7 @@ using Baratickets2._0.Data;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 
 #nullable disable
@@ -11,9 +12,11 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace Baratickets2._0.Migrations
 {
     [DbContext(typeof(ApplicationDbContext))]
-    partial class ApplicationDbContextModelSnapshot : ModelSnapshot
+    [Migration("20260319000847_AgregadaTablaReclamacion")]
+    partial class AgregadaTablaReclamacion
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -136,9 +139,6 @@ namespace Baratickets2._0.Migrations
                     b.Property<string>("CodigoCupon")
                         .HasColumnType("nvarchar(max)");
 
-                    b.Property<bool>("CuponUsado")
-                        .HasColumnType("bit");
-
                     b.Property<bool>("EsCuponGenerado")
                         .HasColumnType("bit");
 
@@ -148,12 +148,6 @@ namespace Baratickets2._0.Migrations
 
                     b.Property<DateTime>("FechaSolicitud")
                         .HasColumnType("datetime2");
-
-                    b.Property<decimal>("MontoOriginal")
-                        .HasColumnType("decimal(18,2)");
-
-                    b.Property<decimal>("MontoRestante")
-                        .HasColumnType("decimal(18,2)");
 
                     b.Property<string>("Motivo")
                         .IsRequired()
@@ -172,8 +166,7 @@ namespace Baratickets2._0.Migrations
 
                     b.HasKey("Id");
 
-                    b.HasIndex("TicketId")
-                        .IsUnique();
+                    b.HasIndex("TicketId");
 
                     b.ToTable("Devoluciones");
                 });
@@ -471,8 +464,8 @@ namespace Baratickets2._0.Migrations
             modelBuilder.Entity("Baratickets2._0.Models.Devolucion", b =>
                 {
                     b.HasOne("Baratickets2._0.Models.Ticket", "Ticket")
-                        .WithOne("Devolucion")
-                        .HasForeignKey("Baratickets2._0.Models.Devolucion", "TicketId")
+                        .WithMany()
+                        .HasForeignKey("TicketId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 
@@ -613,11 +606,6 @@ namespace Baratickets2._0.Migrations
             modelBuilder.Entity("Baratickets2._0.Models.Orden", b =>
                 {
                     b.Navigation("Tickets");
-                });
-
-            modelBuilder.Entity("Baratickets2._0.Models.Ticket", b =>
-                {
-                    b.Navigation("Devolucion");
                 });
 #pragma warning restore 612, 618
         }

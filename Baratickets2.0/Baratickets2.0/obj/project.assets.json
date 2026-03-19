@@ -8188,11 +8188,11 @@
   "project": {
     "version": "1.0.0",
     "restore": {
-      "projectUniqueName": "C:\\Users\\Enocr\\source\\repos\\Baratickets2.0\\Baratickets2.0\\Baratickets2.0.csproj",
+      "projectUniqueName": "C:\\Users\\Enocr\\OneDrive\\Escritorio\\Baratickets\\Baratickets2.0\\Baratickets2.0\\Baratickets2.0.csproj",
       "projectName": "Baratickets2.0",
-      "projectPath": "C:\\Users\\Enocr\\source\\repos\\Baratickets2.0\\Baratickets2.0\\Baratickets2.0.csproj",
+      "projectPath": "C:\\Users\\Enocr\\OneDrive\\Escritorio\\Baratickets\\Baratickets2.0\\Baratickets2.0\\Baratickets2.0.csproj",
       "packagesPath": "C:\\Users\\Enocr\\.nuget\\packages\\",
-      "outputPath": "C:\\Users\\Enocr\\source\\repos\\Baratickets2.0\\Baratickets2.0\\obj\\",
+      "outputPath": "C:\\Users\\Enocr\\OneDrive\\Escritorio\\Baratickets\\Baratickets2.0\\Baratickets2.0\\obj\\",
       "projectStyle": "PackageReference",
       "fallbackFolders": [
         "C:\\Program Files (x86)\\Microsoft Visual Studio\\Shared\\NuGetPackages"
@@ -8301,5 +8301,13 @@
         "runtimeIdentifierGraphPath": "C:\\Program Files\\dotnet\\sdk\\9.0.307/PortableRuntimeIdentifierGraph.json"
       }
     }
-  }
+  },
+  "logs": [
+    {
+      "code": "NU1900",
+      "level": "Warning",
+      "warningLevel": 1,
+      "message": "Error al obtener los datos de vulnerabilidad del paquete: No se puede cargar el índice de servicio del origen https://api.nuget.org/v3/index.json."
+    }
+  ]
 }

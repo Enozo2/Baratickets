@@ -7,95 +7,169 @@
 <div class="container mt-5">
     <h2 class="mb-4"><i class="bi bi-ticket-perforated"></i> Mis Entradas Compradas</h2>
 
-    @if (!Model.Any())
+    @if (Model == null || !Model.Any())
     {
         <div class="alert alert-info text-center">
             <h4>Aún no tienes entradas.</h4>
             <p>¡Ve a la cartelera y elige tu próximo evento!</p>
             <a asp-controller="Home" asp-action="Index" class="btn btn-primary">Ver Eventos</a>
         </div>
+
     }
     else
     {
         <div class="row">
-            <div class="row">
-                @foreach (var ticket in Model)
-                {
-                    <div class="col-md-6 col-lg-4 mb-4">
-                        <div class="card h-100 shadow-sm border-@(ticket.FueUsado ? "secondary" : "success")">
-                            <div class="card-body">
-                                <h5 class="card-title">@ticket.Evento?.Nombre</h5>
-                                <p class="card-text text-muted small">
-                                    <i class="bi bi-calendar"></i> @ticket.Evento?.FechaEvento.ToString("f")
-                                    <br />
-                                    <i class="bi bi-tag"></i> Tipo: <strong>@ticket.Tipo</strong>
-                                </p>
-                                <hr />
-                                <div class="d-flex justify-content-between align-items-center">
-                                    <div>
-                                        <span class="badge @(ticket.FueUsado ? "bg-secondary" : "bg-success")">
+            @foreach (var ticket in Model)
+            {
+                var horasDesdeCompra = (DateTime.Now - ticket.FechaCompra).TotalHours;
+
+                // REGLA DE ORO: No se puede devolver si el precio fue 0 (cupón) o si ya pasaron 24h
+                var esDevolvible = horasDesdeCompra <= 24 &&
+                !ticket.FueUsado &&
+                ticket.Estado != "Devuelto" &&
+                ticket.PrecioPagado > 0;
+
+                // VARIABLE DE COLOR: Azul (info) para canjes, Gris (secondary) para usados/devueltos, Verde (success) para normales
+                var colorBorde = (ticket.PrecioPagado == 0 && ticket.Estado != "Devuelto") ? "info" :
+                (ticket.FueUsado || ticket.Estado == "Devuelto" ? "secondary" : "success");
+
+                <div class="col-md-6 col-lg-4 mb-4">
+                    <div class="card h-100 shadow-sm border-@colorBorde" style="@(ticket.PrecioPagado == 0 ? "border-width: 2px;" : "")">
+
+                        @* --- BANNER PARA TICKETS GRATIS --- *@
+                        @if (ticket.PrecioPagado == 0 && ticket.Estado != "Devuelto")
+                        {
+                            <div class="bg-info text-white text-center small fw-bold py-1">
+                                <i class="bi bi-gift-fill"></i> TICKET ADQUIRIDO CON CUPÓN
+                            </div>
+                        }
+
+                        <div class="card-body">
+                            <h5 class="card-title">@ticket.Evento?.Nombre</h5>
+                            <p class="card-text text-muted small">
+                                <i class="bi bi-calendar"></i> @ticket.Evento?.FechaEvento.ToString("f")
+                                <br />
+                                <i class="bi bi-tag"></i> Tipo: <strong>@ticket.Tipo</strong>
+                                @if (ticket.PrecioPagado == 0)
+                                {
+                                    <span class="text-info fw-bold ms-1">(Canje)</span>
+                                }
+                            </p>
+                            <hr />
+
+                            @* --- SECCIÓN DE CUPÓN AMARILLO (Si el ticket se devolvió) --- *@
+                            @if (ticket.Estado == "Devuelto" && ticket.Devolucion != null && !string.IsNullOrEmpty(ticket.Devolucion.CodigoCupon))
+                            {
+                                <div class="alert alert-warning border-warning p-2 mt-2 mb-3 shadow-sm" style="border-style: dashed !important; border-width: 2px !important; background-color: #fffcf0;">
+                                    <div class="text-center">
+                                        <small class="fw-bold text-uppercase d-block text-muted" style="font-size: 0.6rem; letter-spacing: 1px;">Cupón de Reembolso</small>
+                                        <div class="d-flex justify-content-center align-items-center gap-2">
+                                            <code class="h5 mb-0 text-dark fw-bolder">@ticket.Devolucion.CodigoCupon</code>
+                                            <button class="btn btn-sm btn-link p-0 text-dark" onclick="navigator.clipboard.writeText('@ticket.Devolucion.CodigoCupon'); alert('¡Copiado!')">
+                                                <i class="bi bi-clipboard"></i>
+                                            </button>
+                                        </div>
+                                    </div>
+                                </div>
+                            }
+
+                            <div class="d-flex justify-content-between align-items-center">
+                                <div>
+                                    @if (ticket.Estado == "Devuelto")
+                                    {
+                                        <span class="badge bg-danger">Reembolsado</span>
+                                    }
+                                    else
+                                    {
+                                        <span class="badge @(ticket.FueUsado ? "bg-secondary" : (ticket.PrecioPagado == 0 ? "bg-info" : "bg-success"))">
                                             @(ticket.FueUsado ? "Ya utilizado" : "Válido")
                                         </span>
-                                    </div>
+                                    }
+                                </div>
 
-                                    <div class="btn-group">
+                                <div class="btn-group">
+                                    @if (ticket.Estado != "Devuelto")
+                                    {
                                         <a asp-action="VerTicket" asp-route-id="@ticket.Id" class="btn btn-outline-primary btn-sm">
                                             <i class="bi bi-qr-code"></i> Ver QR
                                         </a>
+                                    }
 
-                                        @if (!ticket.FueUsado)
-                                        {
-                                            <form id="form-devolver-@ticket.Id" asp-action="DevolverTicket" asp-controller="Tickets" method="post" style="display:inline;">
-                                                @Html.AntiForgeryToken()
-                                                <input type="hidden" name="id" value="@ticket.Id" />
-
-                                                <button type="button"
-                                                        class="btn btn-outline-secondary btn-sm border-start-0 shadow-sm"
-                                                        onclick="confirmarDevolucion('@ticket.Id')"
-                                                        title="Devolver ticket"
-                                                        style="border-radius: 0 8px 8px 0; padding: 5px 10px; transition: all 0.3s;">
-                                                    <i class="bi bi-arrow-return-left text-danger"></i>
-                                                </button>
-                                            </form>
-                                        }
-                                    </div>
+                                    @if (esDevolvible)
+                                    {
+                                        <button type="button" class="btn btn-outline-danger btn-sm" onclick="solicitarDevolucionElegante('@ticket.Id')">
+                                            <i class="bi bi-arrow-return-left"></i> Devolver
+                                        </button>
+                                    }
+                                    else if (ticket.PrecioPagado == 0 && ticket.Estado != "Devuelto")
+                                    {
+                                        <small class="text-muted italic" style="font-size: 0.7rem;">No reembolsable</small>
+                                    }
                                 </div>
                             </div>
-                            @if (ticket.FueUsado)
-                            {
-                                <div class="card-footer bg-light text-center py-1">
-                                    <small class="text-muted">No permite devoluciones</small>
-                                </div>
-                            }
                         </div>
+
+                        @if (horasDesdeCompra > 24 && !ticket.FueUsado && ticket.Estado != "Devuelto")
+                        {
+                            <div class="card-footer bg-light text-center py-1">
+                                <small class="text-danger" style="font-size: 0.7rem;">Plazo de 24h expirado</small>
+                            </div>
+                        }
                     </div>
-                }
-            </div>
-        </div>
+                </div>
+            }
+        </div> @* Cierre de row *@ 
+    } @* Cierre de else *@
+</div> @* Cierre de div class="container" *@
 
 @section Scripts {
     <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
-
     <script>
-        function confirmarDevolucion(ticketId) {
+        function solicitarDevolucionElegante(ticketId) {
             Swal.fire({
-                title: '¿Deseas devolver este ticket?',
-                text: "Se liberará el cupo para que otra persona pueda asistir.",
-                icon: 'warning',
+                title: 'Solicitud de Devolución',
+                text: "¿Cómo prefieres recibir tu reembolso?",
+                icon: 'question',
                 showCancelButton: true,
-                confirmButtonColor: '#d33',
+                confirmButtonColor: '#0d6efd',
                 cancelButtonColor: '#6c757d',
-                confirmButtonText: 'Sí, devolver',
-                cancelButtonText: 'Cancelar',
-                background: '#fff',
-                borderRadius: '15px'
+                confirmButtonText: '<i class="bi bi-credit-card"></i> A mi Cuenta',
+                cancelButtonText: '<i class="bi bi-ticket-detailed"></i> Cupón Regalo',
+                reverseButtons: true,
+                footer: '<span class="text-muted small">Válido hasta 24h después de la compra</span>'
             }).then((result) => {
+                let metodo = "";
                 if (result.isConfirmed) {
-                    // Si el usuario confirma, enviamos el formulario correspondiente
-                    document.getElementById('form-devolver-' + ticketId).submit();
+                    metodo = "Cuenta";
+                } else if (result.dismiss === Swal.DismissReason.cancel) {
+                    metodo = "Cupon";
                 }
-            })
+
+                if (metodo !== "") {
+                    enviarFormularioDevolucion(ticketId, metodo);
+                }
+            });
+        }
+
+        function enviarFormularioDevolucion(ticketId, metodo) {
+            const form = document.createElement('form');
+            form.method = 'post';
+            form.action = '/Tickets/SolicitarDevolucion';
+
+            const inputId = document.createElement('input');
+            inputId.type = 'hidden';
+            inputId.name = 'ticketId';
+            inputId.value = ticketId;
+
+            const inputMetodo = document.createElement('input');
+            inputMetodo.type = 'hidden';
+            inputMetodo.name = 'tipoDevolucion';
+            inputMetodo.value = metodo;
+
+            form.appendChild(inputId);
+            form.appendChild(inputMetodo);
+            document.body.appendChild(form);
+            form.submit();
         }
     </script>
-}
 }

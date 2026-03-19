@@ -22,12 +22,15 @@
                         <span class="badge bg-primary mb-2 text-uppercase">Sección: @nombreCategoria</span>
                         <h5 class="fw-bold text-dark mb-1">@Model.Nombre</h5>
                         <p class="text-muted small mb-2"><i class="bi bi-geo-alt-fill text-danger"></i> @Model.Direccion</p>
-                        <h3 class="fw-bold text-primary mb-0">RD$ @precioFinal.ToString("N0")</h3>
+                        <h3 id="precioDisplay" class="fw-bold text-primary mb-0">RD$ @precioFinal.ToString("N0")</h3>
                     </div>
 
                     <form id="formPago" asp-controller="Tickets" asp-action="ComprarTicket" method="post">
                         <input type="hidden" name="eventoId" value="@Model.Id" />
                         <input type="hidden" name="categoriaId" value="@categoriaId" />
+
+                       
+                        <input type="hidden" name="tokenSeguridad" id="tokenSeguridad" value="" />
 
                         <div class="mb-3">
                             <label class="form-label fw-bold small">Nombre en la tarjeta</label>
@@ -66,6 +69,17 @@
                                 <input type="password" id="cvv" class="form-control rounded-pill" placeholder="123" required maxlength="3" />
                             </div>
                         </div>
+
+                        @* --- SECCIÓN DE CUPÓN --- *@
+                        <div class="mb-3 p-3 bg-light rounded-3 border">
+                            <label class="form-label small fw-bold text-muted">¿Tienes un cupón de devolución?</label>
+                            <div class="input-group shadow-sm">
+                                <input type="text" id="inputCupon" class="form-control form-control-sm border-end-0" placeholder="REFUND-XXXX">
+                                <button type="button" class="btn btn-primary btn-sm rounded-end" onclick="aplicarCupon()">Aplicar</button>
+                            </div>
+                            <div id="msjCupon" class="small mt-1 fw-bold" style="display:none;"></div>
+                        </div>
+
                         <button type="button" id="btnPagar" class="btn btn-primary btn-lg w-100 rounded-pill shadow-sm mt-3 fw-bold" disabled>
                             Confirmar y Pagar RD$ @precioFinal.ToString("N0")
                         </button>
@@ -86,6 +100,10 @@
     #btnPagar {
         transition: all 0.3s ease;
     }
+
+    #inputCupon {
+        text-transform: uppercase;
+    }
 </style>
 
 <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
@@ -97,6 +115,55 @@
     const btnPagar = document.getElementById('btnPagar');
     const formPago = document.getElementById('formPago');
     const marcaLabel = document.getElementById('marcaTarjeta');
+    const precioDisplay = document.getElementById('precioDisplay');
+
+    // --- LÓGICA DE CUPONES ---
+       async function aplicarCupon() {
+    const cupon = document.getElementById('inputCupon').value.trim().toUpperCase();
+    const msj = document.getElementById('msjCupon');
+    const categoriaId = document.querySelector('input[name="categoriaId"]').value;
+
+    if (!cupon.startsWith("REFUND-")) {
+        document.getElementById('tokenSeguridad').value = '';
+        msj.innerText = "Cupón no válido o formato incorrecto.";
+        msj.className = "small mt-1 text-danger fw-bold";
+        msj.style.display = "block";
+        Swal.fire('Error', 'El código ingresado no es válido.', 'error');
+        return;
+    }
+
+    const respuesta = await fetch(`/Tickets/ValidarCupon?codigo=${cupon}&categoriaId=${categoriaId}`);
+    const data = await respuesta.json();
+
+    if (!data.valido) {
+        document.getElementById('tokenSeguridad').value = '';
+        msj.innerText = data.mensaje;
+        msj.className = "small mt-1 text-danger fw-bold";
+        msj.style.display = "block";
+        Swal.fire('Error', data.mensaje, 'error');
+        return;
+    }
+
+    document.getElementById('tokenSeguridad').value = cupon;
+    msj.innerHTML = "<i class='bi bi-check-circle-fill'></i> ¡Cupón aplicado! Total a pagar: RD$ 0";
+    msj.className = "small mt-1 text-success fw-bold";
+    msj.style.display = "block";
+
+    precioDisplay.style.textDecoration = "line-through";
+    precioDisplay.style.opacity = "0.5";
+
+    btnPagar.disabled = false;
+    btnPagar.style.opacity = "1";
+    btnPagar.style.filter = "none";
+    btnPagar.innerHTML = "Confirmar y Canjear Cupón (RD$ 0)";
+
+    Swal.fire({
+        title: '¡Cupón Válido!',
+        text: 'Se ha aplicado el descuento total por devolución.',
+        icon: 'success',
+        confirmButtonColor: '#0d6efd'
+        });
+    }
 
     // --- 1. DETECCIÓN DE FRANQUICIA ---
     function detectarFranquicia(numero) {
@@ -158,6 +225,12 @@
             errorSpan.style.display = 'none';
         }
 
+        // Si el cupón ya está aplicado, no bloqueamos el botón por falta de tarjeta
+        const msjCupon = document.getElementById('msjCupon');
+        if (msjCupon.style.display === 'block' && msjCupon.classList.contains('text-success')) {
+            return;
+        }
+
         if (tarjetaLongitud && cvvValido && emailEsValido && fechaEscritaOk) {
             btnPagar.disabled = false;
             btnPagar.style.opacity = "1";
@@ -200,6 +273,24 @@
         e.preventDefault();
         if (yaSeEnvio) return;
 
+        // --- NUEVA LÓGICA: SI HAY CUPÓN, PASA DIRECTO ---
+        const msjCupon = document.getElementById('msjCupon');
+        const cuponValido = msjCupon.style.display === 'block' && msjCupon.classList.contains('text-success');
+
+        if (cuponValido) {
+            yaSeEnvio = true;
+            Swal.fire({
+                title: 'Procesando Cupón...',
+                text: 'Aplicando saldo de devolución a su compra',
+                icon: 'success',
+                timer: 2000,
+                showConfirmButton: false,
+                willClose: () => { formPago.submit(); }
+            });
+            return;
+        }
+
+        // --- SI NO HAY CUPÓN: VALIDACIÓN NORMAL DE TARJETA ---
         if (!validarTarjetaLuhn(inputTarjeta.value)) {
             Swal.fire('Seguridad', 'Número de tarjeta inválido o fraudulento.', 'error');
             return;
@@ -222,23 +313,9 @@
             }).then((result) => {
                 if (result.value === "1234") {
                     yaSeEnvio = true;
-                    btnPagar.disabled = true;
-
-                    let hiddenToken = document.createElement("input");
-                    hiddenToken.type = "hidden";
-                    hiddenToken.name = "tokenSeguridad";
-                    hiddenToken.value = "AUTH_OK_" + Date.now();
-                    formPago.appendChild(hiddenToken);
-
-                    Swal.fire({
-                        title: '¡Pago Autorizado!',
-                        icon: 'success',
-                        timer: 1000,
-                        showConfirmButton: false,
-                        willClose: () => { formPago.submit(); }
-                    });
+                    formPago.submit();
                 } else if (result.isConfirmed) {
-                    Swal.fire('Denegado', 'Código incorrecto.', 'error');
+                    Swal.fire('Denegado', 'Transacción no autorizada por el ente financiero.', 'error');
                 }
             });
         });

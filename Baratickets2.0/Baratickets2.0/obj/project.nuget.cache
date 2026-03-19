@@ -1,8 +1,8 @@
 {
   "version": 2,
-  "dgSpecHash": "t/2LDxYEw80=",
+  "dgSpecHash": "N+r+y88Mw2U=",
   "success": true,
-  "projectFilePath": "C:\\Users\\Enocr\\source\\repos\\Baratickets2.0\\Baratickets2.0\\Baratickets2.0.csproj",
+  "projectFilePath": "C:\\Users\\Enocr\\OneDrive\\Escritorio\\Baratickets\\Baratickets2.0\\Baratickets2.0\\Baratickets2.0.csproj",
   "expectedPackageFiles": [
     "C:\\Users\\Enocr\\.nuget\\packages\\azure.core\\1.38.0\\azure.core.1.38.0.nupkg.sha512",
     "C:\\Users\\Enocr\\.nuget\\packages\\azure.identity\\1.11.4\\azure.identity.1.11.4.nupkg.sha512",
@@ -177,5 +177,15 @@
     "C:\\Users\\Enocr\\.nuget\\packages\\system.threading.channels\\7.0.0\\system.threading.channels.7.0.0.nupkg.sha512",
     "C:\\Users\\Enocr\\.nuget\\packages\\system.threading.tasks.extensions\\4.5.4\\system.threading.tasks.extensions.4.5.4.nupkg.sha512"
   ],
-  "logs": []
+  "logs": [
+    {
+      "code": "NU1900",
+      "level": "Warning",
+      "message": "Error al obtener los datos de vulnerabilidad del paquete: No se puede cargar el índice de servicio del origen https://api.nuget.org/v3/index.json.",
+      "projectPath": "C:\\Users\\Enocr\\OneDrive\\Escritorio\\Baratickets\\Baratickets2.0\\Baratickets2.0\\Baratickets2.0.csproj",
+      "warningLevel": 1,
+      "filePath": "C:\\Users\\Enocr\\OneDrive\\Escritorio\\Baratickets\\Baratickets2.0\\Baratickets2.0\\Baratickets2.0.csproj",
+      "targetGraphs": []
+    }
+  ]
 }

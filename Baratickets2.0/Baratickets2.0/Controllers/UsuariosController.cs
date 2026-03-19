@@ -36,7 +36,11 @@ public class UsuariosController : Controller
         var model = new MiCuentaViewModel
         {
             Usuario = user,
-            TotalTicketsComprados = await _context.Tickets.CountAsync(t => t.UsuarioId == user.Id),
+
+            // MODIFICACIÓN AQUÍ: Filtramos para que no cuente los tickets devueltos
+            TotalTicketsComprados = await _context.Tickets
+                .CountAsync(t => t.UsuarioId == user.Id && t.Estado != "Devuelto"),
+
             UltimoTicket = await _context.Tickets
                 .Include(t => t.Evento)
                 .OrderByDescending(t => t.FechaCompra)

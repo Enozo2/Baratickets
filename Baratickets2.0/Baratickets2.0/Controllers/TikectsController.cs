@@ -30,77 +30,174 @@ namespace Baratickets2._0.Controllers
 
         [HttpPost]
         [Authorize]
-        public async Task<IActionResult> ComprarTicket(int eventoId, int categoriaId, string emailConfirmacion, string tokenSeguridad)
+        public async Task<IActionResult> ComprarTicket(int eventoId, int categoriaId, string emailConfirmacion, string? tokenSeguridad)
         {
             var userId = _userManager.GetUserId(User);
-
-            // 1. Buscamos las entidades (FindAsync las pone bajo seguimiento de EF)
             var evento = await _context.Eventos.FindAsync(eventoId);
             var categoria = await _context.CategoriasTickets.FindAsync(categoriaId);
-
             if (evento == null || categoria == null) return NotFound();
 
-            // 2. Validación de seguridad: Si no hay stock en la categoría, cancelamos
             if (categoria.Capacidad <= 0)
             {
-                TempData["Error"] = "Lo sentimos, ya no quedan boletas para esta sección.";
+                TempData["Error"] = "Lo sentimos, ya no quedan boletas.";
                 return RedirectToAction("Index", "Home");
             }
 
-            // 3. CREACIÓN DEL TICKET
-            var nuevoTicket = new Ticket
-            {
-                Id = Guid.NewGuid(),
-                EventoId = eventoId,
-                UsuarioId = userId,
-                FechaCompra = DateTime.Now,
-                Tipo = categoria.Nombre,
-                PrecioPagado = categoria.Precio,
-                FueUsado = false
-            };
-            if (string.IsNullOrEmpty(tokenSeguridad))
-            {
-                return BadRequest("Transacción no autorizada por el ente financiero.");
-            }
+            decimal montoDescuento = 0;
+            bool esCupon = !string.IsNullOrEmpty(tokenSeguridad) && tokenSeguridad.StartsWith("REFUND-");
 
-            // 4. DESCUENTO SINCRONIZADO (1 en 1)
-            // Para que no baje de 2 en 2, restamos ÚNICAMENTE a la categoría.
-            // El organizador verá que bajó 1 en su lista de boletas.
-            categoria.Capacidad -= 1;
-
-            // Si tu vista general también depende de la capacidad del evento, 
-            // asegúrate de que esa capacidad sea la SUMA de las categorías en la base de datos,
-            // pero si la manejas manual, puedes dejar esta línea comentada o borrarla:
-            // evento.Capacidad -= 1; 
-
-            // 5. AGREGAMOS EL TICKET
-            _context.Tickets.Add(nuevoTicket);
-
-            // Guardar cambios una sola vez asegura que la operación sea atómica
-            await _context.SaveChangesAsync();
-
-            // 6. ENVÍO DE CORREO Y QR
+            using var transaction = await _context.Database.BeginTransactionAsync();
             try
             {
-                string urlValidacion = $"https://localhost:7204/Tickets/ValidarEntrada?id={nuevoTicket.Id}";
-                string qr = _qrService.GenerarQrBase64(urlValidacion);
+                if (esCupon)
+                {
+                    var cupon = await _context.Devoluciones
+                        .FirstOrDefaultAsync(c => c.CodigoCupon == tokenSeguridad && !c.CuponUsado);
 
-                await _emailService.EnviarTicketAsync(
-                    emailConfirmacion,
-                    User.Identity.Name ?? "Cliente",
-                    evento.Nombre,
-                    categoria.Nombre,
-                    categoria.Precio,
-                    qr
-                );
+                    if (cupon == null)
+                    {
+                        TempData["Error"] = "Cupón ya utilizado o inválido.";
+                        await transaction.RollbackAsync();
+                        return RedirectToAction("MisTickets");
+                    }
+
+                    // ✅ Validación de monto también en el backend
+                    if (categoria.Precio > cupon.MontoOriginal)
+                    {
+                        TempData["Error"] = $"El cupón (RD$ {cupon.MontoOriginal:N0}) no cubre el precio de esta boleta (RD$ {categoria.Precio:N0}).";
+                        await transaction.RollbackAsync();
+                        return RedirectToAction("MisTickets");
+                    }
+
+                    int filasAfectadas = await _context.Devoluciones
+                        .Where(c => c.Id == cupon.Id && !c.CuponUsado)
+                        .ExecuteUpdateAsync(s => s.SetProperty(c => c.CuponUsado, true));
+
+                    if (filasAfectadas == 0)
+                    {
+                        TempData["Error"] = "Cupón ya utilizado o inválido.";
+                        await transaction.RollbackAsync();
+                        return RedirectToAction("MisTickets");
+                    }
+
+                    montoDescuento = cupon.MontoOriginal;
+                }
+
+                decimal precioFinal = Math.Max(0, categoria.Precio - montoDescuento);
+
+                var nuevoTicket = new Ticket
+                {
+                    Id = Guid.NewGuid(),
+                    EventoId = eventoId,
+                    UsuarioId = userId,
+                    FechaCompra = DateTime.Now,
+                    Tipo = categoria.Nombre,
+                    PrecioPagado = precioFinal,
+                    FueUsado = false,
+                    Estado = "Valido"
+                };
+
+                categoria.Capacidad -= 1;
+                _context.Tickets.Add(nuevoTicket);
+
+                await _context.SaveChangesAsync();
+                await transaction.CommitAsync();
+
+                return RedirectToAction("VerTicket", new { id = nuevoTicket.Id });
             }
-            catch (Exception ex)
+            catch
             {
-                System.Diagnostics.Debug.WriteLine("Error enviando correo: " + ex.Message);
+                await transaction.RollbackAsync();
+                TempData["Error"] = "Error al procesar la compra. Intenta nuevamente.";
+                return RedirectToAction("Index", "Home");
+            }
+        }
+        [HttpGet]
+        [Authorize]
+        public async Task<IActionResult> ValidarCupon(string codigo, int categoriaId)
+        {
+            var userId = _userManager.GetUserId(User);
+            var cupon = await _context.Devoluciones
+                .FirstOrDefaultAsync(c => c.CodigoCupon == codigo && c.UsuarioId == userId);
+
+            if (cupon == null)
+                return Json(new { valido = false, mensaje = "Cupón no encontrado." });
+
+            if (cupon.CuponUsado)
+                return Json(new { valido = false, mensaje = "Este cupón ya fue utilizado." });
+
+            // ✅ Validar que el cupón alcanza para esta boleta
+            var categoria = await _context.CategoriasTickets.FindAsync(categoriaId);
+            if (categoria == null)
+                return Json(new { valido = false, mensaje = "Categoría no encontrada." });
+
+            if (categoria.Precio > cupon.MontoOriginal)
+                return Json(new
+                {
+                    valido = false,
+                    mensaje = $"Este cupón es por RD$ {cupon.MontoOriginal:N0} y no cubre esta boleta de RD$ {categoria.Precio:N0}."
+                });
+
+            return Json(new { valido = true, mensaje = "Cupón válido.", monto = cupon.MontoOriginal });
+        }
+        [HttpPost]
+        public async Task<IActionResult> SolicitarDevolucion(Guid ticketId, string tipoDevolucion)
+        {
+            // 1. Buscamos el ticket e incluimos la categoría para saber cuál actualizar
+            var ticket = await _context.Tickets.FindAsync(ticketId);
+            if (ticket == null) return NotFound();
+
+            // 2. Validamos el tiempo (24h)
+            var tiempoTranscurrido = DateTime.Now - ticket.FechaCompra;
+            if (tiempoTranscurrido.TotalHours > 24)
+            {
+                TempData["Error"] = "El plazo de 24h ha expirado.";
+                return RedirectToAction("MisTickets");
             }
 
-            // Redirigimos a la vista del ticket
-            return RedirectToAction("VerTicket", new { id = nuevoTicket.Id });
+            // --- NUEVA LÓGICA DE ACTUALIZACIÓN DE STOCK ---
+            // Buscamos la categoría que corresponde a este ticket en este evento
+            var categoria = await _context.CategoriasTickets
+                .FirstOrDefaultAsync(c => c.EventoId == ticket.EventoId && c.Nombre == ticket.Tipo);
+            if (ticket.PrecioPagado == 0)
+            {
+                TempData["Error"] = "Los tickets adquiridos con cupón de devolución no pueden ser devueltos.";
+                return RedirectToAction("MisTickets");
+            }
+
+            if (categoria != null)
+            {
+                // LE DEVOLVEMOS EL CUPO AL EVENTO
+                categoria.Capacidad += 1;
+                _context.Update(categoria);
+            }
+            // ----------------------------------------------
+
+            // 3. Creamos la reclamación con el Motivo (para que no de error SQL)
+            var devolucion = new Devolucion
+            {
+                TicketId = ticketId,
+                UsuarioId = _userManager.GetUserId(User),
+                TipoDevolucion = tipoDevolucion,
+                Estado = "Completada",
+                FechaSolicitud = DateTime.Now,
+                Motivo = "Devolución y liberación de cupo (" + tipoDevolucion + ")"
+            };
+
+            // 4. Inhabilitamos el ticket
+            ticket.Estado = "Devuelto";
+
+            if (tipoDevolucion == "Cupon")
+            {
+                devolucion.CodigoCupon = "REFUND-" + Guid.NewGuid().ToString().Substring(0, 8).ToUpper();
+                devolucion.MontoOriginal = ticket.PrecioPagado;
+            }
+
+            _context.Devoluciones.Add(devolucion);
+            await _context.SaveChangesAsync();
+
+            TempData["Success"] = "Ticket devuelto. El cupo ha sido liberado para la venta.";
+            return RedirectToAction("MisTickets");
         }
         [HttpPost]
         [ValidateAntiForgeryToken]
@@ -121,7 +218,11 @@ namespace Baratickets2._0.Controllers
                 TempData["Error"] = "Este ticket no puede ser devuelto.";
                 return RedirectToAction("MisTickets");
             }
-
+            if (ticket.PrecioPagado == 0)
+            {
+                TempData["Error"] = "Los tickets adquiridos con cupón de devolución no pueden ser devueltos.";
+                return RedirectToAction("MisTickets");
+            }
             // BUSCAMOS LA CATEGORÍA DINÁMICA
             // Buscamos la categoría que coincida con el nombre guardado en el ticket para este evento
             var categoria = await _context.CategoriasTickets
@@ -211,7 +312,8 @@ namespace Baratickets2._0.Controllers
 
             var tickets = await _context.Tickets
                 .Include(t => t.Evento)
-                .Where(t => t.UsuarioId == userId && t.Estado != "Devuelto")
+                .Include(t => t.Devolucion) // <--- ESTA LÍNEA ES LA QUE HACE QUE SE VEA EL CUPÓN
+                .Where(t => t.UsuarioId == userId)
                 .OrderByDescending(t => t.FechaCompra)
                 .ToListAsync();
 

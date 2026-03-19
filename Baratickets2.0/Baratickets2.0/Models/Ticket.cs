@@ -16,9 +16,10 @@ namespace Baratickets2._0.Models
         public string? UsuarioId { get; set; }
         [ForeignKey("UsuarioId")]
         public virtual ApplicationUser? Usuario { get; set; }
-      
 
 
+        // Esto le dice a Ticket que puede tener una devolución asociada
+        public virtual Devolucion? Devolucion { get; set; }
         public string Tipo { get; set; } = "Normal";
         [Column(TypeName = "decimal(18,2)")] // Esto le dice a SQL: 18 dígitos, 2 decimales
         public decimal PrecioPagado { get; set; }
