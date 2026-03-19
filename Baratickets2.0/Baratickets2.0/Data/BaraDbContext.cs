@@ -15,6 +15,7 @@ namespace Baratickets2._0.Data
         public DbSet<Orden> Ordenes { get; set; }
         public DbSet<Ticket> Tickets { get; set; }
         public DbSet<EventoValidador> EventosValidadores { get; set; }
+        public DbSet<Lugar> Lugares { get; set; }
 
         // --- AGREGAMOS LA NUEVA TABLA AQUÍ ---
         public DbSet<CategoriaTicket> CategoriasTickets { get; set; }

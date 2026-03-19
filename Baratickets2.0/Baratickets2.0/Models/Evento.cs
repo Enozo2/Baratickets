@@ -30,7 +30,10 @@ namespace Baratickets2._0.Models
         [Required]
         [Display(Name = "Fecha y Hora")]
         public DateTime FechaEvento { get; set; }
-
+        public DateTime FechaInicio { get; set; }
+        public DateTime FechaFin { get; set; }
+        public int LugarId { get; set; } // Clave foránea
+        public virtual Lugar Lugar { get; set; } // Objeto relacionado
         // --- RELACIÓN CON EL ORGANIZADOR ---
         [Required]
         public string? OrganizadorId { get; set; }

@@ -27,12 +27,12 @@ namespace Baratickets2._0.Controllers
         {
             var userId = _userManager.GetUserId(User);
 
-            // 1. Definimos la consulta base
+            // 1. Adicionamos .Include(e => e.Lugar) para carregar os dados da nova tabela
             var consulta = _context.Eventos
                 .Include(e => e.Organizador)
-                .Include(e => e.CategoriasTickets); // <--- ESTO ES LO QUE FALTABA
+                .Include(e => e.Lugar) // <--- ESSA LINHA TRAZ O NOME DO LUGAR
+                .Include(e => e.CategoriasTickets);
 
-            // 2. Si es Admin, ve todo. Si no, solo lo suyo.
             if (User.IsInRole("Admin"))
             {
                 return View(await consulta.ToListAsync());
@@ -51,6 +51,7 @@ namespace Baratickets2._0.Controllers
 
             var evento = await _context.Eventos
           .Include(e => e.Organizador)
+          .Include(e => e.Lugar)
           .Include(e => e.CategoriasTickets) // <--- ESTA LÍNEA ES OBLIGATORIA
           .Include(e => e.Tickets)
           .FirstOrDefaultAsync(m => m.Id == id);
@@ -61,39 +62,81 @@ namespace Baratickets2._0.Controllers
         }
         // GET: Eventos/Create
         public IActionResult Create()
+
         {
+            var lugares = _context.Lugares.Where(l => l.EstaActivo).ToList();
+
+            // 2. Los pasamos a la vista mediante un SelectList
+            ViewBag.LugarId = new SelectList(lugares, "Id", "Nombre");
             return View();
         }
-
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public async Task<IActionResult> Create(Evento evento)
+        public async Task<IActionResult> Create(Evento evento, string fechaSolo, string horaInicio, string horaFin)
         {
-            // 1. Asignamos el ID del organizador
+            // 1. Asignación de Identidad
             var userId = _userManager.GetUserId(User);
             evento.OrganizadorId = userId;
 
-            // 2. Limpieza de validaciones
+            // 2. 🧩 RECONSTRUCCIÓN MANUAL
+            if (!string.IsNullOrEmpty(fechaSolo) && !string.IsNullOrEmpty(horaInicio) && !string.IsNullOrEmpty(horaFin))
+            {
+                try
+                {
+                    evento.FechaInicio = DateTime.Parse($"{fechaSolo} {horaInicio}");
+                    evento.FechaFin = DateTime.Parse($"{fechaSolo} {horaFin}");
+                    evento.FechaEvento = evento.FechaInicio;
+                }
+                catch (Exception)
+                {
+                    ModelState.AddModelError("", "El formato de fecha u hora es incorrecto.");
+                }
+            }
+
+            // 3. 🧹 LIMPIEZA PROFUNDA (Aquí es donde suele estar el fallo)
             ModelState.Remove("Organizador");
             ModelState.Remove("Tickets");
             ModelState.Remove("OrganizadorId");
+            ModelState.Remove("FechaEvento");
+            ModelState.Remove("Lugar"); // Obligatorio: Ignora el objeto Lugar completo
+            ModelState.Remove("Direccion"); // Como ahora usamos LugarId, ignoramos el campo viejo
 
+            // 4. 🛡️ PROCESO DE GUARDADO
             if (ModelState.IsValid)
             {
-                // --- 🟢 LA SOLUCIÓN ESTÁ AQUÍ ---
-                // Al agregar el 'evento', EF detecta automáticamente las 'CategoriasTickets'
-                // que vienen dentro del objeto y les asigna el EventoId solo.
+                try
+                {
+                    // Validar choque de horario en la Villa Olímpica
+                    bool lugarOcupado = await _context.Eventos.AnyAsync(e =>
+                        e.LugarId == evento.LugarId &&
+                        evento.FechaInicio < e.FechaFin &&
+                        evento.FechaFin > e.FechaInicio
+                    );
 
-                _context.Add(evento);
-
-                // Un solo SaveChanges para todo el paquete (Evento + Categorías)
-                await _context.SaveChangesAsync();
-
-                return RedirectToAction(nameof(Index));
+                    if (lugarOcupado)
+                    {
+                        ModelState.AddModelError("", "¡Atención! Este recinto ya tiene un evento en ese horario.");
+                    }
+                    else
+                    {
+                        _context.Add(evento);
+                        await _context.SaveChangesAsync();
+                        return RedirectToAction(nameof(Index));
+                    }
+                }
+                catch (Exception ex)
+                {
+                    // Si hay un error de Base de Datos, esto lo mostrará en la vista
+                    ModelState.AddModelError("", "Error al guardar en la BD: " + ex.Message);
+                }
             }
+
+            // 5. 🔄 RECARGA DE SEGURIDAD (Si algo falló, rellena el dropdown de nuevo)
+            ViewBag.LugarId = new SelectList(_context.Lugares.Where(l => l.EstaActivo), "Id", "Nombre", evento.LugarId);
 
             return View(evento);
         }
+
         [Authorize(Roles = "Organizador,Admin")]
         public async Task<IActionResult> Dashboard(int id)
         {
@@ -195,33 +238,46 @@ public async Task<IActionResult> Edit(int? id)
     
     return View(evento);
 }
-
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public async Task<IActionResult> Edit(int id, Evento evento)
+        // 1. Agregamos los 3 strings al paréntesis para recibir los datos del formulario
+        public async Task<IActionResult> Edit(int id, Evento evento, string fechaSolo, string horaInicio, string horaFin)
         {
             if (id != evento.Id) return NotFound();
 
-            // 1. Buscamos el evento original en la DB
+            // Buscamos el original
             var eventoOriginal = await _context.Eventos
                 .Include(e => e.CategoriasTickets)
                 .FirstOrDefaultAsync(e => e.Id == id);
 
             if (eventoOriginal == null) return NotFound();
 
+            // 2. Limpieza de validaciones obsoletas (Evita el error del 0001)
+            ModelState.Remove("Organizador");
+            ModelState.Remove("Tickets");
+            ModelState.Remove("FechaEvento"); // Quitamos la validación del campo viejo
+
             if (ModelState.IsValid)
             {
                 try
                 {
-                    // 2. ACTUALIZACIÓN: Agregamos la línea de Institución aquí
+                    // 3. RECONSTRUCCIÓN: Unimos los pedazos editados
+                    if (!string.IsNullOrEmpty(fechaSolo) && !string.IsNullOrEmpty(horaInicio))
+                    {
+                        eventoOriginal.FechaInicio = DateTime.Parse($"{fechaSolo} {horaInicio}");
+                        eventoOriginal.FechaFin = DateTime.Parse($"{fechaSolo} {horaFin}");
+                        // Si aún usas FechaEvento para algo, actualízalo también:
+                        eventoOriginal.FechaEvento = eventoOriginal.FechaInicio;
+                    }
+
+                    // 4. ACTUALIZACIÓN de los demás campos
                     eventoOriginal.Nombre = evento.Nombre;
-                    eventoOriginal.Organizacion = evento.Organizacion; // <--- ESTO ES LO NUEVO
+                    eventoOriginal.Organizacion = evento.Organizacion;
                     eventoOriginal.Descripcion = evento.Descripcion;
                     eventoOriginal.Direccion = evento.Direccion;
-                    eventoOriginal.FechaEvento = evento.FechaEvento;
                     eventoOriginal.ImagenUrl = evento.ImagenUrl;
 
-                    // 3. Sincronizamos las categorías (como hicimos antes)
+                    // 5. Sincronizamos las categorías
                     if (evento.CategoriasTickets != null)
                     {
                         _context.CategoriasTickets.RemoveRange(eventoOriginal.CategoriasTickets);
@@ -236,10 +292,9 @@ public async Task<IActionResult> Edit(int? id)
                     await _context.SaveChangesAsync();
                     return RedirectToAction(nameof(Index));
                 }
-                catch (DbUpdateConcurrencyException)
+                catch (Exception ex)
                 {
-                    if (!EventoExists(evento.Id)) return NotFound();
-                    else throw;
+                    ModelState.AddModelError("", "Error al actualizar: " + ex.Message);
                 }
             }
             return View(evento);

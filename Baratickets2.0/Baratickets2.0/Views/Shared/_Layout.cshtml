@@ -60,6 +60,22 @@
                                 </a>
                             </li>
                         }
+                        @if (User.IsInRole("Admin"))
+                        {
+                            <li class="nav-item dropdown">
+                                <a class="nav-link dropdown-toggle text-dark fw-bold" href="#" id="adminDropdown" role="button" data-bs-toggle="dropdown">
+                                    <i class="bi bi-shield-lock-fill me-1 text-primary"></i> Panel Admin
+                                </a>
+                                <ul class="dropdown-menu shadow border-0">
+                                    <li>
+                                        <a class="dropdown-item" asp-controller="Lugares" asp-action="Index">
+                                            <i class="bi bi-geo-alt me-2"></i>Gestionar Recintos
+                                        </a>
+                                    </li>
+                                    @* Aquí puedes agregar otros enlaces de Admin más adelante *@
+                                </ul>
+                            </li>
+                        }
 
                         @if (User.IsInRole("Admin"))
                         {

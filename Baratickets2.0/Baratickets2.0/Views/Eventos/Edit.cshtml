@@ -45,9 +45,23 @@
                         <input asp-for="Direccion" class="form-control" />
                     </div>
 
-                    <div class="form-group mb-3">
-                        <label asp-for="FechaEvento" class="control-label fw-bold small"></label>
-                        <input asp-for="FechaEvento" class="form-control" />
+                    <div class="mb-3">
+                        <label>Fecha</label>
+                        <input type="date" name="fechaSolo" class="form-control"
+                               value="@Model.FechaInicio.ToString("yyyy-MM-dd")" required />
+                    </div>
+
+                    <div class="row">
+                        <div class="col-6">
+                            <label>Hora Inicio</label>
+                            <input type="time" name="horaInicio" class="form-control"
+                                   value="@Model.FechaInicio.ToString("HH:mm")" required />
+                        </div>
+                        <div class="col-6">
+                            <label>Hora Fin</label>
+                            <input type="time" name="horaFin" class="form-control"
+                                   value="@Model.FechaFin.ToString("HH:mm")" required />
+                        </div>
                     </div>
 
                     <div class="form-group">

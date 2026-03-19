@@ -4,6 +4,7 @@ using Baratickets2._0.Data;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 
 #nullable disable
@@ -11,9 +12,11 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace Baratickets2._0.Migrations
 {
     [DbContext(typeof(ApplicationDbContext))]
-    partial class ApplicationDbContextModelSnapshot : ModelSnapshot
+    [Migration("20260319145341_Add-Migration")]
+    partial class AddMigration
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -212,9 +215,6 @@ namespace Baratickets2._0.Migrations
                     b.Property<string>("ImagenUrl")
                         .HasColumnType("nvarchar(max)");
 
-                    b.Property<int>("LugarId")
-                        .HasColumnType("int");
-
                     b.Property<string>("Nombre")
                         .IsRequired()
                         .HasColumnType("nvarchar(max)");
@@ -229,8 +229,6 @@ namespace Baratickets2._0.Migrations
                         .HasColumnType("nvarchar(450)");
 
                     b.HasKey("Id");
-
-                    b.HasIndex("LugarId");
 
                     b.HasIndex("OrganizadorId");
 
@@ -250,29 +248,6 @@ namespace Baratickets2._0.Migrations
                     b.HasIndex("ValidadorId");
 
                     b.ToTable("EventosValidadores");
-                });
-
-            modelBuilder.Entity("Baratickets2._0.Models.Lugar", b =>
-                {
-                    b.Property<int>("Id")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("int");
-
-                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
-
-                    b.Property<string>("Descripcion")
-                        .HasColumnType("nvarchar(max)");
-
-                    b.Property<bool>("EstaActivo")
-                        .HasColumnType("bit");
-
-                    b.Property<string>("Nombre")
-                        .IsRequired()
-                        .HasColumnType("nvarchar(max)");
-
-                    b.HasKey("Id");
-
-                    b.ToTable("Lugares");
                 });
 
             modelBuilder.Entity("Baratickets2._0.Models.Orden", b =>
@@ -518,19 +493,11 @@ namespace Baratickets2._0.Migrations
 
             modelBuilder.Entity("Baratickets2._0.Models.Evento", b =>
                 {
-                    b.HasOne("Baratickets2._0.Models.Lugar", "Lugar")
-                        .WithMany("Eventos")
-                        .HasForeignKey("LugarId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-
                     b.HasOne("Baratickets2._0.Models.ApplicationUser", "Organizador")
                         .WithMany("EventosOrganizados")
                         .HasForeignKey("OrganizadorId")
                         .OnDelete(DeleteBehavior.Restrict)
                         .IsRequired();
-
-                    b.Navigation("Lugar");
 
                     b.Navigation("Organizador");
                 });
@@ -653,11 +620,6 @@ namespace Baratickets2._0.Migrations
                     b.Navigation("Tickets");
 
                     b.Navigation("ValidadoresAsignados");
-                });
-
-            modelBuilder.Entity("Baratickets2._0.Models.Lugar", b =>
-                {
-                    b.Navigation("Eventos");
                 });
 
             modelBuilder.Entity("Baratickets2._0.Models.Orden", b =>

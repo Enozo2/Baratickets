@@ -1,0 +1,47 @@
+﻿@model IEnumerable<Baratickets2._0.Models.Lugar>
+
+<div class="container mt-4">
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <h2 class="fw-bold text-primary">Gestión de Recintos - Villa Olímpica</h2>
+        <a asp-action="Create" class="btn btn-success rounded-pill shadow-sm">
+            <i class="bi bi-plus-circle me-2"></i>Nuevo Recinto
+        </a>
+    </div>
+
+    <div class="card border-0 shadow-sm rounded-4">
+        <table class="table table-hover align-middle mb-0">
+            <thead class="bg-light">
+                <tr>
+                    <th>Nombre del Recinto</th>
+                    <th>Estado Actual</th>
+                    <th class="text-center">Acciones</th>
+                </tr>
+            </thead>
+            <tbody>
+                @foreach (var item in Model)
+                {
+                    <tr>
+                        <td class="fw-bold">@item.Nombre</td>
+                        <td>
+                            @if (item.EstaActivo)
+                            {
+                                <span class="badge bg-success-subtle text-success border border-success px-3">Operativo</span>
+                            }
+                            else
+                            {
+                                <span class="badge bg-danger-subtle text-danger border border-danger px-3">Mantenimiento</span>
+                            }
+                        </td>
+                        <td class="text-center">
+                            <a asp-action="ToggleEstado" asp-route-id="@item.Id"
+                               class="btn btn-sm @(item.EstaActivo ? "btn-outline-danger" : "btn-outline-success") rounded-pill px-3">
+                                <i class="bi @(item.EstaActivo ? "bi-tools" : "bi-check-circle") me-1"></i>
+                                @(item.EstaActivo ? "Poner en Mantenimiento" : "Habilitar")
+                            </a>
+                        </td>
+                    </tr>
+                }
+            </tbody>
+        </table>
+    </div>
+</div>

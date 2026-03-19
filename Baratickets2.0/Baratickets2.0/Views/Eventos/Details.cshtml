@@ -25,6 +25,16 @@
         border-radius: 0 0 30px 30px;
     }
 
+    .location-badge-hero {
+        background: rgba(220, 53, 69, 0.9);
+        color: white;
+        padding: 8px 15px;
+        border-radius: 10px;
+        display: inline-flex;
+        align-items: center;
+        font-weight: bold;
+    }
+
     .content-card {
         border-radius: 20px;
         border: none;
@@ -54,11 +64,15 @@
 
 @* --- HERO SECTION --- *@
 <div class="event-hero shadow-lg">
-    <div class="event-hero-overlay d-flex align-items-end pb-4">
+    <div class="event-hero-overlay d-flex align-items-end pb-5">
         <div class="container">
             <span class="badge bg-info text-dark mb-2 px-3 rounded-pill">Evento Verificado</span>
             <h1 class="display-4 fw-bold text-white">@Model.Nombre</h1>
-            <p class="text-white-50 fs-5"><i class="bi bi-geo-alt-fill text-danger"></i> @Model.Direccion</p>
+
+            <div class="location-badge-hero shadow-sm">
+                <i class="bi bi-geo-alt-fill me-2 text-warning"></i>
+                <span>Villa Olímpica, Barahona</span>
+            </div>
         </div>
     </div>
 </div>
@@ -74,37 +88,58 @@
                 <p class="text-secondary fs-5" style="line-height: 1.6;">@Model.Descripcion</p>
             </div>
 
-            @* Tarjeta Detalles Rápidos *@
+            @* Tarjetas de Detalles en Grid *@
             <div class="row g-3">
                 <div class="col-md-6">
-                    <div class="card content-card shadow-sm p-3 h-100">
+                    <div class="card content-card shadow-sm p-3 h-100 border-start border-danger border-4">
                         <label class="text-muted small fw-bold text-uppercase">Fecha y Hora</label>
                         <div class="d-flex align-items-center mt-2">
-                            <i class="bi bi-calendar-event fs-3 text-danger me-3"></i>
-                            <span class="fw-bold">@Model.FechaEvento.ToString("f")</span>
+                            <i class="bi bi-calendar-check fs-3 text-danger me-3"></i>
+                            <div>
+                                <span class="fw-bold d-block text-capitalize">@Model.FechaInicio.ToString("dddd, dd 'de' MMMM", new System.Globalization.CultureInfo("es-ES"))</span>
+                                <small class="text-primary fw-bold">@Model.FechaInicio.ToString("hh:mm tt")</small>
+                            </div>
                         </div>
                     </div>
                 </div>
+
                 <div class="col-md-6">
-                    <div class="card content-card shadow-sm p-3 h-100">
-                        <label class="text-muted small fw-bold text-uppercase">Organizado por</label>
+                    <div class="card content-card shadow-sm p-3 h-100 border-start border-primary border-4">
+                        <label class="text-muted small fw-bold text-uppercase">Instalación</label>
                         <div class="d-flex align-items-center mt-2">
-                            <i class="bi bi-building fs-3 text-success me-3"></i>
-                            <span class="fw-bold">@(string.IsNullOrEmpty(Model.Organizacion) ? Model.Organizador?.UserName : Model.Organizacion)</span>
+                            <i class="bi bi-building fs-3 text-primary me-3"></i>
+                            <div>
+                                <span class="fw-bold d-block text-primary">@(Model.Lugar?.Nombre ?? "Pabellón por definir")</span>
+                                <small class="text-muted">Sector Villa Olímpica</small>
+                            </div>
                         </div>
                     </div>
                 </div>
             </div>
 
-            @* Botón Mapa *@
+            @* Tarjeta Organizador *@
+            <div class="card content-card shadow-sm p-3 mt-3 bg-light">
+                <label class="text-muted small fw-bold text-uppercase">Organizado por</label>
+                <div class="d-flex align-items-center mt-2">
+                    <i class="bi bi-shield-check fs-3 text-success me-3"></i>
+                    <span class="fw-bold">@(string.IsNullOrWhiteSpace(Model.Organizacion) ? "Villa Olímpica Staff" : Model.Organizacion)</span>
+                </div>
+            </div>
+
+            @* BOTÓN CÓMO LLEGAR (Dentro de la columna info) *@
             <div class="mt-4 text-center">
-                <a href="https://www.google.com/maps/search/?api=1&query=@Model.Direccion" target="_blank" class="btn btn-outline-dark rounded-pill px-5 shadow-sm">
-                    <i class="bi bi-map-fill me-2"></i>Ver ubicación en el mapa
+                @{
+                    string queryMapa = "Villa Olimpica, Barahona, Republica Dominicana " + (Model.Lugar?.Nombre ?? "");
+                    string urlMapa = "https://www.google.com/maps/search/?api=1&query=" + System.Net.WebUtility.UrlEncode(queryMapa);
+                }
+                <a href="@urlMapa" target="_blank" class="btn btn-dark rounded-pill px-5 py-3 shadow-lg fw-bold">
+                    <i class="bi bi-geo-alt-fill me-2 text-danger"></i>¿Cómo llegar al evento?
                 </a>
+                
             </div>
         </div>
 
-        @* --- COLUMNA DERECHA: TICKET SHOP --- *@
+        @* --- COLUMNA DERECHA: TICKET SHOP (Vuelve a su lugar) --- *@
         <div class="col-lg-5">
             <div class="sticky-shop">
                 <div class="card content-card shadow-lg p-4 border-0 bg-light">
@@ -117,8 +152,8 @@
 
                     @if (Model.CategoriasTickets == null || !Model.CategoriasTickets.Any())
                     {
-                        <div class="alert alert-warning rounded-4 border-0 shadow-sm">
-                            <i class="bi bi-exclamation-triangle me-2"></i> No hay boletas disponibles.
+                        <div class="alert alert-warning rounded-4 border-0 text-center">
+                            No hay boletas disponibles.
                         </div>
                     }
                     else
@@ -129,41 +164,27 @@
                                 <div class="d-flex justify-content-between align-items-center">
                                     <div>
                                         <h6 class="fw-bold mb-1">@cat.Nombre</h6>
-                                        <span class="text-success fw-bold">RD$ @cat.Precio.ToString("N0")</span>
+                                        <span class="text-success fw-bold h5">RD$ @cat.Precio.ToString("N0")</span>
                                         <br />
-                                        <small class="text-muted"><i class="bi bi-person"></i> @cat.Capacidad Ticket</small>
+                                        <small class="text-muted"><i class="bi bi-info-circle"></i> Disponibles: @cat.Capacidad</small>
                                     </div>
                                     <div>
                                         @if (cat.Capacidad <= 0)
                                         {
                                             <button class="btn btn-secondary btn-sm disabled rounded-pill" disabled>Agotado</button>
                                         }
-                                        else if (!User.Identity.IsAuthenticated)
-                                        {
-                                            <a asp-area="Identity" asp-page="/Account/Login" asp-route-returnUrl="@Context.Request.Path" class="btn btn-outline-primary btn-sm rounded-pill px-3">Comprar</a>
-                                        }
                                         else
                                         {
                                             <form asp-controller="Tickets" asp-action="ProcesarPago" method="get">
                                                 <input type="hidden" name="eventoId" value="@Model.Id" />
                                                 <input type="hidden" name="categoriaId" value="@cat.Id" />
-                                                <button type="submit" class="btn btn-primary btn-sm rounded-pill px-3">Comprar</button>
+                                                <button type="submit" class="btn btn-primary btn-sm rounded-pill px-4 fw-bold">Comprar</button>
                                             </form>
                                         }
                                     </div>
                                 </div>
                             </div>
                         }
-                    }
-
-                    @* Solo mostramos el panel de gestión si es Admin u Organizador *@
-                    @if (User.IsInRole("Admin") || User.IsInRole("Organizador"))
-                    {
-                        <div class="mt-4 p-3 bg-white rounded-4 border text-center">
-                            <i class="bi bi-shield-lock text-muted fs-3"></i>
-                            <h6 class="fw-bold mt-2">Modo Administración</h6>
-                            <p class="small text-muted mb-0">Puedes supervisar este evento desde tu panel principal.</p>
-                        </div>
                     }
                 </div>
             </div>

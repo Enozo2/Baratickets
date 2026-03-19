@@ -8,7 +8,7 @@
     <div class="d-flex justify-content-between align-items-center mb-4">
         <div>
             <h1 class="text-primary fw-bold mb-0">Gestión de Eventos</h1>
-            <p class="text-muted">Explora o administra los eventos dinámicos de BaraTickets 2.0</p>
+            <p class="text-muted">Administra los recintos y horarios de la Villa Olímpica</p>
         </div>
 
         @if (User.IsInRole("Organizador") || User.IsInRole("Admin"))
@@ -29,32 +29,51 @@
                             <h5 class="card-title fw-bold text-dark mb-0">@item.Nombre</h5>
                             <span class="badge bg-light text-primary border">ID: @item.Id</span>
                         </div>
-                        <p class="card-text text-muted small" style="min-height: 40px;">@item.Descripcion</p>
 
-                        <p class="mb-2 text-danger fw-bold">
-                            <i class="bi bi-calendar-check-fill me-1"></i> @item.FechaEvento.ToString("dd/MM/yyyy HH:mm")
-                        </p>
+                        @* 👤 ORGANIZADOR *@
+                        <div class="d-flex align-items-center mb-3">
+                            <i class="bi bi-person-circle text-secondary me-2"></i>
+                            <span class="small text-muted">Por: <b class="text-dark">@(item.Organizador?.UserName?.Split('@')[0] ?? "Staff")</b></span>
+                        </div>
 
-                        @* SECCIÓN DE PRECIOS DINÁMICOS *@
+                        <p class="card-text text-muted small mb-3" style="min-height: 40px;">@item.Descripcion</p>
+
+                        @* 🗓️ FECHA Y HORA *@
+                        <div class="mb-3">
+                            <p class="mb-1 text-danger small fw-bold">
+                                <i class="bi bi-calendar-check-fill me-1"></i>
+                                @item.FechaInicio.ToString("dd/MM/yyyy")
+                            </p>
+                            <p class="mb-0 text-muted small">
+                                <i class="bi bi-clock me-1"></i>
+                                @item.FechaInicio.ToString("hh:mm tt") - @item.FechaFin.ToString("hh:mm tt")
+                            </p>
+                        </div>
+
+                        @* 📍 SECCIÓN DEL LUGAR (DISEÑO RESALTADO) *@
+                        <div class="p-2 rounded-3 mb-3" style="background-color: #f8f9fa; border-left: 4px solid #0d6efd;">
+                            <p class="text-uppercase text-muted fw-bold mb-1" style="font-size: 0.6rem; letter-spacing: 0.5px;">Recinto Villa Olímpica</p>
+                            <p class="mb-0 text-primary fw-bold small">
+                                <i class="bi bi-geo-alt-fill me-1"></i> @(item.Lugar?.Nombre ?? "Pabellón por asignar")
+                            </p>
+                        </div>
+
+                        @* SECCIÓN DE PRECIOS *@
                         <div class="bg-light p-2 rounded mb-3 border">
-                            <small class="text-muted d-block mb-1 fw-bold text-uppercase" style="font-size: 0.65rem;">Precios Disponibles</small>
+                            <small class="text-muted d-block mb-1 fw-bold text-uppercase" style="font-size: 0.65rem;">Precios</small>
                             <div class="d-flex flex-wrap gap-1">
                                 @if (item.CategoriasTickets != null && item.CategoriasTickets.Any())
                                 {
                                     @foreach (var cat in item.CategoriasTickets.OrderBy(c => c.Precio).Take(2))
                                     {
-                                        <span class="badge @(cat.Nombre.ToLower().Contains("vip") ? "bg-warning text-dark" : "bg-primary")" style="font-size: 0.75rem;">
+                                        <span class="badge @(cat.Nombre.ToLower().Contains("vip") ? "bg-warning text-dark" : "bg-primary")" style="font-size: 0.7rem;">
                                             @cat.Nombre: RD$ @cat.Precio.ToString("N0")
                                         </span>
-                                    }
-                                    @if (item.CategoriasTickets.Count() > 2)
-                                    {
-                                        <span class="badge bg-secondary">+@(item.CategoriasTickets.Count() - 2) más</span>
                                     }
                                 }
                                 else
                                 {
-                                    <span class="text-muted small italic">Sin boletas configuradas</span>
+                                    <span class="text-muted small italic" style="font-size: 0.7rem;">Sin boletas</span>
                                 }
                             </div>
                         </div>
@@ -62,37 +81,24 @@
 
                     <div class="card-footer bg-white border-0 pb-4">
                         <div class="d-grid gap-2 mb-3">
-                            @if (User.IsInRole("Cliente"))
-                            {
-                                <a asp-action="Details" asp-route-id="@item.Id" class="btn btn-success rounded-pill fw-bold shadow-sm py-2">
-                                    <i class="bi bi-cart-plus-fill me-2"></i> Adquirir Entrada
-                                </a>
-                            }
-                            else
-                            {
-                                <a asp-action="Details" asp-route-id="@item.Id" class="btn btn-outline-primary rounded-pill fw-bold py-2">
-                                    <i class="bi bi-eye-fill me-2"></i> Ver Detalles
-                                </a>
-                            }
+                            <a asp-action="Details" asp-route-id="@item.Id" class="btn btn-outline-primary rounded-pill fw-bold py-2">
+                                <i class="bi bi-eye-fill me-2"></i> Ver Detalles
+                            </a>
                         </div>
 
                         @if (User.IsInRole("Admin") || User.IsInRole("Organizador"))
                         {
                             <div class="pt-3 border-top text-center">
-                                <p class="small text-muted mb-2 fw-bold text-uppercase" style="font-size: 0.7rem;">Herramientas Administrativas</p>
                                 <div class="btn-group shadow-sm" style="border-radius: 10px; overflow: hidden;">
-                                    <a asp-action="Dashboard" asp-route-id="@item.Id" class="btn btn-info text-white btn-sm" title="Dashboard de Ventas">
+                                    <a asp-action="Dashboard" asp-route-id="@item.Id" class="btn btn-info text-white btn-sm">
                                         <i class="bi bi-graph-up-arrow"></i>
                                     </a>
 
-                                    @if (User.IsInRole("Organizador"))
-                                    {
-                                        <a asp-action="Edit" asp-route-id="@item.Id" class="btn btn-secondary btn-sm" title="Editar">
-                                            <i class="bi bi-pencil-square"></i>
-                                        </a>
-                                    }
+                                    <a asp-action="Edit" asp-route-id="@item.Id" class="btn btn-secondary btn-sm">
+                                        <i class="bi bi-pencil-square"></i>
+                                    </a>
 
-                                    <button type="button" class="btn btn-danger btn-sm" onclick="confirmarEliminar('@item.Id', '@item.Nombre')" title="Eliminar">
+                                    <button type="button" class="btn btn-danger btn-sm" onclick="confirmarEliminar('@item.Id', '@item.Nombre')">
                                         <i class="bi bi-trash3-fill"></i>
                                     </button>
                                 </div>
@@ -105,5 +111,14 @@
     </div>
 </div>
 
-@* Modal de confirmación (Partial View) *@
 <partial name="_ModalEliminar" />
+
+@section Scripts {
+    <script>
+        function confirmarEliminar(id, nombre) {
+            $('#nombreEventoEliminar').text(nombre);
+            $('#formEliminar').attr('action', '/Eventos/Delete/' + id);
+            $('#modalEliminar').modal('show');
+        }
+    </script>
+}

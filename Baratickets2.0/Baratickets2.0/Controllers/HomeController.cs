@@ -10,7 +10,7 @@ namespace Baratickets2._0.Controllers
     public class HomeController : Controller
     {
         private readonly ILogger<HomeController> _logger;
-        private readonly ApplicationDbContext _context; 
+        private readonly ApplicationDbContext _context;
 
         // Inyectamos el contexto en el constructor
         public HomeController(ILogger<HomeController> logger, ApplicationDbContext context)
@@ -22,22 +22,32 @@ namespace Baratickets2._0.Controllers
         // 1. Agregamos el parámetro 'buscar' para recibir el texto de la vista
         public async Task<IActionResult> Index(string buscar)
         {
-            // Cambiamos DateTime.Now por .Date para que incluya todo el día de hoy
-            // O simplemente comenta el filtro si quieres ver absolutamente todo lo que creas
-            var consulta = from e in _context.Eventos
-                           where e.FechaEvento >= DateTime.Today 
-                           select e;
+            // 1. Iniciamos la consulta cargando las relaciones (Eager Loading)
+            // Agregamos .Include(e => e.Lugar) para quitar el "Recinto por confirmar"
+            // Agregamos .Include(e => e.CategoriasTickets) para quitar el "TBA" en los precios
+            var consulta = _context.Eventos
+                .Include(e => e.Lugar)
+                .Include(e => e.CategoriasTickets)
+                .AsQueryable();
 
+            // 2. Filtro de fecha (puedes comentar el 'where' si quieres ver eventos pasados para pruebas)
+            consulta = consulta.Where(e => e.FechaInicio >= DateTime.Today);
+
+            // 3. Lógica de búsqueda mejorada
             if (!string.IsNullOrEmpty(buscar))
             {
                 string busquedaLower = buscar.ToLower();
 
-                consulta = consulta.Where(s => s.Nombre.ToLower().Contains(busquedaLower) ||
-                                               s.Direccion.ToLower().Contains(busquedaLower) ||
-                                               s.Descripcion.ToLower().Contains(busquedaLower));
+                consulta = consulta.Where(s =>
+                    s.Nombre.ToLower().Contains(busquedaLower) ||
+                    s.Descripcion.ToLower().Contains(busquedaLower) ||
+                    // ? Ahora también pueden buscar por el nombre del Pabellón/Lugar
+                    (s.Lugar != null && s.Lugar.Nombre.ToLower().Contains(busquedaLower))
+                );
             }
 
-            return View(await consulta.OrderBy(e => e.FechaEvento).ToListAsync());
+            // 4. Ordenamos por fecha de inicio y enviamos a la vista
+            return View(await consulta.OrderBy(e => e.FechaInicio).ToListAsync());
         }
         [Authorize(Roles = "Admin,Validador")]
         public IActionResult ValidarEntrada()

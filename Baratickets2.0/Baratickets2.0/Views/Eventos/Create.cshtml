@@ -32,17 +32,28 @@
                         </div>
                     </div>
 
-                    <div class="row">
-                        <div class="col-md-6 mb-3">
-                            <label asp-for="Direccion" class="form-label fw-bold"></label>
-                            <input asp-for="Direccion" class="form-control" />
-                        </div>
-                        <div class="col-md-6 mb-3">
-                            <label asp-for="FechaEvento" class="form-label fw-bold"></label>
-                            <input asp-for="FechaEvento" class="form-control" />
-                        </div>
+                    <div class="mb-3">
+                        <label class="form-label fw-bold">Seleccionar Recinto de Villa Olímpica</label>
+                        <select asp-for="LugarId" class="form-select shadow-sm" asp-items="ViewBag.LugarId">
+                            <option value="">-- Seleccione un lugar --</option>
+                        </select>
                     </div>
+                        <div class="mb-3">
+                            <label class="form-label fw-bold">Fecha del Evento</label>
+                            <input type="date" name="fechaSolo" class="form-control" required />
+                        </div>
 
+                        <div class="row">
+                            <div class="col-6 mb-3">
+                                <label class="form-label fw-bold">Hora de Inicio</label>
+                                <input type="time" name="horaInicio" class="form-control" required />
+                            </div>
+
+                            <div class="col-6 mb-3">
+                                <label class="form-label fw-bold">Hora de Finalización</label>
+                                <input type="time" name="horaFin" class="form-control" required />
+                            </div>
+                        </div>
                     <div class="mb-4">
                         <label asp-for="ImagenUrl" class="form-label fw-bold">Link del Flyer</label>
                         <input asp-for="ImagenUrl" class="form-control" id="urlInput" />
@@ -134,5 +145,23 @@
                 }
             });
         }
+    </script>
+    <script>
+        const inicio = document.querySelector('input[name="FechaInicio"]');
+        const fin = document.querySelector('input[name="FechaFin"]');
+
+        inicio.addEventListener('change', () => {
+            // Obligamos a que la fecha de fin sea al menos 1 hora después del inicio
+            if (inicio.value) {
+                fin.min = inicio.value;
+            }
+        });
+
+        fin.addEventListener('change', () => {
+            if (fin.value < inicio.value) {
+                alert("La hora de finalización no puede ser antes que la de inicio.");
+                fin.value = "";
+            }
+        });
     </script>
 }
