@@ -6,7 +6,7 @@ using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.Rendering;
 using Microsoft.EntityFrameworkCore;
 using Rotativa.AspNetCore;
-// teo la cabra 
+// teo la cabra illuminati
 
 namespace Baratickets2._0.Controllers
 {

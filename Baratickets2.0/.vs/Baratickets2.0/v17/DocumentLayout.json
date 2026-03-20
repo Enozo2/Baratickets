@@ -1,5 +1,6 @@
 {
   "Version": 1,
+<<<<<<< HEAD
   "WorkspaceRootPath": "C:\\Users\\Enocr\\OneDrive\\Escritorio\\Baratickets\\Baratickets2.0\\",
   "Documents": [
     {
@@ -131,6 +132,132 @@
     },
     {
       "AbsoluteMoniker": "D:0:0:{EB57C89B-746E-4794-BCAB-10C01C17C109}|Baratickets2.0\\Baratickets2.0.csproj|c:\\users\\enocr\\onedrive\\escritorio\\baratickets\\baratickets2.0\\baratickets2.0\\migrations\\20260319145341_add-migration.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
+=======
+  "WorkspaceRootPath": "C:\\Users\\gambe\\source\\repos\\Baratickets\\Baratickets2.0\\",
+  "Documents": [
+    {
+      "AbsoluteMoniker": "D:0:0:{EB57C89B-746E-4794-BCAB-10C01C17C109}|Baratickets2.0\\Baratickets2.0.csproj|c:\\users\\gambe\\source\\repos\\baratickets\\baratickets2.0\\baratickets2.0\\controllers\\eventoscontroller.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
+      "RelativeMoniker": "D:0:0:{EB57C89B-746E-4794-BCAB-10C01C17C109}|Baratickets2.0\\Baratickets2.0.csproj|solutionrelative:baratickets2.0\\controllers\\eventoscontroller.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{EB57C89B-746E-4794-BCAB-10C01C17C109}|Baratickets2.0\\Baratickets2.0.csproj|c:\\users\\gambe\\source\\repos\\baratickets\\baratickets2.0\\baratickets2.0\\appsettings.json||{90A6B3A7-C1A3-4009-A288-E2FF89E96FA0}",
+      "RelativeMoniker": "D:0:0:{EB57C89B-746E-4794-BCAB-10C01C17C109}|Baratickets2.0\\Baratickets2.0.csproj|solutionrelative:baratickets2.0\\appsettings.json||{90A6B3A7-C1A3-4009-A288-E2FF89E96FA0}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{EB57C89B-746E-4794-BCAB-10C01C17C109}|Baratickets2.0\\Baratickets2.0.csproj|c:\\users\\gambe\\source\\repos\\baratickets\\baratickets2.0\\baratickets2.0\\views\\eventos\\details.cshtml||{40D31677-CBC0-4297-A9EF-89D907823A98}",
+      "RelativeMoniker": "D:0:0:{EB57C89B-746E-4794-BCAB-10C01C17C109}|Baratickets2.0\\Baratickets2.0.csproj|solutionrelative:baratickets2.0\\views\\eventos\\details.cshtml||{40D31677-CBC0-4297-A9EF-89D907823A98}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{EB57C89B-746E-4794-BCAB-10C01C17C109}|Baratickets2.0\\Baratickets2.0.csproj|c:\\users\\gambe\\source\\repos\\baratickets\\baratickets2.0\\baratickets2.0\\views\\home\\index.cshtml||{40D31677-CBC0-4297-A9EF-89D907823A98}",
+      "RelativeMoniker": "D:0:0:{EB57C89B-746E-4794-BCAB-10C01C17C109}|Baratickets2.0\\Baratickets2.0.csproj|solutionrelative:baratickets2.0\\views\\home\\index.cshtml||{40D31677-CBC0-4297-A9EF-89D907823A98}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{EB57C89B-746E-4794-BCAB-10C01C17C109}|Baratickets2.0\\Baratickets2.0.csproj|c:\\users\\gambe\\source\\repos\\baratickets\\baratickets2.0\\baratickets2.0\\views\\eventos\\index.cshtml||{40D31677-CBC0-4297-A9EF-89D907823A98}",
+      "RelativeMoniker": "D:0:0:{EB57C89B-746E-4794-BCAB-10C01C17C109}|Baratickets2.0\\Baratickets2.0.csproj|solutionrelative:baratickets2.0\\views\\eventos\\index.cshtml||{40D31677-CBC0-4297-A9EF-89D907823A98}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{EB57C89B-746E-4794-BCAB-10C01C17C109}|Baratickets2.0\\Baratickets2.0.csproj|c:\\users\\gambe\\source\\repos\\baratickets\\baratickets2.0\\baratickets2.0\\controllers\\homecontroller.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
+      "RelativeMoniker": "D:0:0:{EB57C89B-746E-4794-BCAB-10C01C17C109}|Baratickets2.0\\Baratickets2.0.csproj|solutionrelative:baratickets2.0\\controllers\\homecontroller.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{EB57C89B-746E-4794-BCAB-10C01C17C109}|Baratickets2.0\\Baratickets2.0.csproj|c:\\users\\gambe\\source\\repos\\baratickets\\baratickets2.0\\baratickets2.0\\controllers\\lugarescontroller.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
+      "RelativeMoniker": "D:0:0:{EB57C89B-746E-4794-BCAB-10C01C17C109}|Baratickets2.0\\Baratickets2.0.csproj|solutionrelative:baratickets2.0\\controllers\\lugarescontroller.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{EB57C89B-746E-4794-BCAB-10C01C17C109}|Baratickets2.0\\Baratickets2.0.csproj|c:\\users\\gambe\\source\\repos\\baratickets\\baratickets2.0\\baratickets2.0\\views\\lugares\\create.cshtml||{40D31677-CBC0-4297-A9EF-89D907823A98}",
+      "RelativeMoniker": "D:0:0:{EB57C89B-746E-4794-BCAB-10C01C17C109}|Baratickets2.0\\Baratickets2.0.csproj|solutionrelative:baratickets2.0\\views\\lugares\\create.cshtml||{40D31677-CBC0-4297-A9EF-89D907823A98}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{EB57C89B-746E-4794-BCAB-10C01C17C109}|Baratickets2.0\\Baratickets2.0.csproj|c:\\users\\gambe\\source\\repos\\baratickets\\baratickets2.0\\baratickets2.0\\views\\lugares\\index.cshtml||{40D31677-CBC0-4297-A9EF-89D907823A98}",
+      "RelativeMoniker": "D:0:0:{EB57C89B-746E-4794-BCAB-10C01C17C109}|Baratickets2.0\\Baratickets2.0.csproj|solutionrelative:baratickets2.0\\views\\lugares\\index.cshtml||{40D31677-CBC0-4297-A9EF-89D907823A98}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{EB57C89B-746E-4794-BCAB-10C01C17C109}|Baratickets2.0\\Baratickets2.0.csproj|c:\\users\\gambe\\source\\repos\\baratickets\\baratickets2.0\\baratickets2.0\\views\\shared\\_layout.cshtml||{40D31677-CBC0-4297-A9EF-89D907823A98}",
+      "RelativeMoniker": "D:0:0:{EB57C89B-746E-4794-BCAB-10C01C17C109}|Baratickets2.0\\Baratickets2.0.csproj|solutionrelative:baratickets2.0\\views\\shared\\_layout.cshtml||{40D31677-CBC0-4297-A9EF-89D907823A98}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{EB57C89B-746E-4794-BCAB-10C01C17C109}|Baratickets2.0\\Baratickets2.0.csproj|c:\\users\\gambe\\source\\repos\\baratickets\\baratickets2.0\\baratickets2.0\\views\\eventos\\edit.cshtml||{40D31677-CBC0-4297-A9EF-89D907823A98}",
+      "RelativeMoniker": "D:0:0:{EB57C89B-746E-4794-BCAB-10C01C17C109}|Baratickets2.0\\Baratickets2.0.csproj|solutionrelative:baratickets2.0\\views\\eventos\\edit.cshtml||{40D31677-CBC0-4297-A9EF-89D907823A98}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{EB57C89B-746E-4794-BCAB-10C01C17C109}|Baratickets2.0\\Baratickets2.0.csproj|c:\\users\\gambe\\source\\repos\\baratickets\\baratickets2.0\\baratickets2.0\\models\\lugar.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
+      "RelativeMoniker": "D:0:0:{EB57C89B-746E-4794-BCAB-10C01C17C109}|Baratickets2.0\\Baratickets2.0.csproj|solutionrelative:baratickets2.0\\models\\lugar.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{EB57C89B-746E-4794-BCAB-10C01C17C109}|Baratickets2.0\\Baratickets2.0.csproj|c:\\users\\gambe\\source\\repos\\baratickets\\baratickets2.0\\baratickets2.0\\data\\baradbcontext.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
+      "RelativeMoniker": "D:0:0:{EB57C89B-746E-4794-BCAB-10C01C17C109}|Baratickets2.0\\Baratickets2.0.csproj|solutionrelative:baratickets2.0\\data\\baradbcontext.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{EB57C89B-746E-4794-BCAB-10C01C17C109}|Baratickets2.0\\Baratickets2.0.csproj|c:\\users\\gambe\\source\\repos\\baratickets\\baratickets2.0\\baratickets2.0\\views\\eventos\\create.cshtml||{40D31677-CBC0-4297-A9EF-89D907823A98}",
+      "RelativeMoniker": "D:0:0:{EB57C89B-746E-4794-BCAB-10C01C17C109}|Baratickets2.0\\Baratickets2.0.csproj|solutionrelative:baratickets2.0\\views\\eventos\\create.cshtml||{40D31677-CBC0-4297-A9EF-89D907823A98}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{EB57C89B-746E-4794-BCAB-10C01C17C109}|Baratickets2.0\\Baratickets2.0.csproj|c:\\users\\gambe\\source\\repos\\baratickets\\baratickets2.0\\baratickets2.0\\models\\evento.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
+      "RelativeMoniker": "D:0:0:{EB57C89B-746E-4794-BCAB-10C01C17C109}|Baratickets2.0\\Baratickets2.0.csproj|solutionrelative:baratickets2.0\\models\\evento.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{EB57C89B-746E-4794-BCAB-10C01C17C109}|Baratickets2.0\\Baratickets2.0.csproj|c:\\users\\gambe\\source\\repos\\baratickets\\baratickets2.0\\baratickets2.0\\views\\eventos\\dashboard.cshtml||{40D31677-CBC0-4297-A9EF-89D907823A98}",
+      "RelativeMoniker": "D:0:0:{EB57C89B-746E-4794-BCAB-10C01C17C109}|Baratickets2.0\\Baratickets2.0.csproj|solutionrelative:baratickets2.0\\views\\eventos\\dashboard.cshtml||{40D31677-CBC0-4297-A9EF-89D907823A98}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{EB57C89B-746E-4794-BCAB-10C01C17C109}|Baratickets2.0\\Baratickets2.0.csproj|c:\\users\\gambe\\source\\repos\\baratickets\\baratickets2.0\\baratickets2.0\\controllers\\tikectscontroller.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
+      "RelativeMoniker": "D:0:0:{EB57C89B-746E-4794-BCAB-10C01C17C109}|Baratickets2.0\\Baratickets2.0.csproj|solutionrelative:baratickets2.0\\controllers\\tikectscontroller.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{EB57C89B-746E-4794-BCAB-10C01C17C109}|Baratickets2.0\\Baratickets2.0.csproj|c:\\users\\gambe\\source\\repos\\baratickets\\baratickets2.0\\baratickets2.0\\views\\tickets\\procesarpago.cshtml||{40D31677-CBC0-4297-A9EF-89D907823A98}",
+      "RelativeMoniker": "D:0:0:{EB57C89B-746E-4794-BCAB-10C01C17C109}|Baratickets2.0\\Baratickets2.0.csproj|solutionrelative:baratickets2.0\\views\\tickets\\procesarpago.cshtml||{40D31677-CBC0-4297-A9EF-89D907823A98}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{EB57C89B-746E-4794-BCAB-10C01C17C109}|Baratickets2.0\\Baratickets2.0.csproj|c:\\users\\gambe\\source\\repos\\baratickets\\baratickets2.0\\baratickets2.0\\views\\tickets\\mistickets.cshtml||{40D31677-CBC0-4297-A9EF-89D907823A98}",
+      "RelativeMoniker": "D:0:0:{EB57C89B-746E-4794-BCAB-10C01C17C109}|Baratickets2.0\\Baratickets2.0.csproj|solutionrelative:baratickets2.0\\views\\tickets\\mistickets.cshtml||{40D31677-CBC0-4297-A9EF-89D907823A98}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{EB57C89B-746E-4794-BCAB-10C01C17C109}|Baratickets2.0\\Baratickets2.0.csproj|c:\\users\\gambe\\source\\repos\\baratickets\\baratickets2.0\\baratickets2.0\\models\\devolucion.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
+      "RelativeMoniker": "D:0:0:{EB57C89B-746E-4794-BCAB-10C01C17C109}|Baratickets2.0\\Baratickets2.0.csproj|solutionrelative:baratickets2.0\\models\\devolucion.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{EB57C89B-746E-4794-BCAB-10C01C17C109}|Baratickets2.0\\Baratickets2.0.csproj|c:\\users\\gambe\\source\\repos\\baratickets\\baratickets2.0\\baratickets2.0\\views\\tickets\\validarentrada.cshtml||{40D31677-CBC0-4297-A9EF-89D907823A98}",
+      "RelativeMoniker": "D:0:0:{EB57C89B-746E-4794-BCAB-10C01C17C109}|Baratickets2.0\\Baratickets2.0.csproj|solutionrelative:baratickets2.0\\views\\tickets\\validarentrada.cshtml||{40D31677-CBC0-4297-A9EF-89D907823A98}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{EB57C89B-746E-4794-BCAB-10C01C17C109}|Baratickets2.0\\Baratickets2.0.csproj|c:\\users\\gambe\\source\\repos\\baratickets\\baratickets2.0\\baratickets2.0\\views\\tickets\\verticket.cshtml||{40D31677-CBC0-4297-A9EF-89D907823A98}",
+      "RelativeMoniker": "D:0:0:{EB57C89B-746E-4794-BCAB-10C01C17C109}|Baratickets2.0\\Baratickets2.0.csproj|solutionrelative:baratickets2.0\\views\\tickets\\verticket.cshtml||{40D31677-CBC0-4297-A9EF-89D907823A98}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{EB57C89B-746E-4794-BCAB-10C01C17C109}|Baratickets2.0\\Baratickets2.0.csproj|c:\\users\\gambe\\source\\repos\\baratickets\\baratickets2.0\\baratickets2.0\\models\\ticket.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
+      "RelativeMoniker": "D:0:0:{EB57C89B-746E-4794-BCAB-10C01C17C109}|Baratickets2.0\\Baratickets2.0.csproj|solutionrelative:baratickets2.0\\models\\ticket.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{EB57C89B-746E-4794-BCAB-10C01C17C109}|Baratickets2.0\\Baratickets2.0.csproj|c:\\users\\gambe\\source\\repos\\baratickets\\baratickets2.0\\baratickets2.0\\controllers\\usuarioscontroller.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
+      "RelativeMoniker": "D:0:0:{EB57C89B-746E-4794-BCAB-10C01C17C109}|Baratickets2.0\\Baratickets2.0.csproj|solutionrelative:baratickets2.0\\controllers\\usuarioscontroller.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{EB57C89B-746E-4794-BCAB-10C01C17C109}|Baratickets2.0\\Baratickets2.0.csproj|c:\\users\\gambe\\source\\repos\\baratickets\\baratickets2.0\\baratickets2.0\\migrations\\20260319000847_agregadatablareclamacion.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
+      "RelativeMoniker": "D:0:0:{EB57C89B-746E-4794-BCAB-10C01C17C109}|Baratickets2.0\\Baratickets2.0.csproj|solutionrelative:baratickets2.0\\migrations\\20260319000847_agregadatablareclamacion.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{EB57C89B-746E-4794-BCAB-10C01C17C109}|Baratickets2.0\\Baratickets2.0.csproj|c:\\users\\gambe\\source\\repos\\baratickets\\baratickets2.0\\baratickets2.0\\migrations\\20260319025647_agregarmontoscupon.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
+      "RelativeMoniker": "D:0:0:{EB57C89B-746E-4794-BCAB-10C01C17C109}|Baratickets2.0\\Baratickets2.0.csproj|solutionrelative:baratickets2.0\\migrations\\20260319025647_agregarmontoscupon.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{EB57C89B-746E-4794-BCAB-10C01C17C109}|Baratickets2.0\\Baratickets2.0.csproj|c:\\users\\gambe\\source\\repos\\baratickets\\baratickets2.0\\baratickets2.0\\migrations\\20260319014140_cuponusado.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
+      "RelativeMoniker": "D:0:0:{EB57C89B-746E-4794-BCAB-10C01C17C109}|Baratickets2.0\\Baratickets2.0.csproj|solutionrelative:baratickets2.0\\migrations\\20260319014140_cuponusado.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{EB57C89B-746E-4794-BCAB-10C01C17C109}|Baratickets2.0\\Baratickets2.0.csproj|c:\\users\\gambe\\source\\repos\\baratickets\\baratickets2.0\\baratickets2.0\\migrations\\20260319124834_expiracion.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
+      "RelativeMoniker": "D:0:0:{EB57C89B-746E-4794-BCAB-10C01C17C109}|Baratickets2.0\\Baratickets2.0.csproj|solutionrelative:baratickets2.0\\migrations\\20260319124834_expiracion.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{EB57C89B-746E-4794-BCAB-10C01C17C109}|Baratickets2.0\\Baratickets2.0.csproj|c:\\users\\gambe\\source\\repos\\baratickets\\baratickets2.0\\baratickets2.0\\migrations\\20260319162435_mefaltouno.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
+      "RelativeMoniker": "D:0:0:{EB57C89B-746E-4794-BCAB-10C01C17C109}|Baratickets2.0\\Baratickets2.0.csproj|solutionrelative:baratickets2.0\\migrations\\20260319162435_mefaltouno.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{EB57C89B-746E-4794-BCAB-10C01C17C109}|Baratickets2.0\\Baratickets2.0.csproj|c:\\users\\gambe\\source\\repos\\baratickets\\baratickets2.0\\baratickets2.0\\migrations\\20260319161754_lugar.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
+      "RelativeMoniker": "D:0:0:{EB57C89B-746E-4794-BCAB-10C01C17C109}|Baratickets2.0\\Baratickets2.0.csproj|solutionrelative:baratickets2.0\\migrations\\20260319161754_lugar.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{EB57C89B-746E-4794-BCAB-10C01C17C109}|Baratickets2.0\\Baratickets2.0.csproj|c:\\users\\gambe\\source\\repos\\baratickets\\baratickets2.0\\baratickets2.0\\migrations\\20260319145341_add-migration.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
+>>>>>>> ec7eba9efba09914bbc6fc29c756aa50bc649e09
       "RelativeMoniker": "D:0:0:{EB57C89B-746E-4794-BCAB-10C01C17C109}|Baratickets2.0\\Baratickets2.0.csproj|solutionrelative:baratickets2.0\\migrations\\20260319145341_add-migration.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
     }
   ],
@@ -141,6 +268,7 @@
       "DocumentGroups": [
         {
           "DockedWidth": 200,
+<<<<<<< HEAD
           "SelectedChildIndex": 0,
           "Children": [
             {
@@ -155,10 +283,18 @@
               "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.001642|",
               "WhenOpened": "2026-03-20T05:01:58.903Z",
               "EditorCaption": ""
+=======
+          "SelectedChildIndex": 5,
+          "Children": [
+            {
+              "$type": "Bookmark",
+              "Name": "ST:129:0:{75188d03-9892-4ae2-abf1-207126247ce5}"
+>>>>>>> ec7eba9efba09914bbc6fc29c756aa50bc649e09
             },
             {
               "$type": "Document",
               "DocumentIndex": 1,
+<<<<<<< HEAD
               "Title": "Microsoft.NET.Sdk.StaticWebAssets.targets",
               "DocumentMoniker": "C:\\Program Files\\dotnet\\sdk\\9.0.307\\Sdks\\Microsoft.NET.Sdk.StaticWebAssets\\targets\\Microsoft.NET.Sdk.StaticWebAssets.targets",
               "RelativeDocumentMoniker": "..\\..\\..\\..\\..\\..\\Program Files\\dotnet\\sdk\\9.0.307\\Sdks\\Microsoft.NET.Sdk.StaticWebAssets\\targets\\Microsoft.NET.Sdk.StaticWebAssets.targets",
@@ -191,10 +327,45 @@
               "ViewState": "AgIAAAAAAAAAAAAAAAAAAAgAAAASAAAAAAAAAA==",
               "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
               "WhenOpened": "2026-03-20T04:47:07.247Z"
+=======
+              "Title": "appsettings.json",
+              "DocumentMoniker": "C:\\Users\\gambe\\source\\repos\\Baratickets\\Baratickets2.0\\Baratickets2.0\\appsettings.json",
+              "RelativeDocumentMoniker": "Baratickets2.0\\appsettings.json",
+              "ToolTip": "C:\\Users\\gambe\\source\\repos\\Baratickets\\Baratickets2.0\\Baratickets2.0\\appsettings.json",
+              "RelativeToolTip": "Baratickets2.0\\appsettings.json",
+              "ViewState": "AgIAAAAAAAAAAAAAAAAAAAIAAAA2AAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.001642|",
+              "WhenOpened": "2026-03-20T05:08:40.21Z"
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 11,
+              "Title": "Lugar.cs",
+              "DocumentMoniker": "C:\\Users\\gambe\\source\\repos\\Baratickets\\Baratickets2.0\\Baratickets2.0\\Models\\Lugar.cs",
+              "RelativeDocumentMoniker": "Baratickets2.0\\Models\\Lugar.cs",
+              "ToolTip": "C:\\Users\\gambe\\source\\repos\\Baratickets\\Baratickets2.0\\Baratickets2.0\\Models\\Lugar.cs",
+              "RelativeToolTip": "Baratickets2.0\\Models\\Lugar.cs",
+              "ViewState": "AgIAAAAAAAAAAAAAAAAAAAgAAAASAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
+              "WhenOpened": "2026-03-20T05:08:40.329Z"
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 3,
+              "Title": "Index.cshtml",
+              "DocumentMoniker": "C:\\Users\\gambe\\source\\repos\\Baratickets\\Baratickets2.0\\Baratickets2.0\\Views\\Home\\Index.cshtml",
+              "RelativeDocumentMoniker": "Baratickets2.0\\Views\\Home\\Index.cshtml",
+              "ToolTip": "C:\\Users\\gambe\\source\\repos\\Baratickets\\Baratickets2.0\\Baratickets2.0\\Views\\Home\\Index.cshtml",
+              "RelativeToolTip": "Baratickets2.0\\Views\\Home\\Index.cshtml",
+              "ViewState": "AgIAABMAAAAAAAAAAAArwFgAAABlAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000759|",
+              "WhenOpened": "2026-03-20T05:08:40.338Z"
+>>>>>>> ec7eba9efba09914bbc6fc29c756aa50bc649e09
             },
             {
               "$type": "Document",
               "DocumentIndex": 5,
+<<<<<<< HEAD
               "Title": "Index.cshtml",
               "DocumentMoniker": "C:\\Users\\Enocr\\OneDrive\\Escritorio\\Baratickets\\Baratickets2.0\\Baratickets2.0\\Views\\Home\\Index.cshtml",
               "RelativeDocumentMoniker": "Baratickets2.0\\Views\\Home\\Index.cshtml",
@@ -239,10 +410,34 @@
               "ViewState": "AgIAAEEAAAAAAAAAAAArwFgAAABQAAAAAAAAAA==",
               "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000759|",
               "WhenOpened": "2026-03-20T04:47:07.254Z"
+=======
+              "Title": "HomeController.cs",
+              "DocumentMoniker": "C:\\Users\\gambe\\source\\repos\\Baratickets\\Baratickets2.0\\Baratickets2.0\\Controllers\\HomeController.cs",
+              "RelativeDocumentMoniker": "Baratickets2.0\\Controllers\\HomeController.cs",
+              "ToolTip": "C:\\Users\\gambe\\source\\repos\\Baratickets\\Baratickets2.0\\Baratickets2.0\\Controllers\\HomeController.cs",
+              "RelativeToolTip": "Baratickets2.0\\Controllers\\HomeController.cs",
+              "ViewState": "AgIAAAgAAAAAAAAAAAAkwEMAAAABAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
+              "WhenOpened": "2026-03-20T05:08:40.345Z"
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 0,
+              "Title": "EventosController.cs",
+              "DocumentMoniker": "C:\\Users\\gambe\\source\\repos\\Baratickets\\Baratickets2.0\\Baratickets2.0\\Controllers\\EventosController.cs",
+              "RelativeDocumentMoniker": "Baratickets2.0\\Controllers\\EventosController.cs",
+              "ToolTip": "C:\\Users\\gambe\\source\\repos\\Baratickets\\Baratickets2.0\\Baratickets2.0\\Controllers\\EventosController.cs",
+              "RelativeToolTip": "Baratickets2.0\\Controllers\\EventosController.cs",
+              "ViewState": "AQIAAAAAAAAAAAAAAAAAAAgAAAAaAAAA",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
+              "WhenOpened": "2026-03-20T05:08:40.352Z",
+              "EditorCaption": ""
+>>>>>>> ec7eba9efba09914bbc6fc29c756aa50bc649e09
             },
             {
               "$type": "Document",
               "DocumentIndex": 4,
+<<<<<<< HEAD
               "Title": "Details.cshtml",
               "DocumentMoniker": "C:\\Users\\Enocr\\OneDrive\\Escritorio\\Baratickets\\Baratickets2.0\\Baratickets2.0\\Views\\Eventos\\Details.cshtml",
               "RelativeDocumentMoniker": "Baratickets2.0\\Views\\Eventos\\Details.cshtml",
@@ -263,10 +458,69 @@
               "ViewState": "AgIAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA==",
               "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
               "WhenOpened": "2026-03-20T04:47:07.257Z"
+=======
+              "Title": "Index.cshtml",
+              "DocumentMoniker": "C:\\Users\\gambe\\source\\repos\\Baratickets\\Baratickets2.0\\Baratickets2.0\\Views\\Eventos\\Index.cshtml",
+              "RelativeDocumentMoniker": "Baratickets2.0\\Views\\Eventos\\Index.cshtml",
+              "ToolTip": "C:\\Users\\gambe\\source\\repos\\Baratickets\\Baratickets2.0\\Baratickets2.0\\Views\\Eventos\\Index.cshtml",
+              "RelativeToolTip": "Baratickets2.0\\Views\\Eventos\\Index.cshtml",
+              "ViewState": "AgIAAEEAAAAAAAAAAAArwFgAAABQAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000759|",
+              "WhenOpened": "2026-03-20T05:08:40.358Z"
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 2,
+              "Title": "Details.cshtml",
+              "DocumentMoniker": "C:\\Users\\gambe\\source\\repos\\Baratickets\\Baratickets2.0\\Baratickets2.0\\Views\\Eventos\\Details.cshtml",
+              "RelativeDocumentMoniker": "Baratickets2.0\\Views\\Eventos\\Details.cshtml",
+              "ToolTip": "C:\\Users\\gambe\\source\\repos\\Baratickets\\Baratickets2.0\\Baratickets2.0\\Views\\Eventos\\Details.cshtml",
+              "RelativeToolTip": "Baratickets2.0\\Views\\Eventos\\Details.cshtml",
+              "ViewState": "AgIAAAAAAAAAAAAAAAAAAIkAAAAQAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000759|",
+              "WhenOpened": "2026-03-20T05:08:40.364Z"
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 28,
+              "Title": "20260319162435_mefaltouno.cs",
+              "DocumentMoniker": "C:\\Users\\gambe\\source\\repos\\Baratickets\\Baratickets2.0\\Baratickets2.0\\Migrations\\20260319162435_mefaltouno.cs",
+              "RelativeDocumentMoniker": "Baratickets2.0\\Migrations\\20260319162435_mefaltouno.cs",
+              "ToolTip": "C:\\Users\\gambe\\source\\repos\\Baratickets\\Baratickets2.0\\Baratickets2.0\\Migrations\\20260319162435_mefaltouno.cs",
+              "RelativeToolTip": "Baratickets2.0\\Migrations\\20260319162435_mefaltouno.cs",
+              "ViewState": "AgIAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
+              "WhenOpened": "2026-03-20T05:08:40.372Z"
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 6,
+              "Title": "LugaresController.cs",
+              "DocumentMoniker": "C:\\Users\\gambe\\source\\repos\\Baratickets\\Baratickets2.0\\Baratickets2.0\\Controllers\\LugaresController.cs",
+              "RelativeDocumentMoniker": "Baratickets2.0\\Controllers\\LugaresController.cs",
+              "ToolTip": "C:\\Users\\gambe\\source\\repos\\Baratickets\\Baratickets2.0\\Baratickets2.0\\Controllers\\LugaresController.cs",
+              "RelativeToolTip": "Baratickets2.0\\Controllers\\LugaresController.cs",
+              "ViewState": "AgIAAA0AAAAAAAAAAAA1wCEAAAAAAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
+              "WhenOpened": "2026-03-20T05:08:40.379Z"
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 7,
+              "Title": "Create.cshtml",
+              "DocumentMoniker": "C:\\Users\\gambe\\source\\repos\\Baratickets\\Baratickets2.0\\Baratickets2.0\\Views\\Lugares\\Create.cshtml",
+              "RelativeDocumentMoniker": "Baratickets2.0\\Views\\Lugares\\Create.cshtml",
+              "ToolTip": "C:\\Users\\gambe\\source\\repos\\Baratickets\\Baratickets2.0\\Baratickets2.0\\Views\\Lugares\\Create.cshtml",
+              "RelativeToolTip": "Baratickets2.0\\Views\\Lugares\\Create.cshtml",
+              "ViewState": "AgIAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000759|",
+              "WhenOpened": "2026-03-20T05:08:40.387Z"
+>>>>>>> ec7eba9efba09914bbc6fc29c756aa50bc649e09
             },
             {
               "$type": "Document",
               "DocumentIndex": 8,
+<<<<<<< HEAD
               "Title": "LugaresController.cs",
               "DocumentMoniker": "C:\\Users\\Enocr\\OneDrive\\Escritorio\\Baratickets\\Baratickets2.0\\Baratickets2.0\\Controllers\\LugaresController.cs",
               "RelativeDocumentMoniker": "Baratickets2.0\\Controllers\\LugaresController.cs",
@@ -275,10 +529,21 @@
               "ViewState": "AgIAAA0AAAAAAAAAAAA1wCEAAAAAAAAAAAAAAA==",
               "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
               "WhenOpened": "2026-03-20T04:47:07.259Z"
+=======
+              "Title": "Index.cshtml",
+              "DocumentMoniker": "C:\\Users\\gambe\\source\\repos\\Baratickets\\Baratickets2.0\\Baratickets2.0\\Views\\Lugares\\Index.cshtml",
+              "RelativeDocumentMoniker": "Baratickets2.0\\Views\\Lugares\\Index.cshtml",
+              "ToolTip": "C:\\Users\\gambe\\source\\repos\\Baratickets\\Baratickets2.0\\Baratickets2.0\\Views\\Lugares\\Index.cshtml",
+              "RelativeToolTip": "Baratickets2.0\\Views\\Lugares\\Index.cshtml",
+              "ViewState": "AgIAABIAAAAAAAAAAAAAAC4AAAAGAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000759|",
+              "WhenOpened": "2026-03-20T05:08:40.394Z"
+>>>>>>> ec7eba9efba09914bbc6fc29c756aa50bc649e09
             },
             {
               "$type": "Document",
               "DocumentIndex": 9,
+<<<<<<< HEAD
               "Title": "Create.cshtml",
               "DocumentMoniker": "C:\\Users\\Enocr\\OneDrive\\Escritorio\\Baratickets\\Baratickets2.0\\Baratickets2.0\\Views\\Lugares\\Create.cshtml",
               "RelativeDocumentMoniker": "Baratickets2.0\\Views\\Lugares\\Create.cshtml",
@@ -287,10 +552,33 @@
               "ViewState": "AgIAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA==",
               "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000759|",
               "WhenOpened": "2026-03-20T04:47:07.261Z"
+=======
+              "Title": "_Layout.cshtml",
+              "DocumentMoniker": "C:\\Users\\gambe\\source\\repos\\Baratickets\\Baratickets2.0\\Baratickets2.0\\Views\\Shared\\_Layout.cshtml",
+              "RelativeDocumentMoniker": "Baratickets2.0\\Views\\Shared\\_Layout.cshtml",
+              "ToolTip": "C:\\Users\\gambe\\source\\repos\\Baratickets\\Baratickets2.0\\Baratickets2.0\\Views\\Shared\\_Layout.cshtml",
+              "RelativeToolTip": "Baratickets2.0\\Views\\Shared\\_Layout.cshtml",
+              "ViewState": "AgIAACcAAAAAAAAAAAAAAE0AAAAZAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000759|",
+              "WhenOpened": "2026-03-20T05:08:40.401Z"
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 14,
+              "Title": "Evento.cs",
+              "DocumentMoniker": "C:\\Users\\gambe\\source\\repos\\Baratickets\\Baratickets2.0\\Baratickets2.0\\Models\\Evento.cs",
+              "RelativeDocumentMoniker": "Baratickets2.0\\Models\\Evento.cs",
+              "ToolTip": "C:\\Users\\gambe\\source\\repos\\Baratickets\\Baratickets2.0\\Baratickets2.0\\Models\\Evento.cs",
+              "RelativeToolTip": "Baratickets2.0\\Models\\Evento.cs",
+              "ViewState": "AgIAAA4AAAAAAAAAAAA9wCMAAABGAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
+              "WhenOpened": "2026-03-20T05:08:40.41Z"
+>>>>>>> ec7eba9efba09914bbc6fc29c756aa50bc649e09
             },
             {
               "$type": "Document",
               "DocumentIndex": 10,
+<<<<<<< HEAD
               "Title": "Index.cshtml",
               "DocumentMoniker": "C:\\Users\\Enocr\\OneDrive\\Escritorio\\Baratickets\\Baratickets2.0\\Baratickets2.0\\Views\\Lugares\\Index.cshtml",
               "RelativeDocumentMoniker": "Baratickets2.0\\Views\\Lugares\\Index.cshtml",
@@ -383,10 +671,45 @@
               "ViewState": "AgIAABUAAAAAAAAAAAAkwCcAAAAaAAAAAAAAAA==",
               "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000759|",
               "WhenOpened": "2026-03-20T04:47:07.274Z"
+=======
+              "Title": "Edit.cshtml",
+              "DocumentMoniker": "C:\\Users\\gambe\\source\\repos\\Baratickets\\Baratickets2.0\\Baratickets2.0\\Views\\Eventos\\Edit.cshtml",
+              "RelativeDocumentMoniker": "Baratickets2.0\\Views\\Eventos\\Edit.cshtml",
+              "ToolTip": "C:\\Users\\gambe\\source\\repos\\Baratickets\\Baratickets2.0\\Baratickets2.0\\Views\\Eventos\\Edit.cshtml",
+              "RelativeToolTip": "Baratickets2.0\\Views\\Eventos\\Edit.cshtml",
+              "ViewState": "AgIAABgAAAAAAAAAAADwvy4AAAAAAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000759|",
+              "WhenOpened": "2026-03-20T05:08:40.418Z"
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 29,
+              "Title": "20260319161754_LUGAR.cs",
+              "DocumentMoniker": "C:\\Users\\gambe\\source\\repos\\Baratickets\\Baratickets2.0\\Baratickets2.0\\Migrations\\20260319161754_LUGAR.cs",
+              "RelativeDocumentMoniker": "Baratickets2.0\\Migrations\\20260319161754_LUGAR.cs",
+              "ToolTip": "C:\\Users\\gambe\\source\\repos\\Baratickets\\Baratickets2.0\\Baratickets2.0\\Migrations\\20260319161754_LUGAR.cs",
+              "RelativeToolTip": "Baratickets2.0\\Migrations\\20260319161754_LUGAR.cs",
+              "ViewState": "AgIAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
+              "WhenOpened": "2026-03-20T05:08:40.424Z"
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 12,
+              "Title": "BaraDbContext.cs",
+              "DocumentMoniker": "C:\\Users\\gambe\\source\\repos\\Baratickets\\Baratickets2.0\\Baratickets2.0\\Data\\BaraDbContext.cs",
+              "RelativeDocumentMoniker": "Baratickets2.0\\Data\\BaraDbContext.cs",
+              "ToolTip": "C:\\Users\\gambe\\source\\repos\\Baratickets\\Baratickets2.0\\Baratickets2.0\\Data\\BaraDbContext.cs",
+              "RelativeToolTip": "Baratickets2.0\\Data\\BaraDbContext.cs",
+              "ViewState": "AgIAAAAAAAAAAAAAAAAAABEAAAAxAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
+              "WhenOpened": "2026-03-20T05:08:40.429Z"
+>>>>>>> ec7eba9efba09914bbc6fc29c756aa50bc649e09
             },
             {
               "$type": "Document",
               "DocumentIndex": 18,
+<<<<<<< HEAD
               "Title": "TikectsController.cs",
               "DocumentMoniker": "C:\\Users\\Enocr\\OneDrive\\Escritorio\\Baratickets\\Baratickets2.0\\Baratickets2.0\\Controllers\\TikectsController.cs",
               "RelativeDocumentMoniker": "Baratickets2.0\\Controllers\\TikectsController.cs",
@@ -407,6 +730,172 @@
               "ViewState": "AgIAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA==",
               "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
               "WhenOpened": "2026-03-20T04:47:07.277Z"
+=======
+              "Title": "MisTickets.cshtml",
+              "DocumentMoniker": "C:\\Users\\gambe\\source\\repos\\Baratickets\\Baratickets2.0\\Baratickets2.0\\Views\\Tickets\\MisTickets.cshtml",
+              "RelativeDocumentMoniker": "Baratickets2.0\\Views\\Tickets\\MisTickets.cshtml",
+              "ToolTip": "C:\\Users\\gambe\\source\\repos\\Baratickets\\Baratickets2.0\\Baratickets2.0\\Views\\Tickets\\MisTickets.cshtml",
+              "RelativeToolTip": "Baratickets2.0\\Views\\Tickets\\MisTickets.cshtml",
+              "ViewState": "AgIAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000759|",
+              "WhenOpened": "2026-03-20T05:08:40.437Z"
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 13,
+              "Title": "Create.cshtml",
+              "DocumentMoniker": "C:\\Users\\gambe\\source\\repos\\Baratickets\\Baratickets2.0\\Baratickets2.0\\Views\\Eventos\\Create.cshtml",
+              "RelativeDocumentMoniker": "Baratickets2.0\\Views\\Eventos\\Create.cshtml",
+              "ToolTip": "C:\\Users\\gambe\\source\\repos\\Baratickets\\Baratickets2.0\\Baratickets2.0\\Views\\Eventos\\Create.cshtml",
+              "RelativeToolTip": "Baratickets2.0\\Views\\Eventos\\Create.cshtml",
+              "ViewState": "AgIAABUAAAAAAAAAAAAkwCcAAAAaAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000759|",
+              "WhenOpened": "2026-03-20T05:08:40.444Z"
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 16,
+              "Title": "TikectsController.cs",
+              "DocumentMoniker": "C:\\Users\\gambe\\source\\repos\\Baratickets\\Baratickets2.0\\Baratickets2.0\\Controllers\\TikectsController.cs",
+              "RelativeDocumentMoniker": "Baratickets2.0\\Controllers\\TikectsController.cs",
+              "ToolTip": "C:\\Users\\gambe\\source\\repos\\Baratickets\\Baratickets2.0\\Baratickets2.0\\Controllers\\TikectsController.cs",
+              "RelativeToolTip": "Baratickets2.0\\Controllers\\TikectsController.cs",
+              "ViewState": "AgIAACwAAAAAAAAAAAAowFAAAAA6AAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
+              "WhenOpened": "2026-03-20T05:08:40.451Z"
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 30,
+              "Title": "20260319145341_Add-Migration.cs",
+              "DocumentMoniker": "C:\\Users\\gambe\\source\\repos\\Baratickets\\Baratickets2.0\\Baratickets2.0\\Migrations\\20260319145341_Add-Migration.cs",
+              "RelativeDocumentMoniker": "Baratickets2.0\\Migrations\\20260319145341_Add-Migration.cs",
+              "ToolTip": "C:\\Users\\gambe\\source\\repos\\Baratickets\\Baratickets2.0\\Baratickets2.0\\Migrations\\20260319145341_Add-Migration.cs",
+              "RelativeToolTip": "Baratickets2.0\\Migrations\\20260319145341_Add-Migration.cs",
+              "ViewState": "AgIAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
+              "WhenOpened": "2026-03-20T05:08:40.458Z"
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 19,
+              "Title": "Devolucion.cs",
+              "DocumentMoniker": "C:\\Users\\gambe\\source\\repos\\Baratickets\\Baratickets2.0\\Baratickets2.0\\Models\\Devolucion.cs",
+              "RelativeDocumentMoniker": "Baratickets2.0\\Models\\Devolucion.cs",
+              "ToolTip": "C:\\Users\\gambe\\source\\repos\\Baratickets\\Baratickets2.0\\Baratickets2.0\\Models\\Devolucion.cs",
+              "RelativeToolTip": "Baratickets2.0\\Models\\Devolucion.cs",
+              "ViewState": "AgIAAA4AAAAAAAAAAAA8wBcAAAA2AAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
+              "WhenOpened": "2026-03-20T05:08:40.463Z"
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 15,
+              "Title": "Dashboard.cshtml",
+              "DocumentMoniker": "C:\\Users\\gambe\\source\\repos\\Baratickets\\Baratickets2.0\\Baratickets2.0\\Views\\Eventos\\Dashboard.cshtml",
+              "RelativeDocumentMoniker": "Baratickets2.0\\Views\\Eventos\\Dashboard.cshtml",
+              "ToolTip": "C:\\Users\\gambe\\source\\repos\\Baratickets\\Baratickets2.0\\Baratickets2.0\\Views\\Eventos\\Dashboard.cshtml",
+              "RelativeToolTip": "Baratickets2.0\\Views\\Eventos\\Dashboard.cshtml",
+              "ViewState": "AgIAAAAAAAAAAAAAAAAAAAoBAAAtAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000759|",
+              "WhenOpened": "2026-03-20T05:08:40.58Z"
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 17,
+              "Title": "ProcesarPago.cshtml",
+              "DocumentMoniker": "C:\\Users\\gambe\\source\\repos\\Baratickets\\Baratickets2.0\\Baratickets2.0\\Views\\Tickets\\ProcesarPago.cshtml",
+              "RelativeDocumentMoniker": "Baratickets2.0\\Views\\Tickets\\ProcesarPago.cshtml",
+              "ToolTip": "C:\\Users\\gambe\\source\\repos\\Baratickets\\Baratickets2.0\\Baratickets2.0\\Views\\Tickets\\ProcesarPago.cshtml",
+              "RelativeToolTip": "Baratickets2.0\\Views\\Tickets\\ProcesarPago.cshtml",
+              "ViewState": "AgIAAGYAAAAAAAAAAAAcwIcAAAAIAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000759|",
+              "WhenOpened": "2026-03-20T05:08:40.588Z"
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 27,
+              "Title": "20260319124834_expiracion.cs",
+              "DocumentMoniker": "C:\\Users\\gambe\\source\\repos\\Baratickets\\Baratickets2.0\\Baratickets2.0\\Migrations\\20260319124834_expiracion.cs",
+              "RelativeDocumentMoniker": "Baratickets2.0\\Migrations\\20260319124834_expiracion.cs",
+              "ToolTip": "C:\\Users\\gambe\\source\\repos\\Baratickets\\Baratickets2.0\\Baratickets2.0\\Migrations\\20260319124834_expiracion.cs",
+              "RelativeToolTip": "Baratickets2.0\\Migrations\\20260319124834_expiracion.cs",
+              "ViewState": "AgIAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
+              "WhenOpened": "2026-03-20T05:08:40.595Z"
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 20,
+              "Title": "ValidarEntrada.cshtml",
+              "DocumentMoniker": "C:\\Users\\gambe\\source\\repos\\Baratickets\\Baratickets2.0\\Baratickets2.0\\Views\\Tickets\\ValidarEntrada.cshtml",
+              "RelativeDocumentMoniker": "Baratickets2.0\\Views\\Tickets\\ValidarEntrada.cshtml",
+              "ToolTip": "C:\\Users\\gambe\\source\\repos\\Baratickets\\Baratickets2.0\\Baratickets2.0\\Views\\Tickets\\ValidarEntrada.cshtml",
+              "RelativeToolTip": "Baratickets2.0\\Views\\Tickets\\ValidarEntrada.cshtml",
+              "ViewState": "AgIAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000759|",
+              "WhenOpened": "2026-03-20T05:08:40.604Z"
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 24,
+              "Title": "20260319000847_AgregadaTablaReclamacion.cs",
+              "DocumentMoniker": "C:\\Users\\gambe\\source\\repos\\Baratickets\\Baratickets2.0\\Baratickets2.0\\Migrations\\20260319000847_AgregadaTablaReclamacion.cs",
+              "RelativeDocumentMoniker": "Baratickets2.0\\Migrations\\20260319000847_AgregadaTablaReclamacion.cs",
+              "ToolTip": "C:\\Users\\gambe\\source\\repos\\Baratickets\\Baratickets2.0\\Baratickets2.0\\Migrations\\20260319000847_AgregadaTablaReclamacion.cs",
+              "RelativeToolTip": "Baratickets2.0\\Migrations\\20260319000847_AgregadaTablaReclamacion.cs",
+              "ViewState": "AgIAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
+              "WhenOpened": "2026-03-20T05:08:40.612Z"
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 23,
+              "Title": "UsuariosController.cs",
+              "DocumentMoniker": "C:\\Users\\gambe\\source\\repos\\Baratickets\\Baratickets2.0\\Baratickets2.0\\Controllers\\UsuariosController.cs",
+              "RelativeDocumentMoniker": "Baratickets2.0\\Controllers\\UsuariosController.cs",
+              "ToolTip": "C:\\Users\\gambe\\source\\repos\\Baratickets\\Baratickets2.0\\Baratickets2.0\\Controllers\\UsuariosController.cs",
+              "RelativeToolTip": "Baratickets2.0\\Controllers\\UsuariosController.cs",
+              "ViewState": "AgIAABgAAAAAAAAAAAAgwDQAAAAAAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
+              "WhenOpened": "2026-03-20T05:08:40.62Z"
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 22,
+              "Title": "Ticket.cs",
+              "DocumentMoniker": "C:\\Users\\gambe\\source\\repos\\Baratickets\\Baratickets2.0\\Baratickets2.0\\Models\\Ticket.cs",
+              "RelativeDocumentMoniker": "Baratickets2.0\\Models\\Ticket.cs",
+              "ToolTip": "C:\\Users\\gambe\\source\\repos\\Baratickets\\Baratickets2.0\\Baratickets2.0\\Models\\Ticket.cs",
+              "RelativeToolTip": "Baratickets2.0\\Models\\Ticket.cs",
+              "ViewState": "AgIAAAAAAAAAAAAAAAAAABUAAAA7AAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
+              "WhenOpened": "2026-03-20T05:08:40.627Z"
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 25,
+              "Title": "20260319025647_AgregarMontosCupon.cs",
+              "DocumentMoniker": "C:\\Users\\gambe\\source\\repos\\Baratickets\\Baratickets2.0\\Baratickets2.0\\Migrations\\20260319025647_AgregarMontosCupon.cs",
+              "RelativeDocumentMoniker": "Baratickets2.0\\Migrations\\20260319025647_AgregarMontosCupon.cs",
+              "ToolTip": "C:\\Users\\gambe\\source\\repos\\Baratickets\\Baratickets2.0\\Baratickets2.0\\Migrations\\20260319025647_AgregarMontosCupon.cs",
+              "RelativeToolTip": "Baratickets2.0\\Migrations\\20260319025647_AgregarMontosCupon.cs",
+              "ViewState": "AgIAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
+              "WhenOpened": "2026-03-20T05:08:40.636Z"
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 26,
+              "Title": "20260319014140_cuponusado.cs",
+              "DocumentMoniker": "C:\\Users\\gambe\\source\\repos\\Baratickets\\Baratickets2.0\\Baratickets2.0\\Migrations\\20260319014140_cuponusado.cs",
+              "RelativeDocumentMoniker": "Baratickets2.0\\Migrations\\20260319014140_cuponusado.cs",
+              "ToolTip": "C:\\Users\\gambe\\source\\repos\\Baratickets\\Baratickets2.0\\Baratickets2.0\\Migrations\\20260319014140_cuponusado.cs",
+              "RelativeToolTip": "Baratickets2.0\\Migrations\\20260319014140_cuponusado.cs",
+              "ViewState": "AgIAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
+              "WhenOpened": "2026-03-20T05:08:40.645Z"
+>>>>>>> ec7eba9efba09914bbc6fc29c756aa50bc649e09
             },
             {
               "$type": "Document",
@@ -532,6 +1021,7 @@
               "$type": "Document",
               "DocumentIndex": 23,
               "Title": "VerTicket.cshtml",
+<<<<<<< HEAD
               "DocumentMoniker": "C:\\Users\\Enocr\\OneDrive\\Escritorio\\Baratickets\\Baratickets2.0\\Baratickets2.0\\Views\\Tickets\\VerTicket.cshtml",
               "RelativeDocumentMoniker": "Baratickets2.0\\Views\\Tickets\\VerTicket.cshtml",
               "ToolTip": "C:\\Users\\Enocr\\OneDrive\\Escritorio\\Baratickets\\Baratickets2.0\\Baratickets2.0\\Views\\Tickets\\VerTicket.cshtml",
@@ -539,6 +1029,15 @@
               "ViewState": "AgIAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA==",
               "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000759|",
               "WhenOpened": "2026-03-20T04:47:07.295Z"
+=======
+              "DocumentMoniker": "C:\\Users\\gambe\\source\\repos\\Baratickets\\Baratickets2.0\\Baratickets2.0\\Views\\Tickets\\VerTicket.cshtml",
+              "RelativeDocumentMoniker": "Baratickets2.0\\Views\\Tickets\\VerTicket.cshtml",
+              "ToolTip": "C:\\Users\\gambe\\source\\repos\\Baratickets\\Baratickets2.0\\Baratickets2.0\\Views\\Tickets\\VerTicket.cshtml",
+              "RelativeToolTip": "Baratickets2.0\\Views\\Tickets\\VerTicket.cshtml",
+              "ViewState": "AgIAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000759|",
+              "WhenOpened": "2026-03-20T05:08:40.652Z"
+>>>>>>> ec7eba9efba09914bbc6fc29c756aa50bc649e09
             }
           ]
         },
