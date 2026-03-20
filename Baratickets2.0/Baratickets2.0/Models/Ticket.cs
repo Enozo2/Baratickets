@@ -24,7 +24,7 @@ namespace Baratickets2._0.Models
         [Column(TypeName = "decimal(18,2)")] // Esto le dice a SQL: 18 dígitos, 2 decimales
         public decimal PrecioPagado { get; set; }
         public DateTime FechaCompra { get; set; } = DateTime.Now;
-
+        public bool UsoCupon { get; set; } = false;
         [MaxLength(20)]
         public string Estado { get; set; } = "Activo"; // "Activo" o "Devuelto" [cite: 2026-02-21]
         public bool FueUsado { get; set; } = false;

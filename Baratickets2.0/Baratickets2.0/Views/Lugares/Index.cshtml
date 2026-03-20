@@ -2,17 +2,20 @@
 
 <div class="container mt-4">
     <div class="d-flex justify-content-between align-items-center mb-4">
-        <h2 class="fw-bold text-primary">Gestión de Recintos - Villa Olímpica</h2>
-        <a asp-action="Create" class="btn btn-success rounded-pill shadow-sm">
+        <div>
+            <h2 class="fw-bold text-primary mb-0">Gestión de Recintos - Villa Olímpica</h2>
+            <p class="text-muted">Administra la disponibilidad física de los pabellones en Barahona</p>
+        </div>
+        <a asp-action="Create" class="btn btn-success rounded-pill shadow-sm px-4">
             <i class="bi bi-plus-circle me-2"></i>Nuevo Recinto
         </a>
     </div>
 
-    <div class="card border-0 shadow-sm rounded-4">
+    <div class="card border-0 shadow-sm rounded-4 overflow-hidden">
         <table class="table table-hover align-middle mb-0">
             <thead class="bg-light">
                 <tr>
-                    <th>Nombre del Recinto</th>
+                    <th class="ps-4">Nombre del Recinto</th>
                     <th>Estado Actual</th>
                     <th class="text-center">Acciones</th>
                 </tr>
@@ -21,23 +24,32 @@
                 @foreach (var item in Model)
                 {
                     <tr>
-                        <td class="fw-bold">@item.Nombre</td>
+                        <td class="fw-bold ps-4">@item.Nombre</td>
                         <td>
                             @if (item.EstaActivo)
                             {
-                                <span class="badge bg-success-subtle text-success border border-success px-3">Operativo</span>
+                                <span class="badge bg-success-subtle text-success border border-success px-3 rounded-pill">Operativo</span>
                             }
                             else
                             {
-                                <span class="badge bg-danger-subtle text-danger border border-danger px-3">Mantenimiento</span>
+                                <span class="badge bg-danger-subtle text-danger border border-danger px-3 rounded-pill">Mantenimiento</span>
                             }
                         </td>
                         <td class="text-center">
-                            <a asp-action="ToggleEstado" asp-route-id="@item.Id"
-                               class="btn btn-sm @(item.EstaActivo ? "btn-outline-danger" : "btn-outline-success") rounded-pill px-3">
-                                <i class="bi @(item.EstaActivo ? "bi-tools" : "bi-check-circle") me-1"></i>
-                                @(item.EstaActivo ? "Poner en Mantenimiento" : "Habilitar")
-                            </a>
+                            <div class="btn-group shadow-sm" style="border-radius: 20px; overflow: hidden;">
+                                @* Botón de Estado *@
+                                <a asp-action="ToggleEstado" asp-route-id="@item.Id"
+                                   class="btn btn-sm @(item.EstaActivo ? "btn-outline-warning" : "btn-outline-success") px-3">
+                                    <i class="bi @(item.EstaActivo ? "bi-tools" : "bi-check-circle") me-1"></i>
+                                    @(item.EstaActivo ? "Mantenimiento" : "Habilitar")
+                                </a>
+
+                                @* 🔥 BOTÓN DE ELIMINAR *@
+                                <button type="button" class="btn btn-danger btn-sm px-3"
+                                        onclick="confirmarEliminarLugar('@item.Id', '@item.Nombre')">
+                                    <i class="bi bi-trash3-fill"></i>
+                                </button>
+                            </div>
                         </td>
                     </tr>
                 }
@@ -45,3 +57,40 @@
         </table>
     </div>
 </div>
+
+@* --- MODAL DE ELIMINACIÓN DE RECINTO --- *@
+<div class="modal fade" id="modalEliminarLugar" tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content" style="border-radius: 20px;">
+            <div class="modal-body text-center py-4">
+                <div class="text-danger mb-3">
+                    <i class="bi bi-exclamation-octagon-fill" style="font-size: 4rem;"></i>
+                </div>
+                <h4 class="fw-bold">¿Eliminar Recinto?</h4>
+                <p class="text-muted">¿Estás seguro de que deseas borrar <br> <b id="nombreLugarEliminar" class="text-dark"></b>?</p>
+                <div class="alert alert-warning small mx-3">
+                    <i class="bi bi-info-circle me-1"></i> Esta acción solo se completará si el recinto no tiene eventos vinculados.
+                </div>
+
+                <form id="formEliminarLugar" method="post">
+                    @Html.AntiForgeryToken()
+                    <div class="d-flex justify-content-center gap-2 mt-4">
+                        <button type="button" class="btn btn-light rounded-pill px-4" data-bs-dismiss="modal">Cancelar</button>
+                        <button type="submit" class="btn btn-danger rounded-pill px-4 fw-bold">Eliminar para siempre</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+    <script>
+        function confirmarEliminarLugar(id, nombre) {
+            $('#nombreLugarEliminar').text(nombre);
+            // Ajustamos el action para que vaya al controlador de Lugares (o como se llame el tuyo)
+            $('#formEliminarLugar').attr('action', '/Lugares/Delete/' + id);
+            $('#modalEliminarLugar').modal('show');
+        }
+    </script>
+}

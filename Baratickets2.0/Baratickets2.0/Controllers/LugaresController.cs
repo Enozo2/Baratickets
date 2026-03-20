@@ -41,6 +41,31 @@ namespace Baratickets2._0.Controllers
             }
             return View(lugar);
         }
+        [Authorize(Roles = "Admin")] // Solo el Admin puede borrar recintos
+        [HttpPost, ActionName("Delete")]
+        [ValidateAntiForgeryToken]
+        public async Task<IActionResult> DeleteConfirmed(int id)
+        {
+            var lugar = await _context.Lugares
+                .Include(l => l.Eventos) // Cargamos los eventos para verificar
+                .FirstOrDefaultAsync(l => l.Id == id);
+
+            if (lugar == null) return NotFound();
+
+            // 🛡️ VALIDACIÓN DE SEGURIDAD
+            if (lugar.Eventos != null && lugar.Eventos.Any())
+            {
+                // Si tiene eventos, no lo borramos, mejor enviamos un error
+                TempData["Error"] = "No se puede eliminar el recinto porque tiene eventos programados. Primero elimina los eventos.";
+                return RedirectToAction(nameof(Index));
+            }
+
+            _context.Lugares.Remove(lugar);
+            await _context.SaveChangesAsync();
+
+            TempData["Success"] = "Recinto eliminado correctamente.";
+            return RedirectToAction(nameof(Index));
+        }
 
         // ACCIÓN RÁPIDA: CAMBIAR ESTADO (Activar/Desactivar)
         public async Task<IActionResult> ToggleEstado(int id)

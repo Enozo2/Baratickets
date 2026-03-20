@@ -93,7 +93,8 @@ namespace Baratickets2._0.Controllers
                     Tipo = categoria.Nombre,
                     PrecioPagado = precioFinal,
                     FueUsado = false,
-                    Estado = "Valido"
+                    Estado = "Valido",
+                    UsoCupon = esCupon
                 };
 
                 categoria.Capacidad -= 1;
@@ -173,7 +174,7 @@ namespace Baratickets2._0.Controllers
             // Buscamos la categoría que corresponde a este ticket en este evento
             var categoria = await _context.CategoriasTickets
                 .FirstOrDefaultAsync(c => c.EventoId == ticket.EventoId && c.Nombre == ticket.Tipo);
-            if (ticket.PrecioPagado == 0)
+            if (ticket.PrecioPagado == 0 || ticket.UsoCupon)
             {
                 TempData["Error"] = "Los tickets adquiridos con cupón de devolución no pueden ser devueltos.";
                 return RedirectToAction("MisTickets");
