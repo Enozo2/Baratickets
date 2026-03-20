@@ -1,23 +1,23 @@
 {
   "format": 1,
   "restore": {
-    "C:\\Users\\Aairon\\source\\repos\\Baratickets\\Baratickets2.0\\Baratickets2.0\\Baratickets2.0.csproj": {}
+    "C:\\Users\\Enocr\\OneDrive\\Escritorio\\Baratickets\\Baratickets2.0\\Baratickets2.0\\Baratickets2.0.csproj": {}
   },
   "projects": {
-    "C:\\Users\\Aairon\\source\\repos\\Baratickets\\Baratickets2.0\\Baratickets2.0\\Baratickets2.0.csproj": {
+    "C:\\Users\\Enocr\\OneDrive\\Escritorio\\Baratickets\\Baratickets2.0\\Baratickets2.0\\Baratickets2.0.csproj": {
       "version": "1.0.0",
       "restore": {
-        "projectUniqueName": "C:\\Users\\Aairon\\source\\repos\\Baratickets\\Baratickets2.0\\Baratickets2.0\\Baratickets2.0.csproj",
+        "projectUniqueName": "C:\\Users\\Enocr\\OneDrive\\Escritorio\\Baratickets\\Baratickets2.0\\Baratickets2.0\\Baratickets2.0.csproj",
         "projectName": "Baratickets2.0",
-        "projectPath": "C:\\Users\\Aairon\\source\\repos\\Baratickets\\Baratickets2.0\\Baratickets2.0\\Baratickets2.0.csproj",
-        "packagesPath": "C:\\Users\\Aairon\\.nuget\\packages\\",
-        "outputPath": "C:\\Users\\Aairon\\Source\\Repos\\Baratickets\\Baratickets2.0\\Baratickets2.0\\obj\\",
+        "projectPath": "C:\\Users\\Enocr\\OneDrive\\Escritorio\\Baratickets\\Baratickets2.0\\Baratickets2.0\\Baratickets2.0.csproj",
+        "packagesPath": "C:\\Users\\Enocr\\.nuget\\packages\\",
+        "outputPath": "C:\\Users\\Enocr\\OneDrive\\Escritorio\\Baratickets\\Baratickets2.0\\Baratickets2.0\\obj\\",
         "projectStyle": "PackageReference",
         "fallbackFolders": [
           "C:\\Program Files (x86)\\Microsoft Visual Studio\\Shared\\NuGetPackages"
         ],
         "configFilePaths": [
-          "C:\\Users\\Aairon\\AppData\\Roaming\\NuGet\\NuGet.Config",
+          "C:\\Users\\Enocr\\AppData\\Roaming\\NuGet\\NuGet.Config",
           "C:\\Program Files (x86)\\NuGet\\Config\\Microsoft.VisualStudio.FallbackLocation.config",
           "C:\\Program Files (x86)\\NuGet\\Config\\Microsoft.VisualStudio.Offline.config"
         ],
@@ -26,6 +26,7 @@
         ],
         "sources": {
           "C:\\Program Files (x86)\\Microsoft SDKs\\NuGetPackages\\": {},
+          "C:\\Program Files\\dotnet\\library-packs": {},
           "https://api.nuget.org/v3/index.json": {}
         },
         "frameworks": {
@@ -116,7 +117,7 @@
               "privateAssets": "all"
             }
           },
-          "runtimeIdentifierGraphPath": "C:\\Program Files\\dotnet\\sdk\\9.0.306/PortableRuntimeIdentifierGraph.json"
+          "runtimeIdentifierGraphPath": "C:\\Program Files\\dotnet\\sdk\\9.0.307/PortableRuntimeIdentifierGraph.json"
         }
       }
     }
