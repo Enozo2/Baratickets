@@ -11,6 +11,7 @@ namespace Baratickets2._0.Data
         {
         }
         public DbSet<Devolucion> Devoluciones { get; set; }
+        public DbSet<SolicitudAlquiler> SolicitudesAlquiler { get; set; }
         public DbSet<Evento> Eventos { get; set; }
         public DbSet<Orden> Ordenes { get; set; }
         public DbSet<Ticket> Tickets { get; set; }

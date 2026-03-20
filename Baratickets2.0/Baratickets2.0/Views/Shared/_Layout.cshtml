@@ -1,4 +1,12 @@
-﻿<!DOCTYPE html>
+﻿@inject Baratickets2._0.Data.ApplicationDbContext _dbContext
+@{
+    int eventosPendientes = 0;
+    if (User.IsInRole("Admin"))
+    {
+        eventosPendientes = _dbContext.Eventos.Count(e => e.EstadoEvento == "PendienteAprobacion");
+    }
+}
+<!DOCTYPE html>
 <html lang="en">
 <head>
     <meta charset="utf-8" />
@@ -55,6 +63,12 @@
                                     <i class="bi bi-ticket-detailed me-1"></i> Mis Tickets
                                 </a>
                             </li>
+                            @* ✅ NUEVO: Alquilar espacio *@
+                            <li class="nav-item">
+                                <a class="nav-link text-dark" asp-controller="Alquileres" asp-action="MisSolicitudes">
+                                    <i class="bi bi-building me-1"></i> Mis Alquileres
+                                </a>
+                            </li>
                         }
 
                         @* --- VALIDADOR --- *@
@@ -75,6 +89,7 @@
                                     <i class="bi bi-calendar-check me-1"></i> Mis Eventos
                                 </a>
                             </li>
+                           
                         }
 
                         @* --- 🔥 MENÚ UNIFICADO DE ADMINISTRACIÓN --- *@
@@ -100,6 +115,20 @@
                                     <li>
                                         <a class="dropdown-item py-2" asp-controller="Lugares" asp-action="Index">
                                             <i class="bi bi-geo-alt me-2 text-success"></i> Gestionar Recintos
+                                        </a>
+                                    </li>
+                                    <li>
+                                        <a class="dropdown-item py-2" asp-controller="Alquileres" asp-action="GestionSolicitudes">
+                                            <i class="bi bi-building-gear me-2 text-warning"></i> Solicitudes de Alquiler
+                                        </a>
+                                    </li>
+                                    <li>
+                                        <a class="dropdown-item py-2" asp-controller="Eventos" asp-action="EventosPendientes">
+                                            <i class="bi bi-hourglass-split me-2 text-warning"></i> Eventos Pendientes
+                                            @if (eventosPendientes > 0)
+                                            {
+                                                <span class="badge bg-warning text-dark ms-1 rounded-pill">@eventosPendientes</span>
+                                            }
                                         </a>
                                     </li>
                                     <li><hr class="dropdown-divider"></li>

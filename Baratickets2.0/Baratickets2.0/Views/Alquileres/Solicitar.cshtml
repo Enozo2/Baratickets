@@ -1,0 +1,171 @@
+﻿@model Baratickets2._0.Models.SolicitudAlquiler
+
+@{
+    ViewData["Title"] = "Solicitar Alquiler";
+}
+
+@* FullCalendar CSS *@
+<link href="https://cdn.jsdelivr.net/npm/fullcalendar@6.1.8/index.global.min.css" rel="stylesheet" />
+
+<div class="container mt-5">
+    <div class="row justify-content-center">
+        <div class="col-md-10">
+            <div class="card shadow-lg border-0" style="border-radius: 20px;">
+                <div class="card-header bg-primary text-white text-center py-4" style="border-radius: 20px 20px 0 0;">
+                    <i class="bi bi-building fs-1 mb-2"></i>
+                    <h4 class="fw-bold mb-0">Solicitar Alquiler de Espacio</h4>
+                    <small class="opacity-75">Selecciona un recinto para ver su disponibilidad</small>
+                </div>
+                <div class="card-body p-4">
+
+                    @if (TempData["Error"] != null)
+                    {
+                        <div class="alert alert-danger rounded-3">
+                            <i class="bi bi-exclamation-circle me-2"></i> @TempData["Error"]
+                        </div>
+                    }
+
+                    <form asp-action="Solicitar" method="post">
+                        @Html.AntiForgeryToken()
+
+                        <div class="row">
+                            @* --- COLUMNA IZQUIERDA: FORMULARIO --- *@
+                            <div class="col-md-4">
+                                <div class="mb-3">
+                                    <label class="form-label fw-bold small">Nombre tentativo del evento</label>
+                                    <input asp-for="NombreEvento" class="form-control rounded-pill" placeholder="Ej: Torneo de Baloncesto" required />
+                                </div>
+
+                                <div class="mb-3">
+                                    <label class="form-label fw-bold small">Descripción</label>
+                                    <textarea asp-for="DescripcionEvento" class="form-control" rows="2" style="border-radius: 15px;" placeholder="Describe brevemente tu evento"></textarea>
+                                </div>
+
+                                <div class="mb-3">
+                                    <label class="form-label fw-bold small">Recinto</label>
+                                    <select asp-for="LugarId" class="form-select rounded-pill" required id="selectLugar">
+                                        <option value="">-- Selecciona un recinto --</option>
+                                        @foreach (var lugar in ViewBag.Lugares)
+                                        {
+                                            <option value="@lugar.Id" data-precio="@lugar.PrecioPorHora">
+                                                @lugar.Nombre — RD$ @lugar.PrecioPorHora.ToString("N0")/hora
+                                            </option>
+                                        }
+                                    </select>
+                                </div>
+
+                                <div class="mb-3">
+                                    <label class="form-label fw-bold small">Fecha y hora inicio</label>
+                                    <input asp-for="FechaInicio" type="datetime-local" class="form-control rounded-pill" required id="fechaInicio" />
+                                </div>
+
+                                <div class="mb-3">
+                                    <label class="form-label fw-bold small">Fecha y hora fin</label>
+                                    <input asp-for="FechaFin" type="datetime-local" class="form-control rounded-pill" required id="fechaFin" />
+                                </div>
+
+                                @* Preview del costo *@
+                                <div class="alert alert-primary border-0 rounded-3 mb-3" id="previewCosto" style="display:none;">
+                                    <i class="bi bi-calculator me-2"></i>
+                                    Costo estimado: <strong id="textoCosto">RD$ 0</strong>
+                                </div>
+
+                                <button type="submit" class="btn btn-primary btn-lg w-100 rounded-pill fw-bold mt-2">
+                                    <i class="bi bi-send-fill me-2"></i> Enviar Solicitud
+                                </button>
+                            </div>
+
+                            @* --- COLUMNA DERECHA: CALENDARIO --- *@
+                            <div class="col-md-8">
+                                <div class="mb-2 d-flex gap-2 align-items-center">
+                                    <span class="badge bg-danger px-3 py-2">
+                                        <i class="bi bi-calendar-x me-1"></i> Evento del sistema
+                                    </span>
+                                    <span class="badge px-3 py-2" style="background-color: #fd7e14;">
+                                        <i class="bi bi-building me-1"></i> Alquiler reservado
+                                    </span>
+                                    <span class="badge bg-success px-3 py-2">
+                                        <i class="bi bi-calendar-check me-1"></i> Disponible
+                                    </span>
+                                </div>
+                                <div id="calendario" style="border-radius: 15px; overflow: hidden; border: 1px solid #dee2e6;"></div>
+                            </div>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+@* FullCalendar JS *@
+<script src="https://cdn.jsdelivr.net/npm/fullcalendar@6.1.8/index.global.min.js"></script>
+<script>
+    const selectLugar = document.getElementById('selectLugar');
+    const fechaInicio = document.getElementById('fechaInicio');
+    const fechaFin = document.getElementById('fechaFin');
+    const previewCosto = document.getElementById('previewCosto');
+    const textoCosto = document.getElementById('textoCosto');
+
+    let calendar;
+
+    function iniciarCalendario(lugarId) {
+        const calendarEl = document.getElementById('calendario');
+
+        if (calendar) calendar.destroy();
+
+        calendar = new FullCalendar.Calendar(calendarEl, {
+            initialView: 'dayGridMonth',
+            locale: 'es',
+            height: 500,
+            headerToolbar: {
+                left: 'prev,next today',
+                center: 'title',
+                right: 'dayGridMonth,timeGridWeek'
+            },
+            events: `/Alquileres/EventosOcupados?lugarId=${lugarId}`,
+            dateClick: function(info) {
+                // Al hacer click en un día, prellenar la fecha
+                const fechaStr = info.dateStr + 'T08:00';
+                fechaInicio.value = fechaStr;
+                fechaFin.value = info.dateStr + 'T10:00';
+                calcularCosto();
+            }
+        });
+
+        calendar.render();
+    }
+
+    // Cargar calendario al seleccionar recinto
+    selectLugar.addEventListener('change', function() {
+        const lugarId = this.value;
+        if (lugarId) {
+            iniciarCalendario(lugarId);
+        }
+        calcularCosto();
+    });
+
+    function calcularCosto() {
+        const inicio = new Date(fechaInicio.value);
+        const fin = new Date(fechaFin.value);
+        const opcion = selectLugar.options[selectLugar.selectedIndex];
+        const precio = parseFloat(opcion?.dataset?.precio || 0);
+
+        if (inicio && fin && fin > inicio && precio > 0) {
+            const horas = (fin - inicio) / (1000 * 60 * 60);
+            const costo = horas * precio;
+            textoCosto.innerText = `RD$ ${costo.toLocaleString('es-DO', { minimumFractionDigits: 0 })}`;
+            previewCosto.style.display = 'block';
+        } else {
+            previewCosto.style.display = 'none';
+        }
+    }
+
+    fechaInicio.addEventListener('change', calcularCosto);
+    fechaFin.addEventListener('change', calcularCosto);
+
+    // Si ya hay un lugar seleccionado al cargar
+    if (selectLugar.value) {
+        iniciarCalendario(selectLugar.value);
+    }
+</script>

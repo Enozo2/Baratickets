@@ -17,6 +17,12 @@ namespace Baratickets2._0.Models
 
         // Aquí guardaremos el ID de pago de Stripe
         public string TransaccionPasarelaId { get; set; }
+        // ✅ Para distinguir si es pago de ticket o alquiler
+        public string Concepto { get; set; } = "Ticket"; // "Ticket" o "Alquiler"
+
+        // ✅ Para reembolsos
+        public bool Reembolsado { get; set; } = false;
+        public DateTime? FechaReembolso { get; set; }
 
         // Relación con el Cliente
         [Required]

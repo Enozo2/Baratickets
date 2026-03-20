@@ -83,24 +83,42 @@ using (var scope = app.Services.CreateScope())
 
         context.Database.EnsureCreated();
 
+        // 1. Crear roles
         string[] rolesParaCrear = { "Admin", "Cliente", "Organizador", "Validador" };
-
         foreach (var nombreRol in rolesParaCrear)
         {
             if (!roleManager.RoleExistsAsync(nombreRol).Result)
-            {
                 roleManager.CreateAsync(new IdentityRole(nombreRol)).Wait();
-            }
         }
 
-        var miEmail = "Enocr28@gmail.com";
-        var usuarioActual = userManager.FindByEmailAsync(miEmail).Result;
-        if (usuarioActual != null)
+        // 2. Crear Admin predeterminado si no existe
+        var adminEmail = "Enocr28@gmail.com";
+        var adminExistente = userManager.FindByEmailAsync(adminEmail).Result;
+
+        if (adminExistente == null)
         {
-            if (!userManager.IsInRoleAsync(usuarioActual, "Admin").Result)
+            // ✅ Crear el usuario Admin automáticamente
+            var nuevoAdmin = new ApplicationUser
             {
-                userManager.AddToRoleAsync(usuarioActual, "Admin").Wait();
+                UserName = adminEmail,
+                Email = adminEmail,
+                NombreCompleto = "Administrador",
+                EmailConfirmed = true
+            };
+
+            var resultado = userManager.CreateAsync(nuevoAdmin, "Admin123!").Result;
+
+            if (resultado.Succeeded)
+            {
+                userManager.AddToRoleAsync(nuevoAdmin, "Admin").Wait();
+                Console.WriteLine("✅ Admin creado: " + adminEmail + " / Admin123!");
             }
+        }
+        else
+        {
+            // Si ya existe, asegurarse que tiene el rol Admin
+            if (!userManager.IsInRoleAsync(adminExistente, "Admin").Result)
+                userManager.AddToRoleAsync(adminExistente, "Admin").Wait();
         }
     }
     catch (Exception ex)

@@ -1,0 +1,212 @@
+﻿@{
+    ViewData["Title"] = "Pagar Alquiler";
+    var monto = ViewBag.Monto ?? 0;
+    var lugarNombre = ViewBag.LugarNombre ?? "Recinto";
+    var nombreEvento = ViewBag.NombreEvento ?? "Mi Evento";
+}
+
+<div class="container mt-5">
+    <div class="row justify-content-center">
+        <div class="col-md-6">
+            <div class="card shadow-lg border-0" style="border-radius: 20px;">
+                <div class="card-header bg-success text-white text-center py-4" style="border-radius: 20px 20px 0 0;">
+                    <i class="bi bi-credit-card-2-front fs-1 mb-2"></i>
+                    <h4 class="fw-bold mb-0">Pagar Alquiler</h4>
+                </div>
+                <div class="card-body p-4">
+
+                    @* RESUMEN *@
+                    <div class="alert alert-success border-0 shadow-sm mb-4 text-center" style="border-radius: 15px;">
+                        <span class="badge bg-success mb-2 text-uppercase">Recinto: @lugarNombre</span>
+                        <h5 class="fw-bold text-dark mb-1">@nombreEvento</h5>
+                        <h3 id="precioDisplay" class="fw-bold text-success mb-0">RD$ @monto.ToString("N0")</h3>
+                        <small class="text-muted">Monto total del alquiler</small>
+                    </div>
+
+                    <form id="formPago" asp-controller="Alquileres" asp-action="ProcesarPago" method="post">
+                        @Html.AntiForgeryToken()
+
+                        <div class="mb-3">
+                            <label class="form-label fw-bold small">Nombre en la tarjeta</label>
+                            <input type="text" id="nombreTarjeta" class="form-control rounded-pill" required placeholder="Nombre del titular" />
+                        </div>
+
+                        <div class="mb-3">
+                            <label class="form-label fw-bold small">
+                                Número de Tarjeta
+                                <span id="marcaTarjeta" class="ms-2 fw-bold text-uppercase" style="font-size: 0.7rem;"></span>
+                            </label>
+                            <div class="input-group">
+                                <span class="input-group-text bg-white border-end-0 rounded-start-pill"><i class="bi bi-credit-card"></i></span>
+                                <input type="text" id="numTarjeta" class="form-control border-start-0 rounded-end-pill" required
+                                       placeholder="0000 0000 0000 0000" maxlength="19" />
+                            </div>
+                        </div>
+
+                        <div class="mb-3">
+                            <label class="form-label fw-bold small">Correo de confirmación:</label>
+                            <div class="input-group">
+                                <span class="input-group-text bg-white border-end-0 rounded-start-pill"><i class="bi bi-envelope"></i></span>
+                                <input type="email" name="emailConfirmacion" class="form-control border-start-0 rounded-end-pill"
+                                       value="@User.Identity.Name" required id="correoUser" />
+                            </div>
+                        </div>
+
+                        <div class="row">
+                            <div class="col-6 mb-3">
+                                <label class="form-label fw-bold small">Expiración</label>
+                                <input type="text" id="expiracion" class="form-control rounded-pill" placeholder="MM/YY" required maxlength="5" />
+                                <div id="expError" class="text-danger small mt-1" style="display:none; font-size: 0.75rem;"></div>
+                            </div>
+                            <div class="col-6 mb-3">
+                                <label class="form-label fw-bold small">CVV</label>
+                                <input type="password" id="cvv" class="form-control rounded-pill" placeholder="123" required maxlength="3" />
+                            </div>
+                        </div>
+
+                        <button type="button" id="btnPagar" class="btn btn-success btn-lg w-100 rounded-pill shadow-sm mt-3 fw-bold" disabled>
+                            Confirmar y Pagar RD$ @monto.ToString("N0")
+                        </button>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<style>
+    #btnPagar:disabled {
+        cursor: not-allowed;
+        opacity: 0.6;
+        filter: grayscale(1);
+    }
+    #btnPagar { transition: all 0.3s ease; }
+</style>
+
+<script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+<script>
+    const inputTarjeta = document.getElementById('numTarjeta');
+    const inputExp = document.getElementById('expiracion');
+    const inputCvv = document.getElementById('cvv');
+    const inputEmail = document.getElementById('correoUser');
+    const btnPagar = document.getElementById('btnPagar');
+    const formPago = document.getElementById('formPago');
+    const marcaLabel = document.getElementById('marcaTarjeta');
+
+    function detectarFranquicia(numero) {
+        const num = numero.replace(/\s/g, '');
+        if (num.startsWith('4')) return { nombre: "Visa", color: "#1a1f71" };
+        if (/^5[1-5]/.test(num)) return { nombre: "Mastercard", color: "#eb001b" };
+        if (num.startsWith('34') || num.startsWith('37')) return { nombre: "Amex", color: "#007bc1" };
+        return { nombre: "", color: "#6c757d" };
+    }
+
+    function validarTarjetaLuhn(numero) {
+        let numLimpio = numero.replace(/\s/g, '');
+        if (numLimpio.length < 15) return false;
+        let sum = 0;
+        for (let i = 0; i < numLimpio.length; i++) {
+            let intVal = parseInt(numLimpio.substr(i, 1));
+            if (i % 2 == 0) { intVal *= 2; if (intVal > 9) intVal = (intVal % 10) + 1; }
+            sum += intVal;
+        }
+        return (sum % 10) == 0;
+    }
+
+    function validarFormulario() {
+        const numLimpio = inputTarjeta.value.replace(/\s/g, '');
+        const tarjetaLongitud = numLimpio.length >= 15;
+        const cvvValido = inputCvv.value.length >= 3;
+        const emailValido = inputEmail.value.includes('@@') && inputEmail.value.includes('.');
+
+        let fechaOk = false;
+        const expValue = inputExp.value;
+        const errorSpan = document.getElementById('expError');
+
+        if (expValue.length === 5) {
+            const partes = expValue.split('/');
+            const mes = parseInt(partes[0]);
+            const anio = parseInt(partes[1]);
+            const mesValido = mes >= 1 && mes <= 12;
+            const anioValido = anio >= 26;
+            if (mesValido && anioValido) {
+                fechaOk = true;
+                errorSpan.style.display = 'none';
+            } else {
+                errorSpan.innerText = mesValido ? "Tarjeta vencida" : "Mes inválido";
+                errorSpan.style.display = 'block';
+            }
+        } else {
+            errorSpan.style.display = 'none';
+        }
+
+        if (tarjetaLongitud && cvvValido && emailValido && fechaOk) {
+            btnPagar.disabled = false;
+            btnPagar.style.opacity = "1";
+            btnPagar.style.filter = "none";
+        } else {
+            btnPagar.disabled = true;
+            btnPagar.style.opacity = "0.6";
+            btnPagar.style.filter = "grayscale(1)";
+        }
+    }
+
+    inputTarjeta.addEventListener('input', function (e) {
+        let value = e.target.value.replace(/\D/g, '');
+        let franquicia = detectarFranquicia(value);
+        marcaLabel.innerText = franquicia.nombre;
+        marcaLabel.style.color = franquicia.color;
+        let formatted = value.match(/.{1,4}/g)?.join(' ') || '';
+        e.target.value = formatted.substring(0, 19);
+        validarFormulario();
+    });
+
+    inputExp.addEventListener('input', function (e) {
+        let value = e.target.value.replace(/\D/g, '');
+        if (value.length >= 2) {
+            e.target.value = value.substring(0, 2) + '/' + value.substring(2, 4);
+        } else {
+            e.target.value = value;
+        }
+        validarFormulario();
+    });
+
+    inputEmail.addEventListener('input', validarFormulario);
+    inputCvv.addEventListener('input', validarFormulario);
+
+    let yaSeEnvio = false;
+
+    btnPagar.addEventListener('click', function (e) {
+        e.preventDefault();
+        if (yaSeEnvio) return;
+
+        if (!validarTarjetaLuhn(inputTarjeta.value)) {
+            Swal.fire('Seguridad', 'Número de tarjeta inválido o fraudulento.', 'error');
+            return;
+        }
+
+        Swal.fire({
+            title: 'Verificando...',
+            html: 'Conexión segura 3D Secure...',
+            timer: 2000,
+            allowOutsideClick: false,
+            didOpen: () => { Swal.showLoading(); }
+        }).then(() => {
+            Swal.fire({
+                title: 'Seguridad 3D Secure',
+                text: 'Ingrese el código de su móvil (Prueba: 1234)',
+                input: 'text',
+                showCancelButton: true,
+                confirmButtonText: 'Verificar Pago',
+                allowOutsideClick: false
+            }).then((result) => {
+                if (result.value === "1234") {
+                    yaSeEnvio = true;
+                    formPago.submit();
+                } else if (result.isConfirmed) {
+                    Swal.fire('Denegado', 'Transacción no autorizada por el ente financiero.', 'error');
+                }
+            });
+        });
+    });
+</script>

@@ -30,32 +30,80 @@ namespace Baratickets2._0.Controllers
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> Create(Lugar lugar)
         {
+            // ✅ Limpiar errores de navegación que no vienen del form
             ModelState.Remove("Eventos");
+            ModelState.Remove("SolicitudesAlquiler");
 
             if (ModelState.IsValid)
             {
-                lugar.EstaActivo = true; // Por defecto nace activo
                 _context.Add(lugar);
                 await _context.SaveChangesAsync();
                 return RedirectToAction(nameof(Index));
             }
+
+            // DEBUG — ver qué falla
+            foreach (var error in ModelState.Values.SelectMany(v => v.Errors))
+            {
+                Console.WriteLine("ERROR: " + error.ErrorMessage);
+            }
+
             return View(lugar);
         }
         [Authorize(Roles = "Admin")]
-        public async Task<IActionResult> ReporteUso()
+        public async Task<IActionResult> ReporteUso(int? mes, int? anio)
         {
-            var inicioMes = new DateTime(DateTime.Now.Year, DateTime.Now.Month, 1);
+            // ✅ Usar mes/año seleccionado o el actual por defecto
+            var mesActual = mes ?? DateTime.Now.Month;
+            var anioActual = anio ?? DateTime.Now.Year;
+
+            var inicioMes = new DateTime(anioActual, mesActual, 1);
             var finMes = inicioMes.AddMonths(1).AddDays(-1);
+
+            ViewBag.MesSeleccionado = mesActual;
+            ViewBag.AnioSeleccionado = anioActual;
 
             var reporte = await _context.Lugares
                 .Select(l => new {
                     NombreRecinto = l.Nombre,
-                    CantidadEventos = l.Eventos.Count(e => e.FechaInicio >= inicioMes && e.FechaInicio <= finMes),
-                    Eventos = l.Eventos.Where(e => e.FechaInicio >= inicioMes && e.FechaInicio <= finMes).ToList()
+                    EventosPropios = l.Eventos
+                        .Where(e => e.FechaInicio >= inicioMes && e.FechaInicio <= finMes)
+                        .Select(e => new { Nombre = e.Nombre })
+                        .ToList(),
+                    AlquileresAprobados = l.SolicitudesAlquiler
+                        .Where(s => s.Estado == "Aprobado" &&
+                               s.FechaInicio >= inicioMes &&
+                               s.FechaInicio <= finMes)
+                        .Select(s => new { Nombre = s.NombreEvento })
+                        .ToList(),
+                    GananciaTickets = l.Eventos
+                        .Where(e => e.FechaInicio >= inicioMes && e.FechaInicio <= finMes)
+                        .SelectMany(e => e.Tickets)
+                        .Where(t => t.Estado != "Devuelto")
+                        .Sum(t => (decimal?)t.PrecioPagado) ?? 0,
+                    GananciaAlquileres = l.SolicitudesAlquiler
+                        .Where(s => s.Estado == "Aprobado" &&
+                               s.FechaInicio >= inicioMes &&
+                               s.FechaInicio <= finMes)
+                        .Sum(s => (decimal?)s.MontoAlquiler) ?? 0
                 })
                 .ToListAsync();
 
-            return View(reporte);
+            var reporteFinal = reporte.Select(r => new {
+                r.NombreRecinto,
+                r.EventosPropios,
+                r.AlquileresAprobados,
+                CantidadEventos = r.EventosPropios.Count,
+                CantidadAlquileres = r.AlquileresAprobados.Count,
+                r.GananciaTickets,
+                r.GananciaAlquileres,
+                GananciaTotal = r.GananciaTickets + r.GananciaAlquileres
+            }).ToList();
+
+            ViewBag.GananciaEventos = reporteFinal.Sum(r => r.GananciaTickets);
+            ViewBag.GananciaAlquileres = reporteFinal.Sum(r => r.GananciaAlquileres);
+            ViewBag.GananciaTotal = reporteFinal.Sum(r => r.GananciaTotal);
+
+            return View(reporteFinal);
         }
         [Authorize(Roles = "Admin")] // Solo el Admin puede borrar recintos
         [HttpPost, ActionName("Delete")]
@@ -84,6 +132,36 @@ namespace Baratickets2._0.Controllers
         }
 
         // ACCIÓN RÁPIDA: CAMBIAR ESTADO (Activar/Desactivar)
+        [HttpGet]
+        [Authorize(Roles = "Admin")]
+        public async Task<IActionResult> Edit(int id)
+        {
+            var lugar = await _context.Lugares.FindAsync(id);
+            if (lugar == null) return NotFound();
+            return View(lugar);
+        }
+
+        [HttpPost]
+        [ValidateAntiForgeryToken]
+        [Authorize(Roles = "Admin")]
+        public async Task<IActionResult> Edit(int id, Lugar model)
+        {
+            if (id != model.Id) return NotFound();
+
+            // ✅ Limpiar errores de navegación
+            ModelState.Remove("Eventos");
+            ModelState.Remove("SolicitudesAlquiler");
+
+            if (ModelState.IsValid)
+            {
+                _context.Update(model);
+                await _context.SaveChangesAsync();
+                TempData["Success"] = "Recinto actualizado correctamente.";
+                return RedirectToAction("Index");
+            }
+
+            return View(model);
+        }
         public async Task<IActionResult> ToggleEstado(int id)
         {
             var lugar = await _context.Lugares.FindAsync(id);

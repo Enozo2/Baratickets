@@ -24,6 +24,9 @@ namespace Baratickets2._0.Models
 
         public string Descripcion { get; set; }
 
+        public string EstadoEvento { get; set; } = "Publicado"; // "Publicado", "PendienteAprobacion", "Rechazado"
+        public string? MotivoRechazo { get; set; }
+
         [Display(Name = "URL de la Imagen/Flyer")]
         public string? ImagenUrl { get; set; }
 

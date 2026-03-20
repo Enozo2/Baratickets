@@ -30,8 +30,9 @@ namespace Baratickets2._0.Controllers
                 .Include(e => e.CategoriasTickets)
                 .AsQueryable();
 
-            // 2. Filtro de fecha (puedes comentar el 'where' si quieres ver eventos pasados para pruebas)
             consulta = consulta.Where(e => e.FechaInicio >= DateTime.Today);
+            // ? Solo mostrar eventos publicados al público
+            consulta = consulta.Where(e => e.EstadoEvento == "Publicado");
 
             // 3. Lógica de búsqueda mejorada
             if (!string.IsNullOrEmpty(buscar))

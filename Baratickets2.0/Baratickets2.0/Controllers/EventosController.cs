@@ -27,21 +27,19 @@ namespace Baratickets2._0.Controllers
         public async Task<IActionResult> Index()
         {
             var userId = _userManager.GetUserId(User);
+            var esAdmin = User.IsInRole("Admin");
+            var esOrganizador = User.IsInRole("Organizador");
 
-            // 1. Adicionamos .Include(e => e.Lugar) para carregar os dados da nova tabela
-            var consulta = _context.Eventos
+            var eventos = await _context.Eventos
                 .Include(e => e.Organizador)
-                .Include(e => e.Lugar) // <--- ESSA LINHA TRAZ O NOME DO LUGAR
-                .Include(e => e.CategoriasTickets);
+                .Include(e => e.Lugar)
+                .Include(e => e.CategoriasTickets)
+                .Where(e => esAdmin || esOrganizador
+                    ? true  // Admin y Organizador ven todo
+                    : e.EstadoEvento == "Publicado") // Clientes solo ven publicados
+                .ToListAsync();
 
-            if (User.IsInRole("Admin"))
-            {
-                return View(await consulta.ToListAsync());
-            }
-            else
-            {
-                return View(await consulta.Where(e => e.OrganizadorId == userId).ToListAsync());
-            }
+            return View(eventos);
         }
         // --- CORRECCIÓN: DETALLES PÚBLICOS ---
         [HttpGet]
@@ -120,8 +118,43 @@ namespace Baratickets2._0.Controllers
                     }
                     else
                     {
-                        _context.Add(evento);
-                        await _context.SaveChangesAsync();
+                        // ✅ Si el creador es un cliente con rol Organizador temporal, requiere aprobación
+                        var usuario = await _userManager.GetUserAsync(User);
+                        bool esOrganizadorTemporal = await _context.SolicitudesAlquiler
+                            .AnyAsync(s => s.ClienteId == usuario.Id && s.Estado == "Aprobado");
+
+                        if (esOrganizadorTemporal)
+                        {
+                            var solicitudAprobada = await _context.SolicitudesAlquiler
+                                .FirstOrDefaultAsync(s => s.ClienteId == usuario.Id && s.Estado == "Aprobado");
+
+                            // ✅ Verificar que no haya creado ya un evento
+                            if (solicitudAprobada != null && solicitudAprobada.EventoId != null)
+                            {
+                                TempData["Error"] = "Ya tienes un evento creado para tu alquiler aprobado.";
+                                ViewBag.LugarId = new SelectList(_context.Lugares.Where(l => l.EstaActivo), "Id", "Nombre", evento.LugarId);
+                                return View(evento);
+                            }
+
+                            evento.EstadoEvento = "PendienteAprobacion";
+                            _context.Add(evento);
+                            await _context.SaveChangesAsync();
+
+                            // ✅ Vincular el evento a la solicitud
+                            if (solicitudAprobada != null)
+                            {
+                                solicitudAprobada.EventoId = evento.Id;
+                                _context.Update(solicitudAprobada);
+                                await _context.SaveChangesAsync();
+                            }
+                        }
+                        else
+                        {
+                            evento.EstadoEvento = "Publicado";
+                            _context.Add(evento);
+                            await _context.SaveChangesAsync();
+                        }
+
                         return RedirectToAction(nameof(Index));
                     }
                 }
@@ -137,7 +170,52 @@ namespace Baratickets2._0.Controllers
 
             return View(evento);
         }
+        // ✅ Ver eventos pendientes de aprobación (Admin/Organizador)
+        [HttpGet]
 
+        [Authorize(Roles = "Admin")]
+        public async Task<IActionResult> EventosPendientes()
+        {
+            var eventos = await _context.Eventos
+                .Include(e => e.Organizador)
+                .Include(e => e.Lugar)
+                .Where(e => e.EstadoEvento == "PendienteAprobacion")
+                .OrderByDescending(e => e.FechaInicio)
+                .ToListAsync();
+
+            return View(eventos);
+        }
+
+        // ✅ Aprobar evento
+        [HttpPost]
+        [Authorize(Roles = "Admin,Organizador")]
+        public async Task<IActionResult> AprobarEvento(int id)
+        {
+            var evento = await _context.Eventos.FindAsync(id);
+            if (evento == null) return NotFound();
+
+            evento.EstadoEvento = "Publicado";
+            await _context.SaveChangesAsync();
+
+            TempData["Success"] = $"Evento '{evento.Nombre}' aprobado y publicado correctamente.";
+            return RedirectToAction("EventosPendientes");
+        }
+
+        // ✅ Rechazar evento
+        [HttpPost]
+        [Authorize(Roles = "Admin,Organizador")]
+        public async Task<IActionResult> RechazarEvento(int id, string motivoRechazo)
+        {
+            var evento = await _context.Eventos.FindAsync(id);
+            if (evento == null) return NotFound();
+
+            evento.EstadoEvento = "Rechazado";
+            evento.MotivoRechazo = motivoRechazo;
+            await _context.SaveChangesAsync();
+
+            TempData["Success"] = "Evento rechazado correctamente.";
+            return RedirectToAction("EventosPendientes");
+        }
         [Authorize(Roles = "Organizador,Admin")]
         public async Task<IActionResult> Dashboard(int id)
         {

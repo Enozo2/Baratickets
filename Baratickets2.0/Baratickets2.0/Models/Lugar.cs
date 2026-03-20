@@ -2,17 +2,22 @@
 
 namespace Baratickets2._0.Models
 {
-public class Lugar
+    public class Lugar
     {
         public int Id { get; set; }
 
         [Required]
-        public string Nombre { get; set; } // Ejemplo: "Piscina Olímpica"
+        public string Nombre { get; set; }
 
-        public string? Descripcion { get; set; } // Ejemplo: "Capacidad para 500 personas"
+        public string? Descripcion { get; set; }
 
         public bool EstaActivo { get; set; } = true;
+
+        [Required]
+        public decimal PrecioPorHora { get; set; } = 500;
+
         public virtual ICollection<Evento> Eventos { get; set; }
+        public virtual ICollection<SolicitudAlquiler> SolicitudesAlquiler { get; set; }
     }
 
 }

@@ -4,6 +4,7 @@ using Baratickets2._0.Data;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 
 #nullable disable
@@ -11,9 +12,11 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace Baratickets2._0.Migrations
 {
     [DbContext(typeof(ApplicationDbContext))]
-    partial class ApplicationDbContextModelSnapshot : ModelSnapshot
+    [Migration("20260320083257_AgregarPrecioPorHoraLugar")]
+    partial class AgregarPrecioPorHoraLugar
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -200,10 +203,6 @@ namespace Baratickets2._0.Migrations
                         .IsRequired()
                         .HasColumnType("nvarchar(max)");
 
-                    b.Property<string>("EstadoEvento")
-                        .IsRequired()
-                        .HasColumnType("nvarchar(max)");
-
                     b.Property<DateTime>("FechaEvento")
                         .HasColumnType("datetime2");
 
@@ -218,9 +217,6 @@ namespace Baratickets2._0.Migrations
 
                     b.Property<int>("LugarId")
                         .HasColumnType("int");
-
-                    b.Property<string>("MotivoRechazo")
-                        .HasColumnType("nvarchar(max)");
 
                     b.Property<string>("Nombre")
                         .IsRequired()
@@ -297,18 +293,8 @@ namespace Baratickets2._0.Migrations
                         .IsRequired()
                         .HasColumnType("nvarchar(450)");
 
-                    b.Property<string>("Concepto")
-                        .IsRequired()
-                        .HasColumnType("nvarchar(max)");
-
                     b.Property<DateTime>("FechaCompra")
                         .HasColumnType("datetime2");
-
-                    b.Property<DateTime?>("FechaReembolso")
-                        .HasColumnType("datetime2");
-
-                    b.Property<bool>("Reembolsado")
-                        .HasColumnType("bit");
 
                     b.Property<decimal>("TotalPagado")
                         .HasColumnType("decimal(18,2)");
@@ -367,9 +353,6 @@ namespace Baratickets2._0.Migrations
                     b.Property<string>("NombreEvento")
                         .HasColumnType("nvarchar(max)");
 
-                    b.Property<int?>("OrdenId")
-                        .HasColumnType("int");
-
                     b.HasKey("Id");
 
                     b.HasIndex("ClienteId");
@@ -377,8 +360,6 @@ namespace Baratickets2._0.Migrations
                     b.HasIndex("EventoId");
 
                     b.HasIndex("LugarId");
-
-                    b.HasIndex("OrdenId");
 
                     b.ToTable("SolicitudesAlquiler");
                 });
@@ -665,17 +646,11 @@ namespace Baratickets2._0.Migrations
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 
-                    b.HasOne("Baratickets2._0.Models.Orden", "Orden")
-                        .WithMany()
-                        .HasForeignKey("OrdenId");
-
                     b.Navigation("Cliente");
 
                     b.Navigation("Evento");
 
                     b.Navigation("Lugar");
-
-                    b.Navigation("Orden");
                 });
 
             modelBuilder.Entity("Baratickets2._0.Models.Ticket", b =>

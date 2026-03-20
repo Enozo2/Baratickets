@@ -1,0 +1,133 @@
+﻿@model IEnumerable<Baratickets2._0.Models.Evento>
+
+@{
+    ViewData["Title"] = "Eventos Pendientes";
+}
+
+<div class="container mt-4">
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <div>
+            <h2 class="fw-bold text-warning mb-0">
+                <i class="bi bi-hourglass-split me-2"></i>Eventos Pendientes de Aprobación
+            </h2>
+            <p class="text-muted">Eventos creados por clientes que requieren tu aprobación</p>
+        </div>
+        <span class="badge bg-warning text-dark rounded-pill px-3 py-2">
+            Total: @Model.Count()
+        </span>
+    </div>
+
+    @if (!Model.Any())
+    {
+        <div class="alert alert-success text-center rounded-4 py-5">
+            <i class="bi bi-check-circle-fill d-block mb-2" style="font-size: 3rem;"></i>
+            <h5>No hay eventos pendientes de aprobación.</h5>
+        </div>
+    }
+    else
+    {
+        <div class="card shadow border-0 rounded-4">
+            <div class="table-responsive">
+                <table class="table table-hover align-middle mb-0">
+                    <thead class="table-light">
+                        <tr>
+                            <th>Evento</th>
+                            <th>Organizador</th>
+                            <th class="text-center">Recinto</th>
+                            <th class="text-center">Fecha</th>
+                            <th class="text-center">Acciones</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        @foreach (var e in Model)
+                        {
+                            <tr>
+                                <td>
+                                    <span class="fw-bold">@e.Nombre</span>
+                                    <small class="text-muted d-block">@e.Descripcion</small>
+                                </td>
+                                <td>
+                                    <div class="d-flex align-items-center">
+                                        <div class="rounded-circle bg-warning text-dark d-flex align-items-center justify-content-center me-2"
+                                             style="width: 32px; height: 32px; font-size: 0.8rem; font-weight: bold;">
+                                            @(e.Organizador?.NombreCompleto?.Substring(0, 1).ToUpper() ?? "U")
+                                        </div>
+                                        <div>
+                                            <span class="small fw-bold d-block">@e.Organizador?.NombreCompleto</span>
+                                            <span class="text-muted" style="font-size: 0.7rem;">@e.Organizador?.Email</span>
+                                        </div>
+                                    </div>
+                                </td>
+                                <td class="text-center">
+                                    <span class="badge bg-info text-dark">@e.Lugar?.Nombre</span>
+                                </td>
+                                <td class="text-center small text-muted">
+                                    @e.FechaInicio.ToString("dd/MM/yyyy")<br />
+                                    <span class="text-muted">@e.FechaInicio.ToString("HH:mm") - @e.FechaFin.ToString("HH:mm")</span>
+                                </td>
+                                <td class="text-center">
+                                    <div class="d-flex gap-1 justify-content-center">
+                                        @* Ver detalles *@
+                                        <a asp-action="Details" asp-route-id="@e.Id"
+                                           class="btn btn-outline-primary btn-sm rounded-pill">
+                                            <i class="bi bi-eye"></i>
+                                        </a>
+
+                                        @* Aprobar *@
+                                        <form asp-action="AprobarEvento" method="post">
+                                            @Html.AntiForgeryToken()
+                                            <input type="hidden" name="id" value="@e.Id" />
+                                            <button type="submit" class="btn btn-success btn-sm rounded-pill">
+                                                <i class="bi bi-check-lg me-1"></i> Aprobar
+                                            </button>
+                                        </form>
+
+                                        @* Rechazar *@
+                                        <button type="button" class="btn btn-danger btn-sm rounded-pill"
+                                                onclick="rechazarEvento(@e.Id)">
+                                            <i class="bi bi-x-lg me-1"></i> Rechazar
+                                        </button>
+                                    </div>
+                                </td>
+                            </tr>
+                        }
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    }
+</div>
+
+@* Modal para rechazar con motivo *@
+<div class="modal fade" id="modalRechazarEvento" tabindex="-1">
+    <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content border-0 shadow" style="border-radius: 15px;">
+            <div class="modal-header bg-danger text-white border-0" style="border-radius: 15px 15px 0 0;">
+                <h5 class="modal-title fw-bold"><i class="bi bi-x-circle me-2"></i> Rechazar Evento</h5>
+                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
+            </div>
+            <div class="modal-body p-4">
+                <form id="formRechazarEvento" asp-action="RechazarEvento" method="post">
+                    @Html.AntiForgeryToken()
+                    <input type="hidden" id="rechazarEventoId" name="id" />
+                    <div class="mb-3">
+                        <label class="form-label fw-bold small">Motivo del rechazo</label>
+                        <textarea name="motivoRechazo" class="form-control" rows="3"
+                                  style="border-radius: 10px;"
+                                  placeholder="Explica por qué se rechaza el evento..." required></textarea>
+                    </div>
+                    <button type="submit" class="btn btn-danger w-100 rounded-pill fw-bold">
+                        Confirmar Rechazo
+                    </button>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+    function rechazarEvento(id) {
+        document.getElementById('rechazarEventoId').value = id;
+        new bootstrap.Modal(document.getElementById('modalRechazarEvento')).show();
+    }
+</script>

@@ -1,23 +1,26 @@
 ﻿@model Baratickets2._0.Models.Lugar
 
 @{
-    ViewData["Title"] = "Nuevo Recinto";
+    ViewData["Title"] = "Editar Recinto";
 }
 
 <div class="container mt-5">
     <div class="row justify-content-center">
         <div class="col-md-6">
             <div class="card shadow-lg border-0 rounded-4">
-                <div class="card-header bg-primary text-white text-center py-3">
-                    <h3 class="mb-0 fw-bold">Nuevo Recinto - Villa Olímpica</h3>
+                <div class="card-header bg-warning text-dark text-center py-3">
+                    <h3 class="mb-0 fw-bold">Editar Recinto - Villa Olímpica</h3>
                 </div>
                 <div class="card-body p-4">
-                    <form asp-action="Create" method="post">
+                    <form asp-action="Edit" method="post">
+                        @Html.AntiForgeryToken()
+                        <input type="hidden" asp-for="Id" />
+
                         <div asp-validation-summary="ModelOnly" class="text-danger mb-3"></div>
 
                         <div class="mb-3">
                             <label asp-for="Nombre" class="form-label fw-bold">Nombre del Lugar</label>
-                            <input asp-for="Nombre" class="form-control rounded-pill border-primary" placeholder="Ej: Piscina Olímpica" />
+                            <input asp-for="Nombre" class="form-control rounded-pill border-warning" placeholder="Ej: Piscina Olímpica" />
                             <span asp-validation-for="Nombre" class="text-danger"></span>
                         </div>
 
@@ -27,21 +30,20 @@
                             <span asp-validation-for="Descripcion" class="text-danger"></span>
                         </div>
 
-                        @* ✅ Precio DENTRO del form, antes del botón *@
                         <div class="mb-4">
                             <label asp-for="PrecioPorHora" class="form-label fw-bold">Precio por Hora (RD$)</label>
                             <div class="input-group">
-                                <span class="input-group-text bg-white rounded-start-pill border-primary">RD$</span>
+                                <span class="input-group-text bg-white rounded-start-pill border-warning">RD$</span>
                                 <input asp-for="PrecioPorHora" type="number" min="0" step="50"
-                                       class="form-control border-primary" placeholder="Ej: 500" />
-                                <span class="input-group-text bg-white rounded-end-pill border-primary">/hora</span>
+                                       class="form-control border-warning" placeholder="Ej: 500" />
+                                <span class="input-group-text bg-white rounded-end-pill border-warning">/hora</span>
                             </div>
                             <span asp-validation-for="PrecioPorHora" class="text-danger"></span>
                         </div>
 
                         <div class="d-grid gap-2">
-                            <button type="submit" class="btn btn-primary btn-lg rounded-pill fw-bold shadow-sm">
-                                <i class="bi bi-save me-2"></i>Guardar Recinto
+                            <button type="submit" class="btn btn-warning btn-lg rounded-pill fw-bold shadow-sm text-dark">
+                                <i class="bi bi-save me-2"></i> Guardar Cambios
                             </button>
                             <a asp-action="Index" class="btn btn-outline-secondary rounded-pill">
                                 Cancelar

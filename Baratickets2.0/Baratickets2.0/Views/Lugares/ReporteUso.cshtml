@@ -12,11 +12,80 @@
             </h2>
             <p class="text-muted">Análisis de eventos realizados en la Villa Olímpica este mes</p>
         </div>
-        <div class="badge bg-primary px-3 py-2 rounded-pill">
-            <i class="bi bi-calendar3 me-1"></i> @DateTime.Now.ToString("MMMM yyyy")
+      <form method="get" asp-action="ReporteUso" class="d-flex gap-2 align-items-center">
+            <select name="mes" class="form-select form-select-sm rounded-pill" style="width: auto;">
+                @{
+                    var meses = new Dictionary<int, string> {
+                                {1,"Enero"},{2,"Febrero"},{3,"Marzo"},{4,"Abril"},
+                                {5,"Mayo"},{6,"Junio"},{7,"Julio"},{8,"Agosto"},
+                                {9,"Septiembre"},{10,"Octubre"},{11,"Noviembre"},{12,"Diciembre"}
+                                };
+                    int mesSeleccionado = ViewBag.MesSeleccionado ?? DateTime.Now.Month;
+                    int anioSeleccionado = ViewBag.AnioSeleccionado ?? DateTime.Now.Year;
+                }
+                @foreach (var m in meses)
+                {
+                    if (mesSeleccionado == m.Key)
+                    {
+                        <option value="@m.Key" selected>@m.Value</option>
+                    }
+                    else
+                    {
+                        <option value="@m.Key">@m.Value</option>
+                    }
+                }
+            </select>
+            <select name="anio" class="form-select form-select-sm rounded-pill" style="width: auto;">
+                @for (int a = DateTime.Now.Year; a >= DateTime.Now.Year - 3; a--)
+                {
+                    if (anioSeleccionado == a)
+                    {
+                        <option value="@a" selected>@a</option>
+                    }
+                    else
+                    {
+                        <option value="@a">@a</option>
+                    }
+                }
+            </select>
+    <button type="submit" class="btn btn-primary btn-sm rounded-pill">
+        <i class="bi bi-search me-1"></i> Ver
+    </button>
+</form>
+    </div>
+
+    @* --- TARJETAS DE GANANCIAS TOTALES --- *@
+    <div class="row mb-4">
+        <div class="col-md-4">
+            <div class="card border-0 shadow-sm rounded-4 bg-success text-white">
+                <div class="card-body text-center p-4">
+                    <i class="bi bi-cash-stack fs-1 opacity-50"></i>
+                    <h6 class="text-uppercase small opacity-75 mt-2">Ganancias por Tickets</h6>
+                    <h3 class="fw-bold">RD$ @ViewBag.GananciaEventos.ToString("N0")</h3>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-4">
+            <div class="card border-0 shadow-sm rounded-4 bg-warning text-dark">
+                <div class="card-body text-center p-4">
+                    <i class="bi bi-building fs-1 opacity-50"></i>
+                    <h6 class="text-uppercase small opacity-75 mt-2">Ganancias por Alquileres</h6>
+                    <h3 class="fw-bold">RD$ @ViewBag.GananciaAlquileres.ToString("N0")</h3>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-4">
+            <div class="card border-0 shadow-sm rounded-4 bg-primary text-white">
+                <div class="card-body text-center p-4">
+                    <i class="bi bi-graph-up-arrow fs-1 opacity-50"></i>
+                    <h6 class="text-uppercase small opacity-75 mt-2">Total del Mes</h6>
+                    <h3 class="fw-bold">RD$ @ViewBag.GananciaTotal.ToString("N0")</h3>
+                </div>
+            </div>
         </div>
     </div>
 
+    @* --- TARJETAS POR PABELLÓN --- *@
     <div class="row">
         @foreach (var item in Model)
         {
@@ -30,7 +99,7 @@
                             }
                             else if (item.NombreRecinto.ToLower().Contains("pabellon") || item.NombreRecinto.ToLower().Contains("palacio"))
                             {
-                                <i class="bi bi-dribbble text-orange fs-2" style="color: #fd7e14;"></i>
+                                <i class="bi bi-dribbble fs-2" style="color: #fd7e14;"></i>
                             }
                             else
                             {
@@ -39,28 +108,92 @@
                         </div>
 
                         <h5 class="fw-bold text-dark">@item.NombreRecinto</h5>
-                        <div class="display-3 fw-bold text-primary my-2">@item.CantidadEventos</div>
-                        <p class="text-muted small text-uppercase fw-bold" style="letter-spacing: 1px;">Eventos este mes</p>
 
-                        <hr class="my-3 opacity-25">
-
-                        <div class="d-grid">
-                            <button class="btn btn-sm btn-outline-secondary rounded-pill" type="button" data-bs-toggle="collapse" data-bs-target="#collapse-@item.NombreRecinto.Replace(" ", "")">
-                                Ver Detalles
-                            </button>
+                        @* ✅ Contadores separados *@
+                        <div class="row g-2 mt-1 mb-3">
+                            <div class="col-6">
+                                <div class="bg-primary bg-opacity-10 rounded-3 p-2">
+                                    <div class="fw-bold text-primary fs-4">@item.CantidadEventos</div>
+                                    <small class="text-primary fw-bold" style="font-size: 0.65rem;">EVENTOS PROPIOS</small>
+                                </div>
+                            </div>
+                            <div class="col-6">
+                                <div class="bg-warning bg-opacity-10 rounded-3 p-2">
+                                    <div class="fw-bold text-warning fs-4">@item.CantidadAlquileres</div>
+                                    <small class="text-warning fw-bold" style="font-size: 0.65rem;">ALQUILERES</small>
+                                </div>
+                            </div>
                         </div>
 
-                        <div class="collapse mt-3" id="collapse-@item.NombreRecinto.Replace(" ", "")">
+                        @* ✅ Ganancias separadas por pabellón *@
+                        <div class="row g-2 mb-3">
+                            <div class="col-6">
+                                <div class="bg-success bg-opacity-10 rounded-3 p-2">
+                                    <small class="text-success fw-bold d-block" style="font-size: 0.65rem;">TICKETS</small>
+                                    <span class="fw-bold text-success small">RD$ @item.GananciaTickets.ToString("N0")</span>
+                                </div>
+                            </div>
+                            <div class="col-6">
+                                <div class="bg-warning bg-opacity-10 rounded-3 p-2">
+                                    <small class="text-warning fw-bold d-block" style="font-size: 0.65rem;">ALQUILERES</small>
+                                    <span class="fw-bold text-warning small">RD$ @item.GananciaAlquileres.ToString("N0")</span>
+                                </div>
+                            </div>
+                            <div class="col-12">
+                                <div class="bg-primary bg-opacity-10 rounded-3 p-2">
+                                    <small class="text-primary fw-bold d-block" style="font-size: 0.65rem;">TOTAL PABELLÓN</small>
+                                    <span class="fw-bold text-primary">RD$ @item.GananciaTotal.ToString("N0")</span>
+                                </div>
+                            </div>
+                        </div>
+
+                        <hr class="my-2 opacity-25">
+
+                        @* ✅ Detalles separados *@
+                        <div class="d-flex gap-2 justify-content-center">
+                            @if (item.CantidadEventos > 0)
+                            {
+                                <button class="btn btn-sm btn-outline-primary rounded-pill" type="button"
+                                        data-bs-toggle="collapse"
+                                        data-bs-target="#eventos-@item.NombreRecinto.Replace(" ", "")">
+                                    <i class="bi bi-calendar-event me-1"></i> Eventos (@item.CantidadEventos)
+                                </button>
+                            }
+                            @if (item.CantidadAlquileres > 0)
+                            {
+                                <button class="btn btn-sm btn-outline-warning rounded-pill" type="button"
+                                        data-bs-toggle="collapse"
+                                        data-bs-target="#alquileres-@item.NombreRecinto.Replace(" ", "")">
+                                    <i class="bi bi-building me-1"></i> Alquileres (@item.CantidadAlquileres)
+                                </button>
+                            }
+                            @if (item.CantidadEventos == 0 && item.CantidadAlquileres == 0)
+                            {
+                                <small class="text-muted">Sin actividad este mes</small>
+                            }
+                        </div>
+
+                        @* Lista de eventos propios *@
+                        <div class="collapse mt-3" id="eventos-@item.NombreRecinto.Replace(" ", "")">
                             <ul class="list-group list-group-flush small text-start">
-                                @foreach (var ev in item.Eventos)
+                                @foreach (var ev in item.EventosPropios)
                                 {
                                     <li class="list-group-item bg-transparent px-0 border-0">
-                                        <i class="bi bi-check2-circle text-success me-1"></i> @ev.Nombre
+                                        <i class="bi bi-check2-circle text-primary me-1"></i> @ev.Nombre
                                     </li>
                                 }
-                                @if (item.CantidadEventos == 0)
+                            </ul>
+                        </div>
+
+                        @* Lista de alquileres *@
+                        <div class="collapse mt-3" id="alquileres-@item.NombreRecinto.Replace(" ", "")">
+                            <ul class="list-group list-group-flush small text-start">
+                                @foreach (var al in item.AlquileresAprobados)
                                 {
-                                    <li class="list-group-item bg-transparent px-0 border-0 text-center text-italic text-muted">Sin actividad registrada</li>
+                                    <li class="list-group-item bg-transparent px-0 border-0">
+                                        <i class="bi bi-building text-warning me-1"></i> @al.Nombre
+                                        <span class="badge bg-warning text-dark ms-1" style="font-size: 0.6rem;">Alquiler</span>
+                                    </li>
                                 }
                             </ul>
                         </div>

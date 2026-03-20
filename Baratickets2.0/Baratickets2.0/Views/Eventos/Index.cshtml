@@ -11,11 +11,22 @@
             <p class="text-muted">Administra los recintos y horarios de la Villa Olímpica</p>
         </div>
 
-        @if (User.IsInRole("Organizador") || User.IsInRole("Admin"))
+        @if (User.IsInRole("Admin"))
         {
             <a asp-action="Create" class="btn btn-success shadow-sm rounded-pill px-4">
                 <i class="bi bi-plus-circle-fill me-2"></i> Crear Nuevo Evento
             </a>
+        }
+        else if (User.IsInRole("Organizador"))
+        {
+            @* Solo mostrar si no tiene evento pendiente o publicado *@
+            bool tieneEvento = Model.Any(e => e.OrganizadorId == User.FindFirst(System.Security.Claims.ClaimTypes.NameIdentifier)?.Value);
+            @if (!tieneEvento)
+            {
+                <a asp-action="Create" class="btn btn-success shadow-sm rounded-pill px-4">
+                    <i class="bi bi-plus-circle-fill me-2"></i> Crear Nuevo Evento
+                </a>
+            }
         }
     </div>
 
@@ -24,11 +35,40 @@
         {
             <div class="col-md-4 mb-4">
                 <div class="card h-100 shadow border-0" style="border-radius: 20px; overflow: hidden;">
+
                     <div class="card-body">
                         <div class="d-flex justify-content-between align-items-start mb-2">
                             <h5 class="card-title fw-bold text-dark mb-0">@item.Nombre</h5>
-                            <span class="badge bg-light text-primary border">ID: @item.Id</span>
+                            <div class="d-flex flex-column gap-1 align-items-end">
+                                <span class="badge bg-light text-primary border">ID: @item.Id</span>
+                                @if (item.EstadoEvento == "PendienteAprobacion")
+                                {
+                                    <span class="badge bg-warning text-dark">
+                                        <i class="bi bi-hourglass-split me-1"></i> Pendiente
+                                    </span>
+                                }
+                                else if (item.EstadoEvento == "Rechazado")
+                                {
+                                    <span class="badge bg-danger">
+                                        <i class="bi bi-x-circle me-1"></i> Rechazado
+                                    </span>
+                                }
+                                else
+                                {
+                                    <span class="badge bg-success">
+                                        <i class="bi bi-check-circle me-1"></i> Publicado
+                                    </span>
+                                }
+                            </div>
                         </div>
+
+                        @* Motivo de rechazo si aplica *@
+                        @if (item.EstadoEvento == "Rechazado" && !string.IsNullOrEmpty(item.MotivoRechazo))
+                        {
+                            <div class="alert alert-danger p-2 rounded-3 mb-2">
+                                <small><i class="bi bi-info-circle me-1"></i> <strong>Motivo:</strong> @item.MotivoRechazo</small>
+                            </div>
+                        }
 TT
                         @* 👤 ORGANIZADOR *@
                         <div class="d-flex align-items-center mb-3">
@@ -86,14 +126,14 @@ TT
                             </a>
                         </div>
 
-                        @if (User.IsInRole("Admin") || User.IsInRole("Organizador"))
+                        @if (User.IsInRole("Admin"))
                         {
+                            @* Admin puede hacer todo siempre *@
                             <div class="pt-3 border-top text-center">
                                 <div class="btn-group shadow-sm" style="border-radius: 10px; overflow: hidden;">
                                     <a asp-action="Dashboard" asp-route-id="@item.Id" class="btn btn-info text-white btn-sm">
                                         <i class="bi bi-graph-up-arrow"></i>
                                     </a>
-
                                     <a asp-action="Edit" asp-route-id="@item.Id" class="btn btn-secondary btn-sm">
                                         <i class="bi bi-pencil-square"></i>
                                     </a>
@@ -102,6 +142,43 @@ TT
                                         <i class="bi bi-trash3-fill"></i>
                                     </button>
                                 </div>
+                            </div>
+                        }
+                        else if (User.IsInRole("Organizador") && item.EstadoEvento == "Publicado")
+                        {
+                            @* Publicado — solo dashboard *@
+                            <div class="pt-3 border-top text-center">
+                                <a asp-action="Dashboard" asp-route-id="@item.Id" class="btn btn-info text-white btn-sm rounded-pill px-4">
+                                    <i class="bi bi-graph-up-arrow me-1"></i> Dashboard
+                                </a>
+                            </div>
+                        }
+                        else if (User.IsInRole("Organizador") && item.EstadoEvento == "PendienteAprobacion")
+                        {
+                            @* Pendiente — puede editar y eliminar mientras espera *@
+                            <div class="pt-3 border-top text-center">
+                                <div class="btn-group shadow-sm" style="border-radius: 10px; overflow: hidden;">
+                                    <a asp-action="Edit" asp-route-id="@item.Id" class="btn btn-secondary btn-sm">
+                                        <i class="bi bi-pencil-square"></i>
+                                    </a>
+                                    <button type="button" class="btn btn-danger btn-sm"
+                                            onclick="confirmarEliminar('@item.Id', '@item.Nombre')">
+                                        <i class="bi bi-trash3-fill"></i>
+                                    </button>
+                                </div>
+                                <small class="text-warning fw-bold d-block mt-2">
+                                    <i class="bi bi-hourglass-split me-1"></i> Esperando aprobación
+                                </small>
+                            </div>
+                        }
+                        else if (User.IsInRole("Organizador") && item.EstadoEvento == "Rechazado")
+                        {
+                            @* Rechazado — solo puede eliminarlo *@
+                            <div class="pt-3 border-top text-center">
+                                <button type="button" class="btn btn-danger btn-sm rounded-pill"
+                                        onclick="confirmarEliminar('@item.Id', '@item.Nombre')">
+                                    <i class="bi bi-trash3-fill me-1"></i> Eliminar
+                                </button>
                             </div>
                         }
                     </div>

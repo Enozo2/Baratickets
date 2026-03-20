@@ -16,7 +16,9 @@
             <thead class="bg-light">
                 <tr>
                     <th class="ps-4">Nombre del Recinto</th>
-                    <th>Estado Actual</th>
+                    <th>Descripción</th>
+                    <th class="text-center">Precio/Hora</th>
+                    <th class="text-center">Estado</th>
                     <th class="text-center">Acciones</th>
                 </tr>
             </thead>
@@ -25,7 +27,11 @@
                 {
                     <tr>
                         <td class="fw-bold ps-4">@item.Nombre</td>
-                        <td>
+                        <td class="text-muted small">@(item.Descripcion ?? "—")</td>
+                        <td class="text-center fw-bold text-primary">
+                            RD$ @item.PrecioPorHora.ToString("N0")
+                        </td>
+                        <td class="text-center">
                             @if (item.EstaActivo)
                             {
                                 <span class="badge bg-success-subtle text-success border border-success px-3 rounded-pill">Operativo</span>
@@ -37,6 +43,12 @@
                         </td>
                         <td class="text-center">
                             <div class="btn-group shadow-sm" style="border-radius: 20px; overflow: hidden;">
+                                @* ✅ Botón Editar *@
+                                <a asp-action="Edit" asp-route-id="@item.Id"
+                                   class="btn btn-sm btn-outline-primary px-3">
+                                    <i class="bi bi-pencil-square me-1"></i> Editar
+                                </a>
+
                                 @* Botón de Estado *@
                                 <a asp-action="ToggleEstado" asp-route-id="@item.Id"
                                    class="btn btn-sm @(item.EstaActivo ? "btn-outline-warning" : "btn-outline-success") px-3">
@@ -44,7 +56,7 @@
                                     @(item.EstaActivo ? "Mantenimiento" : "Habilitar")
                                 </a>
 
-                                @* 🔥 BOTÓN DE ELIMINAR *@
+                                @* Botón Eliminar *@
                                 <button type="button" class="btn btn-danger btn-sm px-3"
                                         onclick="confirmarEliminarLugar('@item.Id', '@item.Nombre')">
                                     <i class="bi bi-trash3-fill"></i>
@@ -71,7 +83,6 @@
                 <div class="alert alert-warning small mx-3">
                     <i class="bi bi-info-circle me-1"></i> Esta acción solo se completará si el recinto no tiene eventos vinculados.
                 </div>
-
                 <form id="formEliminarLugar" method="post">
                     @Html.AntiForgeryToken()
                     <div class="d-flex justify-content-center gap-2 mt-4">
@@ -87,10 +98,9 @@
 @section Scripts {
     <script>
         function confirmarEliminarLugar(id, nombre) {
-            $('#nombreLugarEliminar').text(nombre);
-            // Ajustamos el action para que vaya al controlador de Lugares (o como se llame el tuyo)
-            $('#formEliminarLugar').attr('action', '/Lugares/Delete/' + id);
-            $('#modalEliminarLugar').modal('show');
+            document.getElementById('nombreLugarEliminar').innerText = nombre;
+            document.getElementById('formEliminarLugar').action = '/Lugares/Delete/' + id;
+            new bootstrap.Modal(document.getElementById('modalEliminarLugar')).show();
         }
     </script>
 }

@@ -188,6 +188,22 @@ build_metadata.AdditionalFiles.CssScope =
 build_metadata.AdditionalFiles.TargetPath = QXJlYXNcSWRlbnRpdHlcUGFnZXNcX1ZpZXdTdGFydC5jc2h0bWw=
 build_metadata.AdditionalFiles.CssScope = 
 
+[C:/Users/Enocr/OneDrive/Escritorio/Baratickets/Baratickets2.0/Baratickets2.0/Views/Alquileres/GestionSolicitudes.cshtml]
+build_metadata.AdditionalFiles.TargetPath = Vmlld3NcQWxxdWlsZXJlc1xHZXN0aW9uU29saWNpdHVkZXMuY3NodG1s
+build_metadata.AdditionalFiles.CssScope = 
+
+[C:/Users/Enocr/OneDrive/Escritorio/Baratickets/Baratickets2.0/Baratickets2.0/Views/Alquileres/MisSolicitudes.cshtml]
+build_metadata.AdditionalFiles.TargetPath = Vmlld3NcQWxxdWlsZXJlc1xNaXNTb2xpY2l0dWRlcy5jc2h0bWw=
+build_metadata.AdditionalFiles.CssScope = 
+
+[C:/Users/Enocr/OneDrive/Escritorio/Baratickets/Baratickets2.0/Baratickets2.0/Views/Alquileres/ProcesarPago.cshtml]
+build_metadata.AdditionalFiles.TargetPath = Vmlld3NcQWxxdWlsZXJlc1xQcm9jZXNhclBhZ28uY3NodG1s
+build_metadata.AdditionalFiles.CssScope = 
+
+[C:/Users/Enocr/OneDrive/Escritorio/Baratickets/Baratickets2.0/Baratickets2.0/Views/Alquileres/Solicitar.cshtml]
+build_metadata.AdditionalFiles.TargetPath = Vmlld3NcQWxxdWlsZXJlc1xTb2xpY2l0YXIuY3NodG1s
+build_metadata.AdditionalFiles.CssScope = 
+
 [C:/Users/Enocr/OneDrive/Escritorio/Baratickets/Baratickets2.0/Baratickets2.0/Views/Eventos/Checkout.cshtml]
 build_metadata.AdditionalFiles.TargetPath = Vmlld3NcRXZlbnRvc1xDaGVja291dC5jc2h0bWw=
 build_metadata.AdditionalFiles.CssScope = 
@@ -212,6 +228,10 @@ build_metadata.AdditionalFiles.CssScope =
 build_metadata.AdditionalFiles.TargetPath = Vmlld3NcRXZlbnRvc1xFZGl0LmNzaHRtbA==
 build_metadata.AdditionalFiles.CssScope = 
 
+[C:/Users/Enocr/OneDrive/Escritorio/Baratickets/Baratickets2.0/Baratickets2.0/Views/Eventos/EventosPendientes.cshtml]
+build_metadata.AdditionalFiles.TargetPath = Vmlld3NcRXZlbnRvc1xFdmVudG9zUGVuZGllbnRlcy5jc2h0bWw=
+build_metadata.AdditionalFiles.CssScope = 
+
 [C:/Users/Enocr/OneDrive/Escritorio/Baratickets/Baratickets2.0/Baratickets2.0/Views/Eventos/Index.cshtml]
 build_metadata.AdditionalFiles.TargetPath = Vmlld3NcRXZlbnRvc1xJbmRleC5jc2h0bWw=
 build_metadata.AdditionalFiles.CssScope = 
@@ -226,6 +246,10 @@ build_metadata.AdditionalFiles.CssScope =
 
 [C:/Users/Enocr/OneDrive/Escritorio/Baratickets/Baratickets2.0/Baratickets2.0/Views/Lugares/Create.cshtml]
 build_metadata.AdditionalFiles.TargetPath = Vmlld3NcTHVnYXJlc1xDcmVhdGUuY3NodG1s
+build_metadata.AdditionalFiles.CssScope = 
+
+[C:/Users/Enocr/OneDrive/Escritorio/Baratickets/Baratickets2.0/Baratickets2.0/Views/Lugares/Edit.cshtml]
+build_metadata.AdditionalFiles.TargetPath = Vmlld3NcTHVnYXJlc1xFZGl0LmNzaHRtbA==
 build_metadata.AdditionalFiles.CssScope = 
 
 [C:/Users/Enocr/OneDrive/Escritorio/Baratickets/Baratickets2.0/Baratickets2.0/Views/Lugares/Index.cshtml]
