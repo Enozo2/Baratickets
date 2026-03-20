@@ -301,35 +301,75 @@ public async Task<IActionResult> Edit(int? id)
             return View(evento);
         }
         // GET: Eventos/Delete/5
+        [Authorize(Roles = "Admin,Organizador")]
         public async Task<IActionResult> Delete(int? id)
         {
             if (id == null) return NotFound();
 
             var evento = await _context.Eventos
                 .Include(e => e.Organizador)
+                .Include(e => e.Lugar) // Agregamos esto para que en la confirmación se vea el lugar
                 .FirstOrDefaultAsync(m => m.Id == id);
 
             if (evento == null) return NotFound();
 
+            // SEGURIDAD: Solo el dueño o el Admin pasan
+            var userId = _userManager.GetUserId(User);
+            if (!User.IsInRole("Admin") && evento.OrganizadorId != userId)
+            {
+                return Forbid();
+            }
+
             return View(evento);
         }
 
+        // POST: Eventos/Delete/5
         [HttpPost, ActionName("Delete")]
         [ValidateAntiForgeryToken]
+        [Authorize(Roles = "Admin,Organizador")]
         public async Task<IActionResult> DeleteConfirmed(int id)
         {
-            var evento = await _context.Eventos.FindAsync(id);
-            if (evento != null)
+            var evento = await _context.Eventos
+                .Include(e => e.CategoriasTickets)
+                .Include(e => e.Tickets)
+                .FirstOrDefaultAsync(m => m.Id == id);
+
+            if (evento == null) return NotFound();
+
+            var userId = _userManager.GetUserId(User);
+            if (!User.IsInRole("Admin") && evento.OrganizadorId != userId)
+                return Forbid();
+
+            try
             {
+                // 1. Borrar devoluciones de los tickets del evento
+                if (evento.Tickets != null && evento.Tickets.Any())
+                {
+                    var ticketIds = evento.Tickets.Select(t => t.Id).ToList();
+                    await _context.Devoluciones
+                        .Where(d => ticketIds.Contains(d.TicketId))
+                        .ExecuteDeleteAsync();
+                }
+
+                // 2. Borrar tickets
+                if (evento.Tickets != null && evento.Tickets.Any())
+                    _context.Tickets.RemoveRange(evento.Tickets);
+
+                // 3. Borrar categorías
+                if (evento.CategoriasTickets != null && evento.CategoriasTickets.Any())
+                    _context.CategoriasTickets.RemoveRange(evento.CategoriasTickets);
+
+                // 4. Borrar evento
                 _context.Eventos.Remove(evento);
                 await _context.SaveChangesAsync();
-            }
-            return RedirectToAction(nameof(Index));
-        }
 
-        private bool EventoExists(int id)
-        {
-            return _context.Eventos.Any(e => e.Id == id);
+                return RedirectToAction(nameof(Index));
+            }
+            catch (Exception ex)
+            {
+                ModelState.AddModelError("", "No se pudo eliminar el evento: " + ex.Message);
+                return View(evento);
+            }
         }
     }
 }

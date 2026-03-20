@@ -1,50 +1,86 @@
 ﻿@model Baratickets2._0.Models.Evento
 
 @{
-    ViewData["Title"] = "Eliminar Evento";
+    ViewData["Title"] = "Confirmar Eliminación";
 }
 
 <div class="container mt-5">
     <div class="row justify-content-center">
         <div class="col-md-6 text-center">
-            @* Tarjeta de Alerta Crítica *@
-            <div class="card shadow-lg border-0 animate__animated animate__shakeX" style="border-radius: 20px;">
-                <div class="card-header bg-danger text-white py-4" style="border-radius: 20px 20px 0 0;">
-                    <i class="bi bi-exclamation-octagon-fill d-block mb-2" style="font-size: 3rem;"></i>
+            @* --- TARJETA DE ALERTA CRÍTICA --- *@
+            <div class="card shadow-lg border-0 animate__animated animate__shakeX" style="border-radius: 25px; overflow: hidden;">
+
+                @* Encabezado de Advertencia *@
+                <div class="card-header bg-danger text-white py-4">
+                    <i class="bi bi-exclamation-octagon-fill d-block mb-2" style="font-size: 3.5rem;"></i>
                     <h3 class="fw-bold mb-0">¿Eliminar este evento?</h3>
                 </div>
 
                 <div class="card-body p-5">
-                    <p class="text-muted fs-5 mb-4">Esta acción es irreversible y cancelará todas las categorías y tickets asociados.</p>
+                    <p class="text-muted fs-5 mb-4">
+                        Esta acción es **irreversible**. Al confirmar, se eliminarán permanentemente todas las categorías de tickets y registros asociados.
+                    </p>
 
-                    <div class="bg-light p-3 rounded-3 mb-4 border-start border-danger border-4 text-start">
-                        <h4 class="fw-bold text-dark mb-1">@Html.DisplayFor(model => model.Nombre)</h4>
-                        <p class="text-secondary small mb-2"><i class="bi bi-calendar-event me-2"></i>@Model.FechaEvento.ToString("f")</p>
+                    @* Bloque de Información del Evento *@
+                    <div class="bg-light p-4 rounded-4 mb-4 border-start border-danger border-5 text-start shadow-sm">
+                        <p class="text-uppercase text-danger fw-bold mb-1" style="font-size: 0.7rem; letter-spacing: 1px;">Confirmar baja de:</p>
+                        <h4 class="fw-bold text-dark mb-2">@Model.Nombre</h4>
 
-                        <div class="mt-2">
-                            <span class="badge bg-secondary">Segmentos: @Model.CategoriasTickets?.Count</span>
-                            <span class="badge bg-dark">Organizador: @Model.Organizador?.UserName</span>
+                        <div class="d-flex align-items-center text-secondary small mb-3">
+                            <i class="bi bi-geo-alt-fill me-2 text-danger"></i>
+                            <span>Villa Olímpica, Barahona — <b>@(Model.Lugar?.Nombre ?? "Recinto asignado")</b></span>
+                        </div>
+
+                        <div class="d-flex gap-2">
+                            <span class="badge bg-white text-dark border rounded-pill px-3 py-2">
+                                <i class="bi bi-calendar-event me-1 text-primary"></i>
+                                @Model.FechaInicio.ToString("dd/MM/yyyy")
+                            </span>
+                            <span class="badge bg-white text-dark border rounded-pill px-3 py-2">
+                                <i class="bi bi-person-badge me-1 text-primary"></i>
+                                @(string.IsNullOrWhiteSpace(Model.Organizacion) ? "Staff" : Model.Organizacion)
+                            </span>
                         </div>
                     </div>
 
-                    @* Formulario de Eliminación *@
-                    <form asp-action="Delete">
+                    @* --- FORMULARIO REFORZADO --- *@
+                    <form asp-action="Delete" method="post">
+                        @* 🛡️ Token de seguridad contra ataques XSRF *@
+                        @Html.AntiForgeryToken()
+
+                        @* 🆔 El ID oculto para que el controlador sepa qué borrar *@
                         <input type="hidden" asp-for="Id" />
-                        <div class="d-grid gap-2">
-                            <button type="submit" class="btn btn-danger btn-lg rounded-pill fw-bold shadow">
-                                <i class="bi bi-trash3-fill me-2"></i>Confirmar Eliminación
+
+                        <div class="d-grid gap-3">
+                            <button type="submit" class="btn btn-danger btn-lg rounded-pill fw-bold shadow py-3 transition-hover">
+                                <i class="bi bi-trash3-fill me-2"></i>SÍ, ELIMINAR DEFINITIVAMENTE
                             </button>
-                            <a asp-action="Index" class="btn btn-outline-secondary rounded-pill">
-                                Cancelar y regresar
+
+                            <a asp-action="Index" class="btn btn-outline-secondary rounded-pill py-2 fw-bold">
+                                <i class="bi bi-arrow-left me-2"></i>No, cancelar y volver al panel
                             </a>
                         </div>
                     </form>
                 </div>
 
                 <div class="card-footer bg-white border-0 py-3">
-                    <small class="text-danger fw-bold"><i class="bi bi-shield-lock me-1"></i> Solo personal autorizado</small>
+                    <small class="text-muted">
+                        <i class="bi bi-shield-lock-fill text-danger me-1"></i>
+                        Zona de seguridad: Solo el Organizador o Admin pueden proceder.
+                    </small>
                 </div>
             </div>
         </div>
     </div>
 </div>
+
+<style>
+    .transition-hover {
+        transition: all 0.3s ease;
+    }
+
+        .transition-hover:hover {
+            transform: scale(1.02);
+            filter: brightness(1.1);
+        }
+</style>

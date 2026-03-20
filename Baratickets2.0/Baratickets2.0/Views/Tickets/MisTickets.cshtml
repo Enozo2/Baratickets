@@ -27,7 +27,8 @@
                 var esDevolvible = horasDesdeCompra <= 24 &&
                 !ticket.FueUsado &&
                 ticket.Estado != "Devuelto" &&
-                ticket.PrecioPagado > 0;
+                ticket.PrecioPagado > 0 &&
+                !ticket.UsoCupon;
 
                 // VARIABLE DE COLOR: Azul (info) para canjes, Gris (secondary) para usados/devueltos, Verde (success) para normales
                 var colorBorde = (ticket.PrecioPagado == 0 && ticket.Estado != "Devuelto") ? "info" :
