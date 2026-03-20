@@ -15,7 +15,7 @@ using System.Reflection;
 [assembly: System.Reflection.AssemblyCompanyAttribute("Baratickets2.0")]
 [assembly: System.Reflection.AssemblyConfigurationAttribute("Debug")]
 [assembly: System.Reflection.AssemblyFileVersionAttribute("1.0.0.0")]
-[assembly: System.Reflection.AssemblyInformationalVersionAttribute("1.0.0+7200f4205e11e5473921294415869430d3501080")]
+[assembly: System.Reflection.AssemblyInformationalVersionAttribute("1.0.0+666133ea3398b4aca6e09234374bd411bf0918f3")]
 [assembly: System.Reflection.AssemblyProductAttribute("Baratickets2.0")]
 [assembly: System.Reflection.AssemblyTitleAttribute("Baratickets2.0")]
 [assembly: System.Reflection.AssemblyVersionAttribute("1.0.0.0")]

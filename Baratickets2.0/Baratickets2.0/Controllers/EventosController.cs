@@ -225,20 +225,22 @@ namespace Baratickets2._0.Controllers
         }
 
         // GET: Eventos/Edit/5
-      [HttpGet]
-public async Task<IActionResult> Edit(int? id)
-{
-    if (id == null) return NotFound();
+        [HttpGet]
+        public async Task<IActionResult> Edit(int? id)
+        {
+            if (id == null) return NotFound();
 
-    // IMPORTANTE: Aquí es donde cargamos las boletas para que se vean en la lista
-    var evento = await _context.Eventos
-        .Include(e => e.CategoriasTickets) 
-        .FirstOrDefaultAsync(m => m.Id == id);
+            var evento = await _context.Eventos
+                .Include(e => e.CategoriasTickets)
+                .FirstOrDefaultAsync(m => m.Id == id);
 
-    if (evento == null) return NotFound();
-    
-    return View(evento);
-}
+            if (evento == null) return NotFound();
+
+            // Cargar los lugares para el Dropdown
+            ViewBag.LugarId = new SelectList(_context.Lugares.Where(l => l.EstaActivo), "Id", "Nombre", evento.LugarId);
+
+            return View(evento);
+        }
         [HttpPost]
         [ValidateAntiForgeryToken]
         // 1. Agregamos los 3 strings al paréntesis para recibir los datos del formulario
@@ -275,7 +277,7 @@ public async Task<IActionResult> Edit(int? id)
                     eventoOriginal.Nombre = evento.Nombre;
                     eventoOriginal.Organizacion = evento.Organizacion;
                     eventoOriginal.Descripcion = evento.Descripcion;
-                    eventoOriginal.Direccion = evento.Direccion;
+                    eventoOriginal.LugarId = evento.LugarId;
                     eventoOriginal.ImagenUrl = evento.ImagenUrl;
 
                     // 5. Sincronizamos las categorías

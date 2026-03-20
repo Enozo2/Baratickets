@@ -1,0 +1,82 @@
+﻿@model IEnumerable<dynamic>
+
+@{
+    ViewData["Title"] = "Reporte de Ocupación";
+}
+
+<div class="container mt-4">
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <div>
+            <h2 class="fw-bold text-primary mb-0">
+                <i class="bi bi-bar-chart-steps me-2"></i>Reporte de Ocupación
+            </h2>
+            <p class="text-muted">Análisis de eventos realizados en la Villa Olímpica este mes</p>
+        </div>
+        <div class="badge bg-primary px-3 py-2 rounded-pill">
+            <i class="bi bi-calendar3 me-1"></i> @DateTime.Now.ToString("MMMM yyyy")
+        </div>
+    </div>
+
+    <div class="row">
+        @foreach (var item in Model)
+        {
+            <div class="col-md-4 mb-4">
+                <div class="card border-0 shadow-sm rounded-4 h-100 transition-hover">
+                    <div class="card-body text-center p-4">
+                        <div class="bg-light p-3 rounded-circle d-inline-block mb-3 border">
+                            @if (item.NombreRecinto.ToLower().Contains("piscina"))
+                            {
+                                <i class="bi bi-water text-info fs-2"></i>
+                            }
+                            else if (item.NombreRecinto.ToLower().Contains("pabellon") || item.NombreRecinto.ToLower().Contains("palacio"))
+                            {
+                                <i class="bi bi-dribbble text-orange fs-2" style="color: #fd7e14;"></i>
+                            }
+                            else
+                            {
+                                <i class="bi bi-building text-secondary fs-2"></i>
+                            }
+                        </div>
+
+                        <h5 class="fw-bold text-dark">@item.NombreRecinto</h5>
+                        <div class="display-3 fw-bold text-primary my-2">@item.CantidadEventos</div>
+                        <p class="text-muted small text-uppercase fw-bold" style="letter-spacing: 1px;">Eventos este mes</p>
+
+                        <hr class="my-3 opacity-25">
+
+                        <div class="d-grid">
+                            <button class="btn btn-sm btn-outline-secondary rounded-pill" type="button" data-bs-toggle="collapse" data-bs-target="#collapse-@item.NombreRecinto.Replace(" ", "")">
+                                Ver Detalles
+                            </button>
+                        </div>
+
+                        <div class="collapse mt-3" id="collapse-@item.NombreRecinto.Replace(" ", "")">
+                            <ul class="list-group list-group-flush small text-start">
+                                @foreach (var ev in item.Eventos)
+                                {
+                                    <li class="list-group-item bg-transparent px-0 border-0">
+                                        <i class="bi bi-check2-circle text-success me-1"></i> @ev.Nombre
+                                    </li>
+                                }
+                                @if (item.CantidadEventos == 0)
+                                {
+                                    <li class="list-group-item bg-transparent px-0 border-0 text-center text-italic text-muted">Sin actividad registrada</li>
+                                }
+                            </ul>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        }
+    </div>
+</div>
+
+<style>
+    .transition-hover {
+        transition: transform 0.3s ease;
+    }
+
+        .transition-hover:hover {
+            transform: translateY(-5px);
+        }
+</style>

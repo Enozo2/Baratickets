@@ -278,8 +278,7 @@ namespace Baratickets2._0.Controllers
             return View("EscanearTicket");
         }
 
-        [HttpGet]
-        [Authorize]
+
         [HttpGet]
         [Authorize]
         public async Task<IActionResult> ProcesarPago(int eventoId, int categoriaId)

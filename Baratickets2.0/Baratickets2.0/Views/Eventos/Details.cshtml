@@ -139,7 +139,7 @@
             </div>
         </div>
 
-        @* --- COLUMNA DERECHA: TICKET SHOP (Vuelve a su lugar) --- *@
+@* --- COLUMNA DERECHA: TICKET SHOP --- *@
         <div class="col-lg-5">
             <div class="sticky-shop">
                 <div class="card content-card shadow-lg p-4 border-0 bg-light">
@@ -169,19 +169,32 @@
                                         <small class="text-muted"><i class="bi bi-info-circle"></i> Disponibles: @cat.Capacidad</small>
                                     </div>
                                     <div>
-                                        @if (cat.Capacidad <= 0)
-                                        {
-                                            <button class="btn btn-secondary btn-sm disabled rounded-pill" disabled>Agotado</button>
-                                        }
-                                        else
-                                        {
-                                            <form asp-controller="Tickets" asp-action="ProcesarPago" method="get">
-                                                <input type="hidden" name="eventoId" value="@Model.Id" />
-                                                <input type="hidden" name="categoriaId" value="@cat.Id" />
-                                                <button type="submit" class="btn btn-primary btn-sm rounded-pill px-4 fw-bold">Comprar</button>
-                                            </form>
-                                        }
-                                    </div>
+                                            @if (cat.Capacidad <= 0)
+                                            {
+                                                <button class="btn btn-secondary btn-sm disabled rounded-pill" disabled>Agotado</button>
+                                            }
+                                            @* 🛑 BLOQUEO PARA ADMIN Y ORGANIZADOR *@
+                                            else if (User.Identity.IsAuthenticated && (Model.OrganizadorId == UserManager.GetUserId(User) || User.IsInRole("Admin")))
+                                            {
+                                                <div class="text-center">
+                                                    <button class="btn btn-outline-secondary btn-sm rounded-pill px-3 disabled mb-1">
+                                                        <i class="bi bi-shield-lock-fill me-1"></i> Acceso Staff
+                                                    </button>
+                                                    <br />
+                                                    <small class="text-muted" style="font-size: 0.65rem;">Restringido para Admins/Organizadores</small>
+                                                </div>
+                                            }
+                                            else
+                                            {
+                                                <form asp-controller="Tickets" asp-action="ProcesarPago" method="get">
+                                                    <input type="hidden" name="eventoId" value="@Model.Id" />
+                                                    <input type="hidden" name="categoriaId" value="@cat.Id" />
+                                                    <button type="submit" class="btn btn-primary btn-sm rounded-pill px-4 fw-bold shadow-sm">
+                                                        Comprar
+                                                    </button>
+                                                </form>
+                                            }
+                                        </div>
                                 </div>
                             </div>
                         }
@@ -189,6 +202,3 @@
                 </div>
             </div>
         </div>
-
-    </div>
-</div>

@@ -40,9 +40,13 @@
                         <textarea asp-for="Descripcion" class="form-control" rows="3">@Model.Descripcion</textarea>
                     </div>
 
-                    <div class="form-group mb-3">
-                        <label asp-for="Direccion" class="control-label fw-bold small"></label>
-                        <input asp-for="Direccion" class="form-control" />
+                    <div class="mb-3">
+                        <label class="form-label fw-bold"><i class="bi bi-building-geo me-2"></i>Recinto Villa Olímpica</label>
+                        <select asp-for="LugarId" class="form-select shadow-sm border-2" asp-items="ViewBag.LugarId">
+                            <option value="">-- Selecciona el Pabellón/Recinto --</option>
+                        </select>
+                        <span asp-validation-for="LugarId" class="text-danger small"></span>
+                        <p class="text-muted small mt-1">Selecciona el lugar específico dentro de la Villa Olímpica.</p>
                     </div>
 
                     <div class="mb-3">

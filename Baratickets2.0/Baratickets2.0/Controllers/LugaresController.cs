@@ -41,6 +41,22 @@ namespace Baratickets2._0.Controllers
             }
             return View(lugar);
         }
+        [Authorize(Roles = "Admin")]
+        public async Task<IActionResult> ReporteUso()
+        {
+            var inicioMes = new DateTime(DateTime.Now.Year, DateTime.Now.Month, 1);
+            var finMes = inicioMes.AddMonths(1).AddDays(-1);
+
+            var reporte = await _context.Lugares
+                .Select(l => new {
+                    NombreRecinto = l.Nombre,
+                    CantidadEventos = l.Eventos.Count(e => e.FechaInicio >= inicioMes && e.FechaInicio <= finMes),
+                    Eventos = l.Eventos.Where(e => e.FechaInicio >= inicioMes && e.FechaInicio <= finMes).ToList()
+                })
+                .ToListAsync();
+
+            return View(reporte);
+        }
         [Authorize(Roles = "Admin")] // Solo el Admin puede borrar recintos
         [HttpPost, ActionName("Delete")]
         [ValidateAntiForgeryToken]
