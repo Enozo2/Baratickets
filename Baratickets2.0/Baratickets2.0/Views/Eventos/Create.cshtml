@@ -2,6 +2,7 @@
 
 @{
     ViewData["Title"] = "Crear Evento";
+    bool esAlquiler = ViewBag.EsDesdeAlquiler ?? false;
 }
 
 <div class="container mt-4">
@@ -31,40 +32,60 @@
                             <textarea asp-for="Descripcion" class="form-control" rows="2"></textarea>
                         </div>
                     </div>
-
+                    @* 1. RECINTO *@
                     <div class="mb-3">
                         <label class="form-label fw-bold">Seleccionar Recinto de Villa Olímpica</label>
-                        <select asp-for="LugarId" class="form-select shadow-sm" asp-items="ViewBag.LugarId">
-                            <option value="">-- Seleccione un lugar --</option>
-                        </select>
-                    </div>
-                        <div class="mb-3">
-                            <label class="form-label fw-bold">Fecha del Evento</label>
-                            <input type="date" name="fechaSolo" class="form-control" required />
-                        </div>
-
-                        <div class="row">
-                            <div class="col-6 mb-3">
-                                <label class="form-label fw-bold">Hora de Inicio</label>
-                                <input type="time" name="horaInicio" class="form-control" required />
-                            </div>
-
-                            <div class="col-6 mb-3">
-                                <label class="form-label fw-bold">Hora de Finalización</label>
-                                <input type="time" name="horaFin" class="form-control" required />
-                            </div>
-                        </div>
-                    <div class="mb-4">
-                        <label asp-for="ImagenUrl" class="form-label fw-bold">Link del Flyer</label>
-                        <input asp-for="ImagenUrl" class="form-control" id="urlInput" />
-
-                        @* VISTA PREVIA DE LA IMAGEN *@
-                        <div class="mt-3 text-center">
-                            <img id="previewImagen" src="#" alt="Vista previa"
-                                 style="max-width: 100%; height: 200px; display: none; border-radius: 10px; border: 1px solid #ddd; object-fit: cover;" />
-                        </div>
+                        @if (esAlquiler)
+                        {
+                            <select asp-for="LugarId" class="form-select bg-light" asp-items="ViewBag.LugarId" style="pointer-events: none;"></select>
+                            <input type="hidden" asp-for="LugarId" />
+                            <small class="text-info"><i class="bi bi-info-circle"></i> Recinto reservado mediante alquiler.</small>
+                        }
+                        else
+                        {
+                            <select asp-for="LugarId" class="form-select" asp-items="ViewBag.LugarId">
+                                <option value="">-- Seleccione un lugar --</option>
+                            </select>
+                        }
                     </div>
 
+                    @* 2. FECHA *@
+                    <div class="mb-3">
+                        <label class="form-label fw-bold">Fecha del Evento</label>
+                        <input type="date" name="fechaSolo" class="form-control @(esAlquiler ? "bg-light" : "")"
+                               value="@ViewBag.FechaAprobada"
+                               @(esAlquiler ? "readonly" : "") />
+                    </div>
+
+                    <div class="row">
+                        @* 3. HORA INICIO *@
+                        <div class="col-md-6 mb-3">
+                            <label class="form-label fw-bold">Hora de Inicio</label>
+                            <input type="time" name="horaInicio" class="form-control @(esAlquiler ? "bg-light" : "")"
+                                   value="@ViewBag.HoraInicioAprobada"
+                                   @(esAlquiler ? "readonly" : "") />
+                        </div>
+
+                        @* 4. HORA FIN *@
+                        <div class="col-md-6 mb-3">
+                            <label class="form-label fw-bold">Hora de Finalización</label>
+                            <input type="time" name="horaFin" class="form-control @(esAlquiler ? "bg-light" : "")"
+                                   value="@ViewBag.HoraFinAprobada"
+                                   @(esAlquiler ? "readonly" : "") />
+                        </div>
+                    </div>
+                    @* CAMPO PARA EL FLYER (Imagen del Evento) *@
+                    <div class="mb-3">
+                        <label asp-for="ImagenUrl" class="form-label fw-bold">Link del Flyer / Imagen del Evento</label>
+                        <div class="input-group">
+                            <span class="input-group-text bg-white"><i class="bi bi-image text-primary"></i></span>
+                            <input asp-for="ImagenUrl" class="form-control" placeholder="https://ejemplo.com/mi-flyer.jpg" />
+                        </div>
+                        <span asp-validation-for="ImagenUrl" class="text-danger small"></span>
+                        <div class="form-text mt-1">
+                            <i class="bi bi-lightbulb me-1"></i> Pega el enlace de una imagen (JPG, PNG) para que tu evento destaque.
+                        </div>
+                    </div>
                     @* --- SECCIÓN DINÁMICA DE CATEGORÍAS --- *@
                     <div class="bg-light p-4 rounded-4 mb-4 border">
                         <div class="d-flex justify-content-between align-items-center mb-3">

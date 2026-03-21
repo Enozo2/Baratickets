@@ -11,7 +11,7 @@ using Rotativa.AspNetCore;
 namespace Baratickets2._0.Controllers
 {
     // Mantenemos el Authorize general, pero usaremos AllowAnonymous en las vistas públicas
-    [Authorize(Roles = "Organizador,Admin")]
+    [Authorize(Roles = "Organizador,Admin,OrganizadorTemporal")]
     public class EventosController : Controller
     {
         private readonly ApplicationDbContext _context;
@@ -29,15 +29,41 @@ namespace Baratickets2._0.Controllers
             var userId = _userManager.GetUserId(User);
             var esAdmin = User.IsInRole("Admin");
             var esOrganizador = User.IsInRole("Organizador");
+            var esOrganizadorTemporal = User.IsInRole("OrganizadorTemporal");
 
-            var eventos = await _context.Eventos
+            IQueryable<Evento> query = _context.Eventos
                 .Include(e => e.Organizador)
                 .Include(e => e.Lugar)
-                .Include(e => e.CategoriasTickets)
-                .Where(e => esAdmin || esOrganizador
-                    ? true  // Admin y Organizador ven todo
-                    : e.EstadoEvento == "Publicado") // Clientes solo ven publicados
-                .ToListAsync();
+                .Include(e => e.CategoriasTickets);
+
+            if (esAdmin)
+            {
+                // El Admin es el único que ve absolutamente TODO (oficiales y alquileres)
+            }
+            else if (esOrganizador)
+            {
+                // ✅ FILTRO PARA EL ORGANIZADOR PROFESIONAL:
+                // Solo ve sus propios eventos O eventos que no sean alquileres privados.
+                // Asumiendo que usas 'EsAlquiler' o puedes filtrar por el rol del creador.
+                query = query.Where(e => e.OrganizadorId == userId || e.EstadoEvento == "Publicado");
+            }
+            else if (esOrganizadorTemporal)
+            {
+                // Solo sus propios eventos (El cliente que alquiló)
+                query = query.Where(e => e.OrganizadorId == userId);
+            }
+            else
+            {
+                // Para cualquier otro (Clientes normales que no alquilaron)
+                query = query.Where(e => e.EstadoEvento == "Publicado");
+            }
+
+            var eventos = await query.ToListAsync();
+
+            ViewBag.TieneEventoAlquiler = await _context.SolicitudesAlquiler
+                .AnyAsync(s => s.ClienteId == userId &&
+                          s.Estado == "Aprobado" &&
+                          s.EventoId != null);
 
             return View(eventos);
         }
@@ -60,13 +86,52 @@ namespace Baratickets2._0.Controllers
             return View(evento);
         }
         // GET: Eventos/Create
-        public IActionResult Create()
+        // ✅ ACCIÓN PARA PRELLENAR EL FORMULARIO DESDE UN ALQUILER
+        [HttpGet]
+        [Authorize]
+        public async Task<IActionResult> CrearDesdeAlquiler(int id)
+        {
+            var solicitud = await _context.SolicitudesAlquiler
+                .Include(s => s.Lugar)
+                .FirstOrDefaultAsync(s => s.Id == id && s.Estado == "Aprobado");
 
+            if (solicitud == null) return NotFound();
+
+            var nuevoEvento = new Evento
+            {
+                Nombre = solicitud.NombreEvento, // Ajustado a tu modelo
+                LugarId = solicitud.LugarId,
+                Descripcion = solicitud.DescripcionEvento ?? "Evento privado.",
+                Organizacion = User.Identity.Name
+            };
+            ViewBag.EsDesdeAlquiler = true;
+            // 💡 PASAMOS LOS DATOS A VIEWGBAG PARA LOS INPUTS MANUALES
+            ViewBag.FechaAprobada = solicitud.FechaInicio.ToString("yyyy-MM-dd");
+            ViewBag.HoraInicioAprobada = solicitud.FechaInicio.ToString("HH:mm");
+            ViewBag.HoraFinAprobada = solicitud.FechaFin.ToString("HH:mm");
+
+            ViewBag.LugarId = new SelectList(_context.Lugares.Where(l => l.EstaActivo), "Id", "Nombre", solicitud.LugarId);
+            ViewBag.EsAlquiler = true; // Flag para saber que venimos de un alquiler
+
+            return View("Create", nuevoEvento);
+        }
+        public IActionResult Create()
         {
             var lugares = _context.Lugares.Where(l => l.EstaActivo).ToList();
-
-            // 2. Los pasamos a la vista mediante un SelectList
             ViewBag.LugarId = new SelectList(lugares, "Id", "Nombre");
+
+            // ✅ Prellenar datos del alquiler si vienen de una solicitud
+            if (TempData["SolicitudFecha"] != null)
+            {
+                ViewBag.SolicitudFecha = TempData["SolicitudFecha"];
+                ViewBag.SolicitudHoraInicio = TempData["SolicitudHoraInicio"];
+                ViewBag.SolicitudHoraFin = TempData["SolicitudHoraFin"];
+                ViewBag.SolicitudNombre = TempData["SolicitudNombreEvento"];
+                ViewBag.SolicitudDescripcion = TempData["SolicitudDescripcion"];
+                ViewBag.SolicitudLugarId = TempData["SolicitudLugarId"];
+                TempData.Keep();
+            }
+
             return View();
         }
         [HttpPost]
@@ -77,7 +142,7 @@ namespace Baratickets2._0.Controllers
             var userId = _userManager.GetUserId(User);
             evento.OrganizadorId = userId;
 
-            // 2. 🧩 RECONSTRUCCIÓN MANUAL
+            // 2. 🧩 RECONSTRUCCIÓN MANUAL DE FECHAS
             if (!string.IsNullOrEmpty(fechaSolo) && !string.IsNullOrEmpty(horaInicio) && !string.IsNullOrEmpty(horaFin))
             {
                 try
@@ -92,20 +157,20 @@ namespace Baratickets2._0.Controllers
                 }
             }
 
-            // 3. 🧹 LIMPIEZA PROFUNDA (Aquí es donde suele estar el fallo)
+            // 3. 🧹 LIMPIEZA DE MODELSTATE
             ModelState.Remove("Organizador");
             ModelState.Remove("Tickets");
             ModelState.Remove("OrganizadorId");
             ModelState.Remove("FechaEvento");
-            ModelState.Remove("Lugar"); // Obligatorio: Ignora el objeto Lugar completo
-            ModelState.Remove("Direccion"); // Como ahora usamos LugarId, ignoramos el campo viejo
+            ModelState.Remove("Lugar");
+            ModelState.Remove("Direccion");
 
             // 4. 🛡️ PROCESO DE GUARDADO
             if (ModelState.IsValid)
             {
                 try
                 {
-                    // Validar choque de horario en la Villa Olímpica
+                    // Validar choque de horario
                     bool lugarOcupado = await _context.Eventos.AnyAsync(e =>
                         e.LugarId == evento.LugarId &&
                         evento.FechaInicio < e.FechaFin &&
@@ -118,17 +183,18 @@ namespace Baratickets2._0.Controllers
                     }
                     else
                     {
-                        // ✅ Si el creador es un cliente con rol Organizador temporal, requiere aprobación
                         var usuario = await _userManager.GetUserAsync(User);
-                        bool esOrganizadorTemporal = await _context.SolicitudesAlquiler
-                            .AnyAsync(s => s.ClienteId == usuario.Id && s.Estado == "Aprobado");
+
+                        // ✅ CORRECCIÓN: Lógica unificada para OrganizadorTemporal
+                        bool esOrganizadorTemporal = User.IsInRole("OrganizadorTemporal") &&
+                            await _context.SolicitudesAlquiler.AnyAsync(s => s.ClienteId == usuario.Id && s.Estado == "Aprobado");
 
                         if (esOrganizadorTemporal)
                         {
                             var solicitudAprobada = await _context.SolicitudesAlquiler
                                 .FirstOrDefaultAsync(s => s.ClienteId == usuario.Id && s.Estado == "Aprobado");
 
-                            // ✅ Verificar que no haya creado ya un evento
+                            // Verificar que no haya creado ya un evento
                             if (solicitudAprobada != null && solicitudAprobada.EventoId != null)
                             {
                                 TempData["Error"] = "Ya tienes un evento creado para tu alquiler aprobado.";
@@ -140,7 +206,7 @@ namespace Baratickets2._0.Controllers
                             _context.Add(evento);
                             await _context.SaveChangesAsync();
 
-                            // ✅ Vincular el evento a la solicitud
+                            // Vincular el evento a la solicitud
                             if (solicitudAprobada != null)
                             {
                                 solicitudAprobada.EventoId = evento.Id;
@@ -160,15 +226,33 @@ namespace Baratickets2._0.Controllers
                 }
                 catch (Exception ex)
                 {
-                    // Si hay un error de Base de Datos, esto lo mostrará en la vista
                     ModelState.AddModelError("", "Error al guardar en la BD: " + ex.Message);
                 }
             }
 
-            // 5. 🔄 RECARGA DE SEGURIDAD (Si algo falló, rellena el dropdown de nuevo)
+            // 5. 🔄 RECARGA DE SEGURIDAD
             ViewBag.LugarId = new SelectList(_context.Lugares.Where(l => l.EstaActivo), "Id", "Nombre", evento.LugarId);
-
             return View(evento);
+        }
+        [HttpGet]
+        [Authorize(Roles = "OrganizadorTemporal")]
+        public async Task<IActionResult> MiEvento()
+        {
+            var userId = _userManager.GetUserId(User);
+
+            var eventos = await _context.Eventos
+                .Include(e => e.Organizador)
+                .Include(e => e.Lugar)
+                .Include(e => e.CategoriasTickets)
+                .Where(e => e.OrganizadorId == userId)
+                .ToListAsync();
+
+            ViewBag.TieneEventoAlquiler = await _context.SolicitudesAlquiler
+                .AnyAsync(s => s.ClienteId == userId &&
+                          s.Estado == "Aprobado" &&
+                          s.EventoId != null);
+
+            return View(eventos);
         }
         // ✅ Ver eventos pendientes de aprobación (Admin/Organizador)
         [HttpGet]
@@ -194,7 +278,19 @@ namespace Baratickets2._0.Controllers
             var evento = await _context.Eventos.FindAsync(id);
             if (evento == null) return NotFound();
 
+            // 🛡️ VALIDACIÓN DE SEGURIDAD: Si ya está publicado, no hagas nada
+            if (evento.EstadoEvento == "Publicado")
+            {
+                TempData["Error"] = "Este evento ya ha sido aprobado anteriormente.";
+                return RedirectToAction("EventosPendientes");
+            }
+
             evento.EstadoEvento = "Publicado";
+
+            // Asegúrate de que el evento sea visible en la cartelera general
+            // Si tienes un campo bool como 'EsVisible', cámbialo aquí también
+
+            _context.Update(evento); // Es buena práctica marcarlo para Update
             await _context.SaveChangesAsync();
 
             TempData["Success"] = $"Evento '{evento.Nombre}' aprobado y publicado correctamente.";
@@ -216,7 +312,7 @@ namespace Baratickets2._0.Controllers
             TempData["Success"] = "Evento rechazado correctamente.";
             return RedirectToAction("EventosPendientes");
         }
-        [Authorize(Roles = "Organizador,Admin")]
+        [Authorize(Roles = "Organizador,Admin,OrganizadorTemporal")]
         public async Task<IActionResult> Dashboard(int id)
         {
             // Cargamos el evento con sus categorías y tickets
@@ -381,7 +477,7 @@ namespace Baratickets2._0.Controllers
             return View(evento);
         }
         // GET: Eventos/Delete/5
-        [Authorize(Roles = "Admin,Organizador")]
+        [Authorize(Roles = "Admin,Organizador,OrganizadorTemporal")]
         public async Task<IActionResult> Delete(int? id)
         {
             if (id == null) return NotFound();
@@ -403,10 +499,11 @@ namespace Baratickets2._0.Controllers
             return View(evento);
         }
 
+
         // POST: Eventos/Delete/5
         [HttpPost, ActionName("Delete")]
         [ValidateAntiForgeryToken]
-        [Authorize(Roles = "Admin,Organizador")]
+        [Authorize(Roles = "Organizador,Admin,OrganizadorTemporal")]
         public async Task<IActionResult> DeleteConfirmed(int id)
         {
             var evento = await _context.Eventos
@@ -419,9 +516,32 @@ namespace Baratickets2._0.Controllers
             var userId = _userManager.GetUserId(User);
             if (!User.IsInRole("Admin") && evento.OrganizadorId != userId)
                 return Forbid();
-
             try
             {
+                // 0. ✅ Desvincular solicitud de alquiler y quitar rol Organizador
+                var solicitudVinculada = await _context.SolicitudesAlquiler
+                    .Include(s => s.Cliente)
+                    .FirstOrDefaultAsync(s => s.EventoId == id);
+
+                if (solicitudVinculada != null)
+                {
+                    solicitudVinculada.EventoId = null;
+                    _context.Update(solicitudVinculada);
+
+                    if (solicitudVinculada.Cliente != null)
+                    {
+                        var esOrganizadorReal = await _context.Eventos
+                            .AnyAsync(e => e.OrganizadorId == solicitudVinculada.ClienteId
+                                        && e.Id != id);
+
+                        if (solicitudVinculada.Cliente != null)
+                        {
+                            await _userManager.RemoveFromRoleAsync(solicitudVinculada.Cliente, "OrganizadorTemporal");
+                            await _userManager.UpdateSecurityStampAsync(solicitudVinculada.Cliente);
+                        }
+                    }
+                } // ← Cierra el if de solicitudVinculada
+
                 // 1. Borrar devoluciones de los tickets del evento
                 if (evento.Tickets != null && evento.Tickets.Any())
                 {
@@ -442,7 +562,6 @@ namespace Baratickets2._0.Controllers
                 // 4. Borrar evento
                 _context.Eventos.Remove(evento);
                 await _context.SaveChangesAsync();
-
                 return RedirectToAction(nameof(Index));
             }
             catch (Exception ex)

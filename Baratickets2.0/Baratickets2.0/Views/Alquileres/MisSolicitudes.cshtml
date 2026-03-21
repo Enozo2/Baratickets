@@ -60,16 +60,22 @@
                                 <h5 class="fw-bold text-primary mb-0">RD$ @s.MontoAlquiler.ToString("N0")</h5>
                                 @if (s.Estado == "Aprobado")
                                 {
-                                    @if (s.EventoId == null)
+                                    @if (s.EventoId == null && User.IsInRole("Organizador"))
                                     {
                                         <a asp-controller="Eventos" asp-action="Create" class="btn btn-success btn-sm rounded-pill">
                                             <i class="bi bi-plus-circle me-1"></i> Crear Evento
                                         </a>
                                     }
-                                    else
+                                    else if (s.EventoId != null)
                                     {
                                         <a asp-controller="Eventos" asp-action="Dashboard" asp-route-id="@s.EventoId" class="btn btn-primary btn-sm rounded-pill">
                                             <i class="bi bi-graph-up me-1"></i> Ver Dashboard
+                                        </a>
+                                    }
+                                    else
+                                    {
+                                        <a asp-controller="Eventos" asp-action="CrearDesdeAlquiler" asp-route-id="@s.Id" class="btn btn-warning btn-sm rounded-pill text-dark fw-bold shadow-sm">
+                                            <i class="bi bi-plus-circle me-1"></i> Crear Evento
                                         </a>
                                     }
                                 }

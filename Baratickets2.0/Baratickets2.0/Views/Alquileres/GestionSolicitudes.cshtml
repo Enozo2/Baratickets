@@ -34,8 +34,10 @@
                     {
                         @foreach (var s in Model)
                         {
+                            // Lógica de colores de Badge actualizada
                             var badgeColor = s.Estado == "Aprobado" ? "success" :
-                            s.Estado == "Rechazado" ? "danger" : "warning text-dark";
+                            s.Estado == "Rechazado" ? "danger" :
+                            s.Estado == "Terminado" ? "secondary" : "warning text-dark";
                             <tr>
                                 <td>
                                     <div class="d-flex align-items-center">
@@ -66,9 +68,9 @@
                                     <span class="badge bg-@badgeColor">@s.Estado</span>
                                 </td>
                                 <td class="text-center">
-                                    @if (s.Estado == "Pendiente")
-                                    {
-                                        <div class="d-flex gap-1 justify-content-center">
+                                    <div class="d-flex gap-1 justify-content-center">
+                                        @if (s.Estado == "Pendiente")
+                                        {
                                             <form asp-action="Aprobar" method="post">
                                                 @Html.AntiForgeryToken()
                                                 <input type="hidden" name="id" value="@s.Id" />
@@ -80,12 +82,23 @@
                                                     onclick="rechazarSolicitud(@s.Id)">
                                                 <i class="bi bi-x-lg"></i> Rechazar
                                             </button>
-                                        </div>
-                                    }
-                                    else
-                                    {
-                                        <span class="text-muted small">—</span>
-                                    }
+                                        }
+                                        @* Nueva acción: Terminar (solo si ya está aprobado) *@
+                                        else if (s.Estado == "Aprobado")
+                                        {
+                                            <form asp-action="Terminar" method="post">
+                                                @Html.AntiForgeryToken()
+                                                <input type="hidden" name="id" value="@s.Id" />
+                                                <button type="submit" class="btn btn-secondary btn-sm rounded-pill">
+                                                    <i class="bi bi-flag-fill me-1"></i> Terminar
+                                                </button>
+                                            </form>
+                                        }
+                                        else
+                                        {
+                                            <span class="text-muted small">—</span>
+                                        }
+                                    </div>
                                 </td>
                             </tr>
                         }

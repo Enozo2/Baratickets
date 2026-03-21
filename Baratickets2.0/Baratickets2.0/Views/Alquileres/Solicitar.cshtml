@@ -55,14 +55,24 @@
                                 </div>
 
                                 <div class="mb-3">
-                                    <label class="form-label fw-bold small">Fecha y hora inicio</label>
-                                    <input asp-for="FechaInicio" type="datetime-local" class="form-control rounded-pill" required id="fechaInicio" />
+                                    <label class="form-label fw-bold small">Fecha del evento</label>
+                                    <input type="date" class="form-control rounded-pill" required id="fechaSolo" />
                                 </div>
 
-                                <div class="mb-3">
-                                    <label class="form-label fw-bold small">Fecha y hora fin</label>
-                                    <input asp-for="FechaFin" type="datetime-local" class="form-control rounded-pill" required id="fechaFin" />
+                                <div class="row">
+                                    <div class="col-6 mb-3">
+                                        <label class="form-label fw-bold small">Hora inicio</label>
+                                        <input type="time" class="form-control rounded-pill" required id="horaInicio" />
+                                    </div>
+                                    <div class="col-6 mb-3">
+                                        <label class="form-label fw-bold small">Hora fin</label>
+                                        <input type="time" class="form-control rounded-pill" required id="horaFin" />
+                                    </div>
                                 </div>
+
+                                @* ✅ Campos ocultos que se envían al backend *@
+                                <input type="hidden" asp-for="FechaInicio" id="fechaInicioHidden" />
+                                <input type="hidden" asp-for="FechaFin" id="fechaFinHidden" />
 
                                 @* Preview del costo *@
                                 <div class="alert alert-primary border-0 rounded-3 mb-3" id="previewCosto" style="display:none;">
@@ -73,7 +83,7 @@
                                 <button type="submit" class="btn btn-primary btn-lg w-100 rounded-pill fw-bold mt-2">
                                     <i class="bi bi-send-fill me-2"></i> Enviar Solicitud
                                 </button>
-                            </div>
+                            </div> @* ← Cierra col-md-4 *@
 
                             @* --- COLUMNA DERECHA: CALENDARIO --- *@
                             <div class="col-md-8">
@@ -89,8 +99,9 @@
                                     </span>
                                 </div>
                                 <div id="calendario" style="border-radius: 15px; overflow: hidden; border: 1px solid #dee2e6;"></div>
-                            </div>
-                        </div>
+                            </div> @* ← Cierra col-md-8 *@
+
+                        </div> @* ← Cierra row *@
                     </form>
                 </div>
             </div>
@@ -102,18 +113,13 @@
 <script src="https://cdn.jsdelivr.net/npm/fullcalendar@6.1.8/index.global.min.js"></script>
 <script>
     const selectLugar = document.getElementById('selectLugar');
-    const fechaInicio = document.getElementById('fechaInicio');
-    const fechaFin = document.getElementById('fechaFin');
     const previewCosto = document.getElementById('previewCosto');
     const textoCosto = document.getElementById('textoCosto');
-
     let calendar;
 
     function iniciarCalendario(lugarId) {
         const calendarEl = document.getElementById('calendario');
-
         if (calendar) calendar.destroy();
-
         calendar = new FullCalendar.Calendar(calendarEl, {
             initialView: 'dayGridMonth',
             locale: 'es',
@@ -125,18 +131,15 @@
             },
             events: `/Alquileres/EventosOcupados?lugarId=${lugarId}`,
             dateClick: function(info) {
-                // Al hacer click en un día, prellenar la fecha
-                const fechaStr = info.dateStr + 'T08:00';
-                fechaInicio.value = fechaStr;
-                fechaFin.value = info.dateStr + 'T10:00';
-                calcularCosto();
+                document.getElementById('fechaSolo').value = info.dateStr;
+                document.getElementById('horaInicio').value = '08:00';
+                document.getElementById('horaFin').value = '10:00';
+                combinarFechaHora();
             }
         });
-
         calendar.render();
     }
 
-    // Cargar calendario al seleccionar recinto
     selectLugar.addEventListener('change', function() {
         const lugarId = this.value;
         if (lugarId) {
@@ -145,9 +148,23 @@
         calcularCosto();
     });
 
+    function combinarFechaHora() {
+        const fecha = document.getElementById('fechaSolo').value;
+        const inicio = document.getElementById('horaInicio').value;
+        const fin = document.getElementById('horaFin').value;
+
+        if (fecha && inicio) {
+            document.getElementById('fechaInicioHidden').value = `${fecha}T${inicio}`;
+        }
+        if (fecha && fin) {
+            document.getElementById('fechaFinHidden').value = `${fecha}T${fin}`;
+        }
+        calcularCosto();
+    }
+
     function calcularCosto() {
-        const inicio = new Date(fechaInicio.value);
-        const fin = new Date(fechaFin.value);
+        const inicio = new Date(document.getElementById('fechaInicioHidden').value);
+        const fin = new Date(document.getElementById('fechaFinHidden').value);
         const opcion = selectLugar.options[selectLugar.selectedIndex];
         const precio = parseFloat(opcion?.dataset?.precio || 0);
 
@@ -161,10 +178,10 @@
         }
     }
 
-    fechaInicio.addEventListener('change', calcularCosto);
-    fechaFin.addEventListener('change', calcularCosto);
+    document.getElementById('fechaSolo').addEventListener('change', combinarFechaHora);
+    document.getElementById('horaInicio').addEventListener('change', combinarFechaHora);
+    document.getElementById('horaFin').addEventListener('change', combinarFechaHora);
 
-    // Si ya hay un lugar seleccionado al cargar
     if (selectLugar.value) {
         iniciarCalendario(selectLugar.value);
     }

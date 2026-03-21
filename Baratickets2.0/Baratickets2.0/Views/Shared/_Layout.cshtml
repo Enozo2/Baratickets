@@ -1,4 +1,5 @@
 ﻿@inject Baratickets2._0.Data.ApplicationDbContext _dbContext
+@inject Microsoft.AspNetCore.Identity.UserManager<Baratickets2._0.Models.ApplicationUser> _userManager
 @{
     int eventosPendientes = 0;
     if (User.IsInRole("Admin"))
@@ -89,9 +90,25 @@
                                     <i class="bi bi-calendar-check me-1"></i> Mis Eventos
                                 </a>
                             </li>
-                           
                         }
 
+                      
+                        @* --- ORGANIZADOR TEMPORAL (cliente que alquiló) --- *@
+                        @if (User.IsInRole("OrganizadorTemporal"))
+                        {
+                            var userId = _userManager.GetUserId(User);
+                            var tieneSolicitudActiva = _dbContext.SolicitudesAlquiler
+                            .Any(s => s.ClienteId == userId && s.Estado == "Aprobado");
+
+                            @if (tieneSolicitudActiva)
+                            {
+                                <li class="nav-item">
+                                    <a class="nav-link text-warning fw-bold" asp-controller="Eventos" asp-action="MiEvento">
+                                        <i class="bi bi-calendar-event me-1"></i> Mi Evento
+                                    </a>
+                                </li>
+                            }
+                        }
                         @* --- 🔥 MENÚ UNIFICADO DE ADMINISTRACIÓN --- *@
                         @if (User.IsInRole("Admin"))
                         {

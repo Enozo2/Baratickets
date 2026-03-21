@@ -86,6 +86,13 @@ namespace Baratickets2._0.Controllers
             TempData["SolicitudDescripcion"] = model.DescripcionEvento;
             TempData["SolicitudLugarNombre"] = lugar.Nombre;
 
+            TempData["SolicitudNombreEvento"] = model.NombreEvento;
+            TempData["SolicitudDescripcion"] = model.DescripcionEvento;
+            TempData["SolicitudFecha"] = model.FechaInicio.ToString("yyyy-MM-dd");
+            TempData["SolicitudHoraInicio"] = model.FechaInicio.ToString("HH:mm");
+            TempData["SolicitudHoraFin"] = model.FechaFin.ToString("HH:mm");
+            TempData["SolicitudLugarId"] = model.LugarId;
+
             return RedirectToAction("ProcesarPago");
         }
 
@@ -180,6 +187,7 @@ namespace Baratickets2._0.Controllers
             var solicitudes = await _context.SolicitudesAlquiler
                 .Include(s => s.Lugar)
                 .Include(s => s.Cliente)
+                .Where(s => s.Estado != "Terminado") // ✅ Ocultar terminados
                 .OrderByDescending(s => s.FechaSolicitud)
                 .ToListAsync();
 
@@ -199,15 +207,58 @@ namespace Baratickets2._0.Controllers
 
             solicitud.Estado = "Aprobado";
 
-            if (!await _userManager.IsInRoleAsync(solicitud.Cliente, "Organizador"))
-                await _userManager.AddToRoleAsync(solicitud.Cliente, "Organizador");
+            // ✅ Dar rol OrganizadorTemporal en vez de Organizador
+            if (!await _userManager.IsInRoleAsync(solicitud.Cliente, "OrganizadorTemporal"))
+                await _userManager.AddToRoleAsync(solicitud.Cliente, "OrganizadorTemporal");
 
             await _context.SaveChangesAsync();
 
             TempData["Success"] = $"Solicitud aprobada. {solicitud.Cliente.NombreCompleto} ahora puede crear su evento.";
             return RedirectToAction("GestionSolicitudes");
         }
-        [HttpGet]
+
+        [HttpPost]
+        [Authorize(Roles = "Admin")]
+        public async Task<IActionResult> Terminar(int id)
+        {
+            var solicitud = await _context.SolicitudesAlquiler
+                .Include(s => s.Cliente)
+                .FirstOrDefaultAsync(s => s.Id == id);
+
+            if (solicitud == null) return NotFound();
+
+            // ✅ Despublicar el evento
+            if (solicitud.EventoId != null)
+            {
+                var evento = await _context.Eventos.FindAsync(solicitud.EventoId);
+                if (evento != null)
+                {
+                    evento.EstadoEvento = "Terminado";
+                    _context.Update(evento);
+                }
+            }
+
+            // ✅ Quitar rol OrganizadorTemporal
+            if (solicitud.Cliente != null)
+            {
+                var tieneOtrosEventos = await _context.Eventos
+                    .AnyAsync(e => e.OrganizadorId == solicitud.ClienteId
+                                && e.Id != solicitud.EventoId);
+
+                if (!tieneOtrosEventos)
+                {
+                    await _userManager.RemoveFromRoleAsync(solicitud.Cliente, "OrganizadorTemporal");
+                    await _userManager.UpdateSecurityStampAsync(solicitud.Cliente);
+                }
+            }
+
+            solicitud.Estado = "Terminado";
+            solicitud.EventoId = null;
+            await _context.SaveChangesAsync();
+
+            TempData["Success"] = "Alquiler terminado. El evento fue despublicado y el cliente perdió el acceso temporal.";
+            return RedirectToAction("GestionSolicitudes");
+        }
         public async Task<IActionResult> EventosOcupados(int? lugarId)
         {
             var eventos = await _context.Eventos

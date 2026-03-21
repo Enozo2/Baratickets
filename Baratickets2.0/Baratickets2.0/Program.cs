@@ -84,7 +84,7 @@ using (var scope = app.Services.CreateScope())
         context.Database.EnsureCreated();
 
         // 1. Crear roles
-        string[] rolesParaCrear = { "Admin", "Cliente", "Organizador", "Validador" };
+        string[] rolesParaCrear = { "Admin", "Cliente", "Organizador", "Validador", "OrganizadorTemporal" };
         foreach (var nombreRol in rolesParaCrear)
         {
             if (!roleManager.RoleExistsAsync(nombreRol).Result)
