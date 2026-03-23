@@ -5,111 +5,148 @@
     bool esAlquiler = ViewBag.EsDesdeAlquiler ?? false;
 }
 
+@* FullCalendar CSS *@
+<link href="https://cdn.jsdelivr.net/npm/fullcalendar@6.1.8/index.global.min.css" rel="stylesheet" />
+@* ✅ Estilo del calendario *@
+<style>
+    #calendario {
+        min-height: 550px;
+        border-radius: 15px;
+        overflow: hidden;
+        border: 1px solid #dee2e6;
+    }
+</style>
 <div class="container mt-4">
     <div class="row justify-content-center">
-        <div class="col-md-8">
+        <div class="col-md-11">
             <div class="card shadow border-0 p-4" style="border-radius: 20px;">
                 <h2 class="text-primary fw-bold mb-4">Configuración del Nuevo Evento</h2>
 
                 <form asp-action="Create">
                     <div asp-validation-summary="ModelOnly" class="text-danger"></div>
 
-                    @* --- Datos Básicos --- *@
-                   
                     <div class="row">
-                        <div class="col-md-12 mb-3">
-                            <label asp-for="Nombre" class="form-label fw-bold"></label>
-                            <input asp-for="Nombre" class="form-control" placeholder="Nombre del evento" />
-                            <span asp-validation-for="Nombre" class="text-danger"></span>
-                        </div>
-                        <div class="form-group mb-3">
-                            <label class="control-label fw-bold">Organizador</label>
-                            <input asp-for="Organizacion" class="form-control" placeholder="Ej: Universidad Autónoma, Club Deportivo, etc." />
-                            <span asp-validation-for="Organizacion" class="text-danger"></span>
-                        </div>
-                        <div class="col-md-12 mb-3">
-                            <label asp-for="Descripcion" class="form-label fw-bold"></label>
-                            <textarea asp-for="Descripcion" class="form-control" rows="2"></textarea>
-                        </div>
-                    </div>
-                    @* 1. RECINTO *@
-                    <div class="mb-3">
-                        <label class="form-label fw-bold">Seleccionar Recinto de Villa Olímpica</label>
-                        @if (esAlquiler)
+                        @* --- COLUMNA IZQUIERDA: FORMULARIO --- *@
+                        <div class="@(esAlquiler ? "col-md-8 mx-auto" : "col-md-6")">
+                            <div class="mb-3">
+                                <label asp-for="Nombre" class="form-label fw-bold"></label>
+                                <input asp-for="Nombre" class="form-control" placeholder="Nombre del evento" />
+                                <span asp-validation-for="Nombre" class="text-danger"></span>
+                            </div>
+
+                            <div class="mb-3">
+                                <label class="form-label fw-bold">Organizador</label>
+                                <input asp-for="Organizacion" class="form-control" placeholder="Ej: Universidad Autónoma, Club Deportivo, etc." />
+                                <span asp-validation-for="Organizacion" class="text-danger"></span>
+                            </div>
+
+                            <div class="mb-3">
+                                <label asp-for="Descripcion" class="form-label fw-bold"></label>
+                                <textarea asp-for="Descripcion" class="form-control" rows="2"></textarea>
+                            </div>
+
+                            @* RECINTO *@
+                            <div class="mb-3">
+                                <label class="form-label fw-bold">Seleccionar Recinto de Villa Olímpica</label>
+                                @if (esAlquiler)
+                                {
+                                    <select asp-for="LugarId" class="form-select bg-light" asp-items="ViewBag.LugarId" style="pointer-events: none;"></select>
+                                    <input type="hidden" asp-for="LugarId" />
+                                    <small class="text-info"><i class="bi bi-info-circle"></i> Recinto reservado mediante alquiler.</small>
+                                }
+                                else
+                                {
+                                    <select asp-for="LugarId" class="form-select" asp-items="ViewBag.LugarId" id="selectLugar">
+                                        <option value="">-- Seleccione un lugar --</option>
+                                    </select>
+                                }
+                            </div>
+
+                            @* FECHA *@
+                            <div class="mb-3">
+                                <label class="form-label fw-bold">Fecha del Evento</label>
+                                <input type="date" name="fechaSolo" id="fechaSolo" class="form-control @(esAlquiler ? "bg-light" : "")"
+                                       value="@ViewBag.FechaAprobada"
+                                       @(esAlquiler ? "readonly" : "") />
+                            </div>
+
+                            <div class="row">
+                                <div class="col-md-6 mb-3">
+                                    <label class="form-label fw-bold">Hora de Inicio</label>
+                                    <input type="time" name="horaInicio" id="horaInicio" class="form-control @(esAlquiler ? "bg-light" : "")"
+                                           value="@ViewBag.HoraInicioAprobada"
+                                           @(esAlquiler ? "readonly" : "") />
+                                </div>
+                                <div class="col-md-6 mb-3">
+                                    <label class="form-label fw-bold">Hora de Finalización</label>
+                                    <input type="time" name="horaFin" id="horaFin" class="form-control @(esAlquiler ? "bg-light" : "")"
+                                           value="@ViewBag.HoraFinAprobada"
+                                           @(esAlquiler ? "readonly" : "") />
+                                </div>
+                            </div>
+
+                            @* FLYER *@
+                            <div class="mb-3">
+                                <label asp-for="ImagenUrl" class="form-label fw-bold">Link del Flyer / Imagen del Evento</label>
+                                <div class="input-group">
+                                    <span class="input-group-text bg-white"><i class="bi bi-image text-primary"></i></span>
+                                    <input asp-for="ImagenUrl" class="form-control" placeholder="https://ejemplo.com/mi-flyer.jpg" />
+                                </div>
+                                <span asp-validation-for="ImagenUrl" class="text-danger small"></span>
+                                <div class="form-text mt-1">
+                                    <i class="bi bi-lightbulb me-1"></i> Pega el enlace de una imagen (JPG, PNG) para que tu evento destaque.
+                                </div>
+                            </div>
+
+                            @* SEGMENTOS *@
+                            <div class="bg-light p-4 rounded-4 mb-4 border">
+                                <div class="d-flex justify-content-between align-items-center mb-3">
+                                    <h5 class="fw-bold mb-0 text-dark"><i class="bi bi-tags-fill me-2"></i>Segmentos de Boletas</h5>
+                                    <button type="button" id="btnAddCategory" class="btn btn-sm btn-dark rounded-pill px-3">
+                                        <i class="bi bi-plus-lg"></i> Agregar Segmento
+                                    </button>
+                                </div>
+                                <div id="categoriesContainer"></div>
+                                <small class="text-muted">Agrega nombres como: General, VIP, Lado A, etc.</small>
+                            </div>
+
+                            <div class="form-group d-flex gap-2">
+                                <button type="submit" class="btn btn-primary btn-lg px-5 rounded-pill shadow">Guardar Evento</button>
+                                <a asp-action="Index" class="btn btn-light btn-lg rounded-pill">Cancelar</a>
+                            </div>
+                        </div> @* ← Cierra col-md-6 formulario *@
+
+                        @* --- COLUMNA DERECHA: CALENDARIO --- *@
+                        @if (!esAlquiler)
                         {
-                            <select asp-for="LugarId" class="form-select bg-light" asp-items="ViewBag.LugarId" style="pointer-events: none;"></select>
-                            <input type="hidden" asp-for="LugarId" />
-                            <small class="text-info"><i class="bi bi-info-circle"></i> Recinto reservado mediante alquiler.</small>
-                        }
-                        else
-                        {
-                            <select asp-for="LugarId" class="form-select" asp-items="ViewBag.LugarId">
-                                <option value="">-- Seleccione un lugar --</option>
-                            </select>
-                        }
-                    </div>
-
-                    @* 2. FECHA *@
-                    <div class="mb-3">
-                        <label class="form-label fw-bold">Fecha del Evento</label>
-                        <input type="date" name="fechaSolo" class="form-control @(esAlquiler ? "bg-light" : "")"
-                               value="@ViewBag.FechaAprobada"
-                               @(esAlquiler ? "readonly" : "") />
-                    </div>
-
-                    <div class="row">
-                        @* 3. HORA INICIO *@
-                        <div class="col-md-6 mb-3">
-                            <label class="form-label fw-bold">Hora de Inicio</label>
-                            <input type="time" name="horaInicio" class="form-control @(esAlquiler ? "bg-light" : "")"
-                                   value="@ViewBag.HoraInicioAprobada"
-                                   @(esAlquiler ? "readonly" : "") />
-                        </div>
-
-                        @* 4. HORA FIN *@
-                        <div class="col-md-6 mb-3">
-                            <label class="form-label fw-bold">Hora de Finalización</label>
-                            <input type="time" name="horaFin" class="form-control @(esAlquiler ? "bg-light" : "")"
-                                   value="@ViewBag.HoraFinAprobada"
-                                   @(esAlquiler ? "readonly" : "") />
-                        </div>
-                    </div>
-                    @* CAMPO PARA EL FLYER (Imagen del Evento) *@
-                    <div class="mb-3">
-                        <label asp-for="ImagenUrl" class="form-label fw-bold">Link del Flyer / Imagen del Evento</label>
-                        <div class="input-group">
-                            <span class="input-group-text bg-white"><i class="bi bi-image text-primary"></i></span>
-                            <input asp-for="ImagenUrl" class="form-control" placeholder="https://ejemplo.com/mi-flyer.jpg" />
-                        </div>
-                        <span asp-validation-for="ImagenUrl" class="text-danger small"></span>
-                        <div class="form-text mt-1">
-                            <i class="bi bi-lightbulb me-1"></i> Pega el enlace de una imagen (JPG, PNG) para que tu evento destaque.
-                        </div>
-                    </div>
-                    @* --- SECCIÓN DINÁMICA DE CATEGORÍAS --- *@
-                    <div class="bg-light p-4 rounded-4 mb-4 border">
-                        <div class="d-flex justify-content-between align-items-center mb-3">
-                            <h5 class="fw-bold mb-0 text-dark"><i class="bi bi-tags-fill me-2"></i>Segmentos de Boletas</h5>
-                            <button type="button" id="btnAddCategory" class="btn btn-sm btn-dark rounded-pill px-3">
-                                <i class="bi bi-plus-lg"></i> Agregar Segmento
-                            </button>
-                        </div>
-
-                        <div id="categoriesContainer">
-                            @* Aquí se insertarán las filas dinámicamente *@
-                        </div>
-                        <small class="text-muted">Agrega nombres como: General, VIP, Lado A, etc.</small>
-                    </div>
-
-                    <div class="form-group d-flex gap-2">
-                        <button type="submit" class="btn btn-primary btn-lg px-5 rounded-pill shadow">Guardar Evento</button>
-                        <a asp-action="Index" class="btn btn-light btn-lg rounded-pill">Cancelar</a>
-                    </div>
+                            <div class="col-md-6">
+                                <label class="form-label fw-bold">Disponibilidad del Recinto</label>
+                                <div class="mb-2 d-flex gap-2 flex-wrap">
+                                    <span class="badge bg-danger px-3 py-2">
+                                        <i class="bi bi-calendar-x me-1"></i> Ocupado
+                                    </span>
+                                    <span class="badge px-3 py-2" style="background-color: #fd7e14;">
+                                        <i class="bi bi-building me-1"></i> Alquiler reservado
+                                    </span>
+                                    <span class="badge bg-success px-3 py-2">
+                                        <i class="bi bi-calendar-check me-1"></i> Disponible
+                                    </span>
+                                </div>
+                                <div id="calendario" style="border-radius: 15px; overflow: hidden; border: 1px solid #dee2e6;"></div>
+                                <small class="text-muted mt-2 d-block">
+                                    <i class="bi bi-info-circle me-1"></i> Haz click en un día para preseleccionar la fecha.
+                                </small>
+                            </div>
+                        }                      
+                    </div> @* ← Cierra row *@
                 </form>
             </div>
         </div>
     </div>
 </div>
+
+@* FullCalendar JS *@
+<script src="https://cdn.jsdelivr.net/npm/fullcalendar@6.1.8/index.global.min.js"></script>
 
 @section Scripts {
     @{
@@ -117,7 +154,134 @@
     }
 
     <script>
-        // --- 1. LÓGICA DINÁMICA DE SEGMENTOS (BOLETAS) ---
+        // --- CALENDARIO ---
+        const selectLugar = document.getElementById('selectLugar');
+        let calendar;
+
+           function iniciarCalendario(lugarId) {
+            const calendarEl = document.getElementById('calendario');
+            if (!calendarEl) return;
+            if (calendar) calendar.destroy();
+
+            let esperandoFin = false;
+            let horaInicioTemp = null;
+
+            calendar = new FullCalendar.Calendar(calendarEl, {
+                initialView: 'dayGridMonth',
+                locale: 'es',
+                height: 600, // ✅ Más alto
+                headerToolbar: {
+                    left: 'prev,next today',
+                    center: 'title',
+                    right: 'dayGridMonth,timeGridDay'
+                },
+                slotMinTime: '06:00:00',
+                slotMaxTime: '24:00:00',
+                slotDuration: '00:30:00',
+                events: `/Alquileres/EventosOcupados?lugarId=${lugarId}`,
+                dateClick: function(info) {
+                    calendar.changeView('timeGridDay', info.dateStr);
+                    document.getElementById('fechaSolo').value = info.dateStr;
+                },
+                eventClick: function(info) {
+                    Swal.fire({
+                        title: '⛔ Horario Ocupado',
+                        html: `<b>${info.event.title}</b><br>
+                               ${info.event.start.toLocaleTimeString('es-DO', {hour:'2-digit', minute:'2-digit'})} -
+                               ${info.event.end?.toLocaleTimeString('es-DO', {hour:'2-digit', minute:'2-digit'})}`,
+                        icon: 'warning',
+                        confirmButtonColor: '#0d6efd'
+                    });
+                },
+                // ✅ Click en slot vacío — primero selecciona inicio, segundo click selecciona fin
+                dateClick: function(info) {
+                    if (info.view.type === 'dayGridMonth') {
+                        calendar.changeView('timeGridDay', info.dateStr);
+                        document.getElementById('fechaSolo').value = info.dateStr;
+                        return;
+                    }
+
+                    const hora = info.dateStr.substring(11, 16);
+
+                    if (!esperandoFin) {
+                        // Primer click — hora inicio
+                        horaInicioTemp = hora;
+                        esperandoFin = true;
+                        document.querySelector('input[name="horaInicio"]').value = hora;
+                        Swal.fire({
+                            title: '🕐 Hora inicio seleccionada',
+                            html: `<b>${hora}</b> — Ahora haz click en la hora de fin`,
+                            icon: 'info',
+                            timer: 2000,
+                            showConfirmButton: false,
+                            toast: true,
+                            position: 'top-end'
+                        });
+                    } else {
+                        // Segundo click — hora fin
+                        const horaFin = hora;
+                        esperandoFin = false;
+
+                        if (horaFin <= horaInicioTemp) {
+                            Swal.fire({
+                                title: 'Error',
+                                text: 'La hora de fin debe ser mayor a la hora de inicio.',
+                                icon: 'error',
+                                confirmButtonColor: '#0d6efd'
+                            });
+                            return;
+                        }
+
+                        document.querySelector('input[name="horaFin"]').value = horaFin;
+                        Swal.fire({
+                            title: '✅ Horario listo',
+                            html: `Inicio: <b>${horaInicioTemp}</b> — Fin: <b>${horaFin}</b>`,
+                            icon: 'success',
+                            timer: 2000,
+                            showConfirmButton: false,
+                            toast: true,
+                            position: 'top-end'
+                        });
+                    }
+                },
+                customButtons: {
+                    volverMes: {
+                        text: '← Mes',
+                        click: function() {
+                            calendar.changeView('dayGridMonth');
+                            esperandoFin = false;
+                        }
+                    }
+                },
+                selectable: false // ✅ Desactivar arrastre, usar clicks individuales
+            });
+
+            calendar.on('viewDidMount', function(info) {
+                if (info.view.type === 'timeGridDay') {
+                    calendar.setOption('headerToolbar', {
+                        left: 'volverMes prev,next',
+                        center: 'title',
+                        right: ''
+                    });
+                } else {
+                    calendar.setOption('headerToolbar', {
+                        left: 'prev,next today',
+                        center: 'title',
+                        right: 'dayGridMonth,timeGridDay'
+                    });
+                }
+            });
+
+            calendar.render();
+        }
+
+        if (selectLugar) {
+            selectLugar.addEventListener('change', function() {
+                if (this.value) iniciarCalendario(this.value);
+            });
+        }
+
+        // --- SEGMENTOS ---
         let categoryIndex = 0;
         const btnAdd = document.getElementById('btnAddCategory');
         const container = document.getElementById('categoriesContainer');
@@ -146,43 +310,7 @@
                 categoryIndex++;
             });
 
-            // Generar la primera fila automáticamente al cargar la página
             btnAdd.click();
         }
-
-        // --- 2. LÓGICA VISTA PREVIA DEL FLYER ---
-        const inputUrl = document.getElementById('urlInput');
-        const preview = document.getElementById('previewImagen');
-
-        if (inputUrl && preview) {
-            inputUrl.addEventListener('input', function () {
-                let url = this.value;
-                if (url) {
-                    preview.src = url;
-                    preview.style.display = "block";
-                    preview.onerror = function() { this.style.display = "none"; };
-                } else {
-                    preview.style.display = "none";
-                }
-            });
-        }
-    </script>
-    <script>
-        const inicio = document.querySelector('input[name="FechaInicio"]');
-        const fin = document.querySelector('input[name="FechaFin"]');
-
-        inicio.addEventListener('change', () => {
-            // Obligamos a que la fecha de fin sea al menos 1 hora después del inicio
-            if (inicio.value) {
-                fin.min = inicio.value;
-            }
-        });
-
-        fin.addEventListener('change', () => {
-            if (fin.value < inicio.value) {
-                alert("La hora de finalización no puede ser antes que la de inicio.");
-                fin.value = "";
-            }
-        });
     </script>
 }

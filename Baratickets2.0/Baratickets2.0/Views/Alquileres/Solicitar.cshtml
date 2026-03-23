@@ -6,7 +6,15 @@
 
 @* FullCalendar CSS *@
 <link href="https://cdn.jsdelivr.net/npm/fullcalendar@6.1.8/index.global.min.css" rel="stylesheet" />
-
+@* ✅ Estilo del calendario *@
+<style>
+    #calendario {
+        min-height: 550px;
+        border-radius: 15px;
+        overflow: hidden;
+        border: 1px solid #dee2e6;
+    }
+</style>
 <div class="container mt-5">
     <div class="row justify-content-center">
         <div class="col-md-10">
@@ -117,26 +125,113 @@
     const textoCosto = document.getElementById('textoCosto');
     let calendar;
 
-    function iniciarCalendario(lugarId) {
+       function iniciarCalendario(lugarId) {
         const calendarEl = document.getElementById('calendario');
         if (calendar) calendar.destroy();
+
+        let esperandoFin = false;
+        let horaInicioTemp = null;
+
         calendar = new FullCalendar.Calendar(calendarEl, {
             initialView: 'dayGridMonth',
             locale: 'es',
-            height: 500,
+            height: 600,
             headerToolbar: {
                 left: 'prev,next today',
                 center: 'title',
-                right: 'dayGridMonth,timeGridWeek'
+                right: 'dayGridMonth,timeGridDay'
             },
+            slotMinTime: '06:00:00',
+            slotMaxTime: '24:00:00',
+            slotDuration: '00:30:00',
             events: `/Alquileres/EventosOcupados?lugarId=${lugarId}`,
             dateClick: function(info) {
-                document.getElementById('fechaSolo').value = info.dateStr;
-                document.getElementById('horaInicio').value = '08:00';
-                document.getElementById('horaFin').value = '10:00';
-                combinarFechaHora();
+                if (info.view.type === 'dayGridMonth') {
+                    calendar.changeView('timeGridDay', info.dateStr);
+                    document.getElementById('fechaSolo').value = info.dateStr;
+                    combinarFechaHora();
+                    return;
+                }
+
+                const hora = info.dateStr.length >= 16 ? info.dateStr.substring(11, 16) : null;
+                if (!hora) return;
+
+                if (!esperandoFin) {
+                    horaInicioTemp = hora;
+                    esperandoFin = true;
+                    document.getElementById('horaInicio').value = hora;
+                    combinarFechaHora();
+                    Swal.fire({
+                        title: '🕐 Hora inicio: ' + hora,
+                        text: 'Ahora haz click en la hora de fin',
+                        icon: 'info',
+                        timer: 2000,
+                        showConfirmButton: false,
+                        toast: true,
+                        position: 'top-end'
+                    });
+                } else {
+                    if (hora <= horaInicioTemp) {
+                        Swal.fire({
+                            title: 'Error',
+                            text: 'La hora de fin debe ser mayor a la hora de inicio.',
+                            icon: 'error',
+                            confirmButtonColor: '#0d6efd'
+                        });
+                        return;
+                    }
+                    esperandoFin = false;
+                    document.getElementById('horaFin').value = hora;
+                    combinarFechaHora();
+                    Swal.fire({
+                        title: '✅ Horario seleccionado',
+                        html: `Inicio: <b>${horaInicioTemp}</b> — Fin: <b>${hora}</b>`,
+                        icon: 'success',
+                        timer: 2500,
+                        showConfirmButton: false,
+                        toast: true,
+                        position: 'top-end'
+                    });
+                }
+            },
+            eventClick: function(info) {
+                Swal.fire({
+                    title: '⛔ Horario Ocupado',
+                    html: `<b>${info.event.title}</b><br>
+                           ${info.event.start.toLocaleTimeString('es-DO', {hour:'2-digit', minute:'2-digit'})} -
+                           ${info.event.end?.toLocaleTimeString('es-DO', {hour:'2-digit', minute:'2-digit'})}`,
+                    icon: 'warning',
+                    confirmButtonColor: '#0d6efd'
+                });
+            },
+            customButtons: {
+                volverMes: {
+                    text: '← Mes',
+                    click: function() {
+                        calendar.changeView('dayGridMonth');
+                        esperandoFin = false;
+                    }
+                }
+            },
+            selectable: false
+        });
+
+        calendar.on('viewDidMount', function(info) {
+            if (info.view.type === 'timeGridDay') {
+                calendar.setOption('headerToolbar', {
+                    left: 'volverMes prev,next',
+                    center: 'title',
+                    right: ''
+                });
+            } else {
+                calendar.setOption('headerToolbar', {
+                    left: 'prev,next today',
+                    center: 'title',
+                    right: 'dayGridMonth,timeGridDay'
+                });
             }
         });
+
         calendar.render();
     }
 

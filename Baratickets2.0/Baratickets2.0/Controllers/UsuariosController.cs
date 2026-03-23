@@ -154,12 +154,83 @@ public class UsuariosController : Controller
             TempData["Error"] = "No puedes eliminar tu propia cuenta.";
             return RedirectToAction(nameof(Index));
         }
+        if (user.Email == "Enocr28@gmail.com")
+        {
+            TempData["Error"] = "No puedes eliminar al administrador principal del sistema.";
+            return RedirectToAction(nameof(Index));
+        }
 
+        // ✅ Borrar eventos del usuario antes de eliminar
+        var eventosUsuario = await _context.Eventos
+            .Include(e => e.Tickets)
+            .Include(e => e.CategoriasTickets)
+            .Where(e => e.OrganizadorId == user.Id)
+            .ToListAsync();
+
+        foreach (var evento in eventosUsuario)
+        {
+            var solicitud = await _context.SolicitudesAlquiler
+                .FirstOrDefaultAsync(s => s.EventoId == evento.Id);
+            if (solicitud != null)
+            {
+                solicitud.EventoId = null;
+                _context.Update(solicitud);
+            }
+
+            if (evento.Tickets != null && evento.Tickets.Any())
+            {
+                var ticketIds = evento.Tickets.Select(t => t.Id).ToList();
+                await _context.Devoluciones
+                    .Where(d => ticketIds.Contains(d.TicketId))
+                    .ExecuteDeleteAsync();
+            }
+
+            if (evento.Tickets != null && evento.Tickets.Any())
+                _context.Tickets.RemoveRange(evento.Tickets);
+
+            if (evento.CategoriasTickets != null && evento.CategoriasTickets.Any())
+                _context.CategoriasTickets.RemoveRange(evento.CategoriasTickets);
+
+            _context.Eventos.Remove(evento);
+        }
+
+        // ✅ Borrar solicitudes de alquiler del usuario
+        var solicitudesUsuario = await _context.SolicitudesAlquiler
+            .Where(s => s.ClienteId == user.Id)
+            .ToListAsync();
+        _context.SolicitudesAlquiler.RemoveRange(solicitudesUsuario);
+
+        // ✅ Borrar tickets comprados por el usuario
+        var ticketsUsuario = await _context.Tickets
+            .Where(t => t.UsuarioId == user.Id)
+            .ToListAsync();
+
+        foreach (var ticket in ticketsUsuario)
+        {
+            await _context.Devoluciones
+                .Where(d => d.TicketId == ticket.Id)
+                .ExecuteDeleteAsync();
+        }
+        _context.Tickets.RemoveRange(ticketsUsuario);
+
+        // ✅ Borrar devoluciones restantes del usuario
+        await _context.Devoluciones
+            .Where(d => d.UsuarioId == user.Id)
+            .ExecuteDeleteAsync();
+
+        // ✅ Borrar órdenes del usuario
+        var ordenesUsuario = await _context.Ordenes
+            .Where(o => o.ClienteId == user.Id)
+            .ToListAsync();
+        _context.Ordenes.RemoveRange(ordenesUsuario);
+
+        await _context.SaveChangesAsync();
+
+        // ✅ Ahora sí eliminar el usuario
         await _userManager.DeleteAsync(user);
         TempData["Success"] = "Usuario eliminado.";
         return RedirectToAction(nameof(Index));
     }
-
     [Authorize(Roles = "Admin")]
     [HttpPost]
     public async Task<IActionResult> AsignarRol(string userId, string nombreRol)

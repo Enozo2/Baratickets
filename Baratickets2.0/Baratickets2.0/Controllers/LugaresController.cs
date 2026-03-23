@@ -52,21 +52,27 @@ namespace Baratickets2._0.Controllers
         [Authorize(Roles = "Admin")]
         public async Task<IActionResult> ReporteUso(int? mes, int? anio)
         {
-            // ✅ Usar mes/año seleccionado o el actual por defecto
             var mesActual = mes ?? DateTime.Now.Month;
             var anioActual = anio ?? DateTime.Now.Year;
-
             var inicioMes = new DateTime(anioActual, mesActual, 1);
             var finMes = inicioMes.AddMonths(1).AddDays(-1);
 
             ViewBag.MesSeleccionado = mesActual;
             ViewBag.AnioSeleccionado = anioActual;
 
+            // ✅ Obtener IDs de eventos vinculados a alquileres
+            var eventosDeAlquiler = await _context.SolicitudesAlquiler
+                .Where(s => s.EventoId != null)
+                .Select(s => s.EventoId)
+                .ToListAsync();
+
             var reporte = await _context.Lugares
                 .Select(l => new {
                     NombreRecinto = l.Nombre,
+                    // ✅ Excluir eventos del organizador temporal
                     EventosPropios = l.Eventos
-                        .Where(e => e.FechaInicio >= inicioMes && e.FechaInicio <= finMes)
+                        .Where(e => e.FechaInicio >= inicioMes && e.FechaInicio <= finMes
+                            && !eventosDeAlquiler.Contains(e.Id))
                         .Select(e => new { Nombre = e.Nombre })
                         .ToList(),
                     AlquileresAprobados = l.SolicitudesAlquiler
@@ -75,8 +81,10 @@ namespace Baratickets2._0.Controllers
                                s.FechaInicio <= finMes)
                         .Select(s => new { Nombre = s.NombreEvento })
                         .ToList(),
+                    // ✅ Ganancias de tickets solo de eventos propios
                     GananciaTickets = l.Eventos
-                        .Where(e => e.FechaInicio >= inicioMes && e.FechaInicio <= finMes)
+                        .Where(e => e.FechaInicio >= inicioMes && e.FechaInicio <= finMes
+                            && !eventosDeAlquiler.Contains(e.Id))
                         .SelectMany(e => e.Tickets)
                         .Where(t => t.Estado != "Devuelto")
                         .Sum(t => (decimal?)t.PrecioPagado) ?? 0,

@@ -7,9 +7,9 @@ using Microsoft.EntityFrameworkCore;
 
 var builder = WebApplication.CreateBuilder(args);
 
-// ==========================================================
-// 1. CONFIGURACIÓN DE SERVICIOS (Contenedor de Dependencias)
-// ==========================================================
+
+// CONFIGURACIÓN DE SERVICIOS (Contenedor de Dependencias)
+
 builder.Services.AddControllersWithViews();
 builder.Services.AddRazorPages();
 
@@ -40,7 +40,7 @@ builder.Services.AddTransient<IEmailSender, EmailSender>();
 // Redirección de Cookies para Identity
 builder.Services.ConfigureApplicationCookie(options =>
 {
-    options.ExpireTimeSpan = TimeSpan.FromMinutes(2); 
+    options.ExpireTimeSpan = TimeSpan.FromMinutes(15); 
     options.SlidingExpiration = true;
     options.LoginPath = "/Identity/Account/Login";
 });

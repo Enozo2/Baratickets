@@ -4,6 +4,17 @@
     ViewData["Title"] = "Editar Evento";
 }
 
+@* FullCalendar CSS *@
+<link href="https://cdn.jsdelivr.net/npm/fullcalendar@6.1.8/index.global.min.css" rel="stylesheet" />
+@* ✅ Estilo del calendario *@
+<style>
+    #calendario {
+        min-height: 550px;
+        border-radius: 15px;
+        overflow: hidden;
+        border: 1px solid #dee2e6;
+    }
+</style>
 <div class="container mt-4">
     <div class="d-flex justify-content-between align-items-center mb-3">
         <div>
@@ -21,7 +32,7 @@
 
         <div class="row">
             @* --- COLUMNA IZQUIERDA: DATOS BÁSICOS --- *@
-            <div class="col-md-6">
+            <div class="col-md-5">
                 <div class="card shadow-sm border-0 p-4 mb-4" style="border-radius: 15px;">
                     <h5 class="fw-bold mb-3 text-secondary">Información Principal</h5>
 
@@ -42,7 +53,7 @@
 
                     <div class="mb-3">
                         <label class="form-label fw-bold"><i class="bi bi-building-geo me-2"></i>Recinto Villa Olímpica</label>
-                        <select asp-for="LugarId" class="form-select shadow-sm border-2" asp-items="ViewBag.LugarId">
+                        <select asp-for="LugarId" class="form-select shadow-sm border-2" asp-items="ViewBag.LugarId" id="selectLugar">
                             <option value="">-- Selecciona el Pabellón/Recinto --</option>
                         </select>
                         <span asp-validation-for="LugarId" class="text-danger small"></span>
@@ -51,7 +62,7 @@
 
                     <div class="mb-3">
                         <label>Fecha</label>
-                        <input type="date" name="fechaSolo" class="form-control"
+                        <input type="date" name="fechaSolo" id="fechaSolo" class="form-control"
                                value="@Model.FechaInicio.ToString("yyyy-MM-dd")" required />
                     </div>
 
@@ -68,7 +79,7 @@
                         </div>
                     </div>
 
-                    <div class="form-group">
+                    <div class="form-group mt-3">
                         <label asp-for="ImagenUrl" class="control-label fw-bold small">URL del Flyer</label>
                         <input asp-for="ImagenUrl" class="form-control" id="urlInputEdit" />
                         <div class="mt-3 text-center">
@@ -78,8 +89,30 @@
                 </div>
             </div>
 
-            @* --- COLUMNA DERECHA: CATEGORÍAS DINÁMICAS --- *@
-            <div class="col-md-6">
+            @* --- COLUMNA CENTRAL: CALENDARIO --- *@
+            <div class="col-md-4">
+                <div class="card shadow-sm border-0 p-3 mb-4" style="border-radius: 15px;">
+                    <h5 class="fw-bold mb-2 text-secondary">Disponibilidad del Recinto</h5>
+                    <div class="mb-2 d-flex gap-2 flex-wrap">
+                        <span class="badge bg-danger px-2 py-1" style="font-size:0.65rem;">
+                            <i class="bi bi-calendar-x me-1"></i> Ocupado
+                        </span>
+                        <span class="badge px-2 py-1" style="background-color: #fd7e14; font-size:0.65rem;">
+                            <i class="bi bi-building me-1"></i> Alquiler
+                        </span>
+                        <span class="badge bg-success px-2 py-1" style="font-size:0.65rem;">
+                            <i class="bi bi-calendar-check me-1"></i> Disponible
+                        </span>
+                    </div>
+                    <div id="calendario" style="border-radius: 10px; overflow: hidden; border: 1px solid #dee2e6;"></div>
+                    <small class="text-muted mt-2 d-block">
+                        <i class="bi bi-info-circle me-1"></i> Haz click en un día para preseleccionar la fecha.
+                    </small>
+                </div>
+            </div>
+
+            @* --- COLUMNA DERECHA: CATEGORÍAS --- *@
+            <div class="col-md-3">
                 <div class="card shadow-sm border-0 p-4" style="border-radius: 15px; background-color: #f8f9fa;">
                     <div class="d-flex justify-content-between align-items-center mb-3">
                         <h5 class="fw-bold mb-0 text-secondary">Categorías de Boletas</h5>
@@ -89,7 +122,6 @@
                     </div>
 
                     <div id="categoriesContainerEdit">
-                        @* Renderizamos las categorías que YA existen en la base de datos *@
                         @if (Model.CategoriasTickets != null)
                         {
                             var index = 0;
@@ -128,19 +160,151 @@
     </form>
 </div>
 
+@* FullCalendar JS *@
+<script src="https://cdn.jsdelivr.net/npm/fullcalendar@6.1.8/index.global.min.js"></script>
+
 @section Scripts {
-    @* 1. Cargamos las validaciones de jQuery (necesarias para formularios) *@
     @{
         await Html.RenderPartialAsync("_ValidationScriptsPartial");
     }
 
     <script>
-        // 2. Lógica de Categorías Dinámicas
+        // --- CALENDARIO ---
+        const selectLugar = document.getElementById('selectLugar');
+        let calendar;
+
+              function iniciarCalendario(lugarId) {
+            const calendarEl = document.getElementById('calendario');
+            if (!calendarEl) return;
+            if (calendar) calendar.destroy();
+
+            let esperandoFin = false;
+            let horaInicioTemp = null;
+
+            calendar = new FullCalendar.Calendar(calendarEl, {
+                initialView: 'dayGridMonth',
+                locale: 'es',
+                height: 600, // ✅ Más alto
+                headerToolbar: {
+                    left: 'prev,next today',
+                    center: 'title',
+                    right: 'dayGridMonth,timeGridDay'
+                },
+                slotMinTime: '06:00:00',
+                slotMaxTime: '24:00:00',
+                slotDuration: '00:30:00',
+                events: `/Alquileres/EventosOcupados?lugarId=${lugarId}`,
+                dateClick: function(info) {
+                    calendar.changeView('timeGridDay', info.dateStr);
+                    document.getElementById('fechaSolo').value = info.dateStr;
+                },
+                eventClick: function(info) {
+                    Swal.fire({
+                        title: '⛔ Horario Ocupado',
+                        html: `<b>${info.event.title}</b><br>
+                               ${info.event.start.toLocaleTimeString('es-DO', {hour:'2-digit', minute:'2-digit'})} -
+                               ${info.event.end?.toLocaleTimeString('es-DO', {hour:'2-digit', minute:'2-digit'})}`,
+                        icon: 'warning',
+                        confirmButtonColor: '#0d6efd'
+                    });
+                },
+                // ✅ Click en slot vacío — primero selecciona inicio, segundo click selecciona fin
+                dateClick: function(info) {
+                    if (info.view.type === 'dayGridMonth') {
+                        calendar.changeView('timeGridDay', info.dateStr);
+                        document.getElementById('fechaSolo').value = info.dateStr;
+                        return;
+                    }
+
+                    const hora = info.dateStr.substring(11, 16);
+
+                    if (!esperandoFin) {
+                        // Primer click — hora inicio
+                        horaInicioTemp = hora;
+                        esperandoFin = true;
+                        document.querySelector('input[name="horaInicio"]').value = hora;
+                        Swal.fire({
+                            title: '🕐 Hora inicio seleccionada',
+                            html: `<b>${hora}</b> — Ahora haz click en la hora de fin`,
+                            icon: 'info',
+                            timer: 2000,
+                            showConfirmButton: false,
+                            toast: true,
+                            position: 'top-end'
+                        });
+                    } else {
+                        // Segundo click — hora fin
+                        const horaFin = hora;
+                        esperandoFin = false;
+
+                        if (horaFin <= horaInicioTemp) {
+                            Swal.fire({
+                                title: 'Error',
+                                text: 'La hora de fin debe ser mayor a la hora de inicio.',
+                                icon: 'error',
+                                confirmButtonColor: '#0d6efd'
+                            });
+                            return;
+                        }
+
+                        document.querySelector('input[name="horaFin"]').value = horaFin;
+                        Swal.fire({
+                            title: '✅ Horario listo',
+                            html: `Inicio: <b>${horaInicioTemp}</b> — Fin: <b>${horaFin}</b>`,
+                            icon: 'success',
+                            timer: 2000,
+                            showConfirmButton: false,
+                            toast: true,
+                            position: 'top-end'
+                        });
+                    }
+                },
+                customButtons: {
+                    volverMes: {
+                        text: '← Mes',
+                        click: function() {
+                            calendar.changeView('dayGridMonth');
+                            esperandoFin = false;
+                        }
+                    }
+                },
+                selectable: false // ✅ Desactivar arrastre, usar clicks individuales
+            });
+
+            calendar.on('viewDidMount', function(info) {
+                if (info.view.type === 'timeGridDay') {
+                    calendar.setOption('headerToolbar', {
+                        left: 'volverMes prev,next',
+                        center: 'title',
+                        right: ''
+                    });
+                } else {
+                    calendar.setOption('headerToolbar', {
+                        left: 'prev,next today',
+                        center: 'title',
+                        right: 'dayGridMonth,timeGridDay'
+                    });
+                }
+            });
+
+            calendar.render();
+        }
+        if (selectLugar) {
+            selectLugar.addEventListener('change', function() {
+                if (this.value) iniciarCalendario(this.value);
+            });
+
+            // Cargar calendario con el recinto actual al abrir
+            if (selectLugar.value) {
+                iniciarCalendario(selectLugar.value);
+            }
+        }
+
+        // --- CATEGORÍAS DINÁMICAS ---
         let categoryIndex = @(Model.CategoriasTickets?.Count ?? 0);
 
         document.getElementById('btnAddCategoryEdit').addEventListener('click', function () {
             const container = document.getElementById('categoriesContainerEdit');
-
             const html = `
                 <div class="row g-2 mb-2 category-row animate__animated animate__fadeIn">
                     <div class="col-md-5">
@@ -159,12 +323,11 @@
                     </div>
                 </div>
             `;
-
             container.insertAdjacentHTML('beforeend', html);
             categoryIndex++;
         });
 
-        // 3. Lógica de Preview de Imagen con validación de error
+        // --- PREVIEW IMAGEN ---
         const inputUrl = document.getElementById('urlInputEdit');
         const preview = document.getElementById('previewImagenEdit');
 
@@ -174,9 +337,7 @@
                 if (url) {
                     preview.src = url;
                     preview.style.display = "block";
-                    preview.onerror = function() {
-                        this.style.display = "none";
-                    };
+                    preview.onerror = function() { this.style.display = "none"; };
                 } else {
                     preview.style.display = "none";
                 }

@@ -3,19 +3,16 @@
 @{
     ViewData["Title"] = "Mi Evento";
 }
-
 <div class="container mt-4">
     <div class="d-flex justify-content-between align-items-center mb-4">
         <div>
             <h1 class="text-warning fw-bold mb-0">Mi Evento</h1>
             <p class="text-muted">Gestiona el evento de tu alquiler aprobado</p>
         </div>
-
+    </div>
         @if (!(bool)ViewBag.TieneEventoAlquiler)
         {
-            <a asp-action="Create" class="btn btn-warning shadow-sm rounded-pill px-4 text-dark">
-                <i class="bi bi-plus-circle-fill me-2"></i> Crear Mi Evento
-            </a>
+        
         }
     </div>
 
@@ -24,9 +21,7 @@
         <div class="alert alert-info text-center rounded-4 py-5">
             <i class="bi bi-calendar-x d-block mb-2" style="font-size: 3rem;"></i>
             <h5>Aún no has creado tu evento.</h5>
-            <a asp-action="Create" class="btn btn-warning mt-2 rounded-pill text-dark fw-bold px-4">
-                <i class="bi bi-plus-circle me-2"></i> Crear Mi Evento
-            </a>
+            <p class="text-muted">Ve a <strong>Mis Alquileres</strong> para crear tu evento.</p>
         </div>
     }
     else
