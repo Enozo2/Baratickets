@@ -26,10 +26,10 @@
                     </div>
 
                     <form id="formPago" asp-controller="Tickets" asp-action="ComprarTicket" method="post">
+                        @Html.AntiForgeryToken()
                         <input type="hidden" name="eventoId" value="@Model.Id" />
                         <input type="hidden" name="categoriaId" value="@categoriaId" />
 
-                       
                         <input type="hidden" name="tokenSeguridad" id="tokenSeguridad" value="" />
 
                         <div class="mb-3">
@@ -121,8 +121,7 @@
     async function aplicarCupon() {
         const cupon = document.getElementById('inputCupon').value.trim().toUpperCase();
         const msj = document.getElementById('msjCupon');
-            const categoriaId = document.querySelector('input[name="categoriaId"]').value;
-    console.log('categoriaId:', categoriaId); // ← agrega esto temporalmente
+        const categoriaId = document.querySelector('input[name="categoriaId"]').value;
 
         if (!cupon.startsWith("REFUND-")) {
             document.getElementById('tokenSeguridad').value = '';
@@ -150,7 +149,6 @@
         msj.style.display = "block";
 
         if (data.restaPagar > 0) {
-            // Saldo parcial — mostrar cuánto resta y pedir tarjeta
             msj.innerHTML = `<i class='bi bi-check-circle-fill'></i> Cupón aplica RD$ ${data.descuento.toLocaleString()}. Resta pagar RD$ ${data.restaPagar.toLocaleString()} con tarjeta.`;
             precioDisplay.innerText = `RD$ ${data.restaPagar.toLocaleString()}`;
             precioDisplay.style.textDecoration = "none";
@@ -167,7 +165,6 @@
                 confirmButtonColor: '#0d6efd'
             });
         } else {
-            // Cubre el total — no pide tarjeta
             msj.innerHTML = "<i class='bi bi-check-circle-fill'></i> ¡Cupón cubre el total! RD$ 0";
             precioDisplay.style.textDecoration = "line-through";
             precioDisplay.style.opacity = "0.5";
@@ -183,9 +180,8 @@
                 confirmButtonColor: '#0d6efd'
             });
         }
-    } // ✅ Cierre correcto de aplicarCupon
+    }
 
-    // --- 1. DETECCIÓN DE FRANQUICIA ---
     function detectarFranquicia(numero) {
         const num = numero.replace(/\s/g, '');
         if (num.startsWith('4')) return { nombre: "Visa", color: "#1a1f71" };
@@ -194,7 +190,6 @@
         return { nombre: "", color: "#6c757d" };
     }
 
-    // --- 2. VALIDACIÓN LUHN ---
     function validarTarjetaLuhn(numero) {
         let numLimpio = numero.replace(/\s/g, '');
         if (numLimpio.length < 15) return false;
@@ -211,7 +206,10 @@
     }
 
     function validarEmail(email) {
-        return email.includes('@@') && email.includes('.');
+        const inputTemporal = document.createElement('input');
+        inputTemporal.type = 'email';
+        inputTemporal.value = (email || '').trim();
+        return inputTemporal.checkValidity();
     }
 
     function validarFormulario() {
@@ -243,7 +241,6 @@
             errorSpan.style.display = 'none';
         }
 
-        // Si el cupón ya está aplicado, no bloqueamos el botón
         const msjCupon = document.getElementById('msjCupon');
         if (msjCupon.style.display === 'block' && msjCupon.classList.contains('text-success')) {
             return;
@@ -260,7 +257,6 @@
         }
     }
 
-    // --- 3. EVENTOS ---
     inputTarjeta.addEventListener('input', function (e) {
         let value = e.target.value.replace(/\D/g, '');
         let franquicia = detectarFranquicia(value);
@@ -295,7 +291,6 @@
         const restaPagar = parseFloat(document.getElementById('tokenSeguridad').dataset.restaPagar || '0');
 
         if (cuponValido && restaPagar === 0) {
-            // Cupón cubre el total — no pide tarjeta
             yaSeEnvio = true;
             Swal.fire({
                 title: 'Procesando Cupón...',
@@ -308,7 +303,6 @@
             return;
         }
 
-        // Sin cupón o saldo parcial — validación normal de tarjeta
         if (!validarTarjetaLuhn(inputTarjeta.value)) {
             Swal.fire('Seguridad', 'Número de tarjeta inválido o fraudulento.', 'error');
             return;

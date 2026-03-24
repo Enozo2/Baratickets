@@ -3,6 +3,7 @@
     var monto = ViewBag.Monto ?? 0;
     var lugarNombre = ViewBag.LugarNombre ?? "Recinto";
     var nombreEvento = ViewBag.NombreEvento ?? "Mi Evento";
+    var tipoEventoAlquiler = ViewBag.TipoEventoAlquiler?.ToString() ?? "Publico";
 }
 
 <div class="container mt-5">
@@ -19,6 +20,17 @@
                     <div class="alert alert-success border-0 shadow-sm mb-4 text-center" style="border-radius: 15px;">
                         <span class="badge bg-success mb-2 text-uppercase">Recinto: @lugarNombre</span>
                         <h5 class="fw-bold text-dark mb-1">@nombreEvento</h5>
+                        <div class="mb-2">
+                            <span class="badge @(tipoEventoAlquiler == "Privado" ? "bg-secondary" : "bg-primary")">
+                                @tipoEventoAlquiler
+                            </span>
+                        </div>
+                        @if (tipoEventoAlquiler == "Publico")
+                        {
+                            <small class="d-block text-muted mb-2">
+                                <i class="bi bi-info-circle me-1"></i> El método de cobro de ganancias se configura después de que el Admin apruebe tu solicitud.
+                            </small>
+                        }
                         <h3 id="precioDisplay" class="fw-bold text-success mb-0">RD$ @monto.ToString("N0")</h3>
                         <small class="text-muted">Monto total del alquiler</small>
                     </div>
@@ -209,4 +221,4 @@
             });
         });
     });
-</script>
+</script></script>

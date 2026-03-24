@@ -39,10 +39,21 @@ namespace Baratickets2._0.Controllers
             ModelState.Remove("Evento");
             ModelState.Remove("Orden");
 
-            // 1. Validar conflicto de horario
+            // Validar tipo de evento
+            if (model.TipoEventoAlquiler != "Publico" && model.TipoEventoAlquiler != "Privado")
+            {
+                TempData["Error"] = "Debes seleccionar si el alquiler será público o privado.";
+                ViewBag.Lugares = await _context.Lugares.Where(l => l.EstaActivo).ToListAsync();
+                return View(model);
+            }
+
+            // 🔒 La cuenta/método de ganancias se define DESPUÉS de que el admin apruebe
+            model.CuentaGanancias = null;
+
+            // 1. Validar conflicto de horario solo con reservas activas
             var conflicto = await _context.SolicitudesAlquiler
                 .AnyAsync(s => s.LugarId == model.LugarId
-                    && s.Estado != "Rechazado"
+                    && (s.Estado == "Pendiente" || s.Estado == "Aprobado")
                     && s.FechaInicio < model.FechaFin
                     && s.FechaFin > model.FechaInicio);
 
@@ -85,6 +96,7 @@ namespace Baratickets2._0.Controllers
             TempData["SolicitudNombreEvento"] = model.NombreEvento;
             TempData["SolicitudDescripcion"] = model.DescripcionEvento;
             TempData["SolicitudLugarNombre"] = lugar.Nombre;
+            TempData["SolicitudTipoEventoAlquiler"] = model.TipoEventoAlquiler;
 
             TempData["SolicitudNombreEvento"] = model.NombreEvento;
             TempData["SolicitudDescripcion"] = model.DescripcionEvento;
@@ -106,6 +118,7 @@ namespace Baratickets2._0.Controllers
             ViewBag.Monto = decimal.Parse(TempData["SolicitudMonto"].ToString());
             ViewBag.LugarNombre = TempData["SolicitudLugarNombre"]?.ToString();
             ViewBag.NombreEvento = TempData["SolicitudNombreEvento"]?.ToString();
+            ViewBag.TipoEventoAlquiler = TempData["SolicitudTipoEventoAlquiler"]?.ToString();
 
             // Mantener TempData para el POST
             TempData.Keep();
@@ -128,6 +141,7 @@ namespace Baratickets2._0.Controllers
             var fechaFin = DateTime.Parse(TempData["SolicitudFechaFin"].ToString());
             var nombreEvento = TempData["SolicitudNombreEvento"]?.ToString();
             var descripcion = TempData["SolicitudDescripcion"]?.ToString();
+            var tipoEventoAlquiler = TempData["SolicitudTipoEventoAlquiler"]?.ToString() ?? "Publico";
 
             // 1. Crear la orden de pago
             var orden = new Orden
@@ -155,6 +169,8 @@ namespace Baratickets2._0.Controllers
                 FechaSolicitud = DateTime.Now,
                 NombreEvento = nombreEvento,
                 DescripcionEvento = descripcion,
+                TipoEventoAlquiler = tipoEventoAlquiler,
+                CuentaGanancias = null, // Se configura después de aprobación
                 OrdenId = orden.Id
             };
 
@@ -164,6 +180,7 @@ namespace Baratickets2._0.Controllers
             TempData["Success"] = $"¡Pago procesado! Tu solicitud está pendiente de aprobación. Monto pagado: RD$ {monto:N0}";
             return RedirectToAction("MisSolicitudes");
         }
+
         // ✅ Ver mis solicitudes (Cliente)
         [HttpGet]
         public async Task<IActionResult> MisSolicitudes()
@@ -207,13 +224,19 @@ namespace Baratickets2._0.Controllers
 
             solicitud.Estado = "Aprobado";
 
-            // ✅ Dar rol OrganizadorTemporal en vez de Organizador
-            if (!await _userManager.IsInRoleAsync(solicitud.Cliente, "OrganizadorTemporal"))
-                await _userManager.AddToRoleAsync(solicitud.Cliente, "OrganizadorTemporal");
+            // ✅ Solo alquiler público recibe rol OrganizadorTemporal
+            if (solicitud.TipoEventoAlquiler == "Publico")
+            {
+                if (!await _userManager.IsInRoleAsync(solicitud.Cliente, "OrganizadorTemporal"))
+                    await _userManager.AddToRoleAsync(solicitud.Cliente, "OrganizadorTemporal");
+            }
 
             await _context.SaveChangesAsync();
 
-            TempData["Success"] = $"Solicitud aprobada. {solicitud.Cliente.NombreCompleto} ahora puede crear su evento.";
+            TempData["Success"] = solicitud.TipoEventoAlquiler == "Publico"
+                ? $"Solicitud aprobada. {solicitud.Cliente.NombreCompleto} ahora puede crear su evento."
+                : "Solicitud privada aprobada correctamente.";
+
             return RedirectToAction("GestionSolicitudes");
         }
 
@@ -227,42 +250,63 @@ namespace Baratickets2._0.Controllers
 
             if (solicitud == null) return NotFound();
 
-            // ✅ Despublicar el evento
+            // Si existe evento vinculado, eliminarlo junto con sus dependencias
             if (solicitud.EventoId != null)
             {
-                var evento = await _context.Eventos.FindAsync(solicitud.EventoId);
+                var evento = await _context.Eventos
+                    .Include(e => e.CategoriasTickets)
+                    .Include(e => e.Tickets)
+                    .FirstOrDefaultAsync(e => e.Id == solicitud.EventoId.Value);
+
                 if (evento != null)
                 {
-                    evento.EstadoEvento = "Terminado";
-                    _context.Update(evento);
+                    if (evento.Tickets != null && evento.Tickets.Any())
+                    {
+                        var ticketIds = evento.Tickets.Select(t => t.Id).ToList();
+                        await _context.Devoluciones
+                            .Where(d => ticketIds.Contains(d.TicketId))
+                            .ExecuteDeleteAsync();
+
+                        _context.Tickets.RemoveRange(evento.Tickets);
+                    }
+
+                    if (evento.CategoriasTickets != null && evento.CategoriasTickets.Any())
+                        _context.CategoriasTickets.RemoveRange(evento.CategoriasTickets);
+
+                    _context.Eventos.Remove(evento);
                 }
             }
 
-            // ✅ Quitar rol OrganizadorTemporal
+            // Quitar rol OrganizadorTemporal solo si no le quedan alquileres públicos aprobados y vigentes
             if (solicitud.Cliente != null)
             {
-                var tieneOtrosEventos = await _context.Eventos
-                    .AnyAsync(e => e.OrganizadorId == solicitud.ClienteId
-                                && e.Id != solicitud.EventoId);
+                var tieneOtrosAlquileresActivos = await _context.SolicitudesAlquiler
+                    .AnyAsync(s => s.ClienteId == solicitud.ClienteId
+                                && s.Id != solicitud.Id
+                                && s.Estado == "Aprobado"
+                                && s.TipoEventoAlquiler == "Publico"
+                                && s.FechaFin >= DateTime.Now);
 
-                if (!tieneOtrosEventos)
+                if (!tieneOtrosAlquileresActivos)
                 {
                     await _userManager.RemoveFromRoleAsync(solicitud.Cliente, "OrganizadorTemporal");
                     await _userManager.UpdateSecurityStampAsync(solicitud.Cliente);
                 }
             }
 
-            solicitud.Estado = "Terminado";
-            solicitud.EventoId = null;
+            // Eliminar solicitud terminada para limpiar histórico de pruebas y liberar calendario
+            _context.SolicitudesAlquiler.Remove(solicitud);
             await _context.SaveChangesAsync();
 
-            TempData["Success"] = "Alquiler terminado. El evento fue despublicado y el cliente perdió el acceso temporal.";
+            TempData["Success"] = "Alquiler terminado y eliminado. El calendario quedó liberado.";
             return RedirectToAction("GestionSolicitudes");
         }
         public async Task<IActionResult> EventosOcupados(int? lugarId)
         {
             var eventos = await _context.Eventos
-                .Where(e => lugarId == null || e.LugarId == lugarId)
+                .Where(e => (lugarId == null || e.LugarId == lugarId)
+                         && e.EstadoEvento != "Terminado"
+                         && e.EstadoEvento != "Rechazado")
                 .Select(e => new {
                     title = e.Nombre,
                     start = e.FechaInicio.ToString("yyyy-MM-ddTHH:mm:ss"),
@@ -273,7 +317,8 @@ namespace Baratickets2._0.Controllers
                 .ToListAsync();
 
             var alquileres = await _context.SolicitudesAlquiler
-                .Where(s => s.Estado != "Rechazado" && (lugarId == null || s.LugarId == lugarId))
+                .Where(s => (s.Estado == "Pendiente" || s.Estado == "Aprobado")
+                         && (lugarId == null || s.LugarId == lugarId))
                 .Select(s => new {
                     title = s.NombreEvento,
                     start = s.FechaInicio.ToString("yyyy-MM-ddTHH:mm:ss"),

@@ -6,6 +6,7 @@ using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.Rendering;
 using Microsoft.EntityFrameworkCore;
 using Rotativa.AspNetCore;
+using System.Text.RegularExpressions;
 // teo la cabra illuminati
 
 namespace Baratickets2._0.Controllers
@@ -23,6 +24,12 @@ namespace Baratickets2._0.Controllers
             _userManager = userManager;
         }
 
+        private static bool EsCorreoPayPalValido(string correo)
+        {
+            if (string.IsNullOrWhiteSpace(correo)) return false;
+            return Regex.IsMatch(correo.Trim(), @"^[^@\s]+@[^@\s]+\.[^@\s]{2,}$");
+        }
+
         // GET: Eventos (Gestión para Organizadores/Admins)
         public async Task<IActionResult> Index()
         {
@@ -30,6 +37,7 @@ namespace Baratickets2._0.Controllers
             var esAdmin = User.IsInRole("Admin");
             var esOrganizador = User.IsInRole("Organizador");
             var esOrganizadorTemporal = User.IsInRole("OrganizadorTemporal");
+            var ahora = DateTime.Now;
 
             IQueryable<Evento> query = _context.Eventos
                 .Include(e => e.Organizador)
@@ -42,10 +50,8 @@ namespace Baratickets2._0.Controllers
             }
             else if (esOrganizador)
             {
-                // ✅ FILTRO PARA EL ORGANIZADOR PROFESIONAL:
-                // Solo ve sus propios eventos O eventos que no sean alquileres privados.
-                // Asumiendo que usas 'EsAlquiler' o puedes filtrar por el rol del creador.
-                query = query.Where(e => e.OrganizadorId == userId || e.EstadoEvento == "Publicado");
+                // ✅ Organizador normal: solo sus propios eventos en el panel de gestión
+                query = query.Where(e => e.OrganizadorId == userId);
             }
             else if (esOrganizadorTemporal)
             {
@@ -63,7 +69,9 @@ namespace Baratickets2._0.Controllers
             ViewBag.TieneEventoAlquiler = await _context.SolicitudesAlquiler
                 .AnyAsync(s => s.ClienteId == userId &&
                           s.Estado == "Aprobado" &&
-                          s.EventoId != null);
+                          s.TipoEventoAlquiler == "Publico" &&
+                          s.EventoId != null &&
+                          s.FechaFin >= ahora);
 
             return View(eventos);
         }
@@ -93,25 +101,29 @@ namespace Baratickets2._0.Controllers
         {
             var solicitud = await _context.SolicitudesAlquiler
                 .Include(s => s.Lugar)
-                .FirstOrDefaultAsync(s => s.Id == id && s.Estado == "Aprobado");
+                .FirstOrDefaultAsync(s => s.Id == id && s.Estado == "Aprobado" && s.TipoEventoAlquiler == "Publico");
 
             if (solicitud == null) return NotFound();
 
             var nuevoEvento = new Evento
             {
-                Nombre = solicitud.NombreEvento, // Ajustado a tu modelo
+                Nombre = solicitud.NombreEvento,
                 LugarId = solicitud.LugarId,
                 Descripcion = solicitud.DescripcionEvento ?? "Evento privado.",
                 Organizacion = User.Identity.Name
             };
+
             ViewBag.EsDesdeAlquiler = true;
-            // 💡 PASAMOS LOS DATOS A VIEWGBAG PARA LOS INPUTS MANUALES
+            ViewBag.SolicitudAlquilerId = solicitud.Id;
+            ViewBag.RequiereConfigCobro = true; // ✅ Siempre permitir configurar/actualizar cobro
+            ViewBag.CuentaGananciasActual = solicitud.CuentaGanancias;
+
             ViewBag.FechaAprobada = solicitud.FechaInicio.ToString("yyyy-MM-dd");
             ViewBag.HoraInicioAprobada = solicitud.FechaInicio.ToString("HH:mm");
             ViewBag.HoraFinAprobada = solicitud.FechaFin.ToString("HH:mm");
 
             ViewBag.LugarId = new SelectList(_context.Lugares.Where(l => l.EstaActivo), "Id", "Nombre", solicitud.LugarId);
-            ViewBag.EsAlquiler = true; // Flag para saber que venimos de un alquiler
+            ViewBag.EsAlquiler = true;
 
             return View("Create", nuevoEvento);
         }
@@ -136,13 +148,24 @@ namespace Baratickets2._0.Controllers
         }
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public async Task<IActionResult> Create(Evento evento, string fechaSolo, string horaInicio, string horaFin)
+        public async Task<IActionResult> Create(
+            Evento evento,
+            string fechaSolo,
+            string horaInicio,
+            string horaFin,
+            int? solicitudAlquilerId,
+            string? metodoGanancia,
+            string? titular,
+            string? banco,
+            string? tipoCuenta,
+            string? numeroCuenta,
+            string? telefonoPagoMovil,
+            string? correoPayPal)
         {
-            // 1. Asignación de Identidad
             var userId = _userManager.GetUserId(User);
             evento.OrganizadorId = userId;
+            var ahora = DateTime.Now;
 
-            // 2. 🧩 RECONSTRUCCIÓN MANUAL DE FECHAS
             if (!string.IsNullOrEmpty(fechaSolo) && !string.IsNullOrEmpty(horaInicio) && !string.IsNullOrEmpty(horaFin))
             {
                 try
@@ -157,7 +180,6 @@ namespace Baratickets2._0.Controllers
                 }
             }
 
-            // 3. 🧹 LIMPIEZA DE MODELSTATE
             ModelState.Remove("Organizador");
             ModelState.Remove("Tickets");
             ModelState.Remove("OrganizadorId");
@@ -165,12 +187,10 @@ namespace Baratickets2._0.Controllers
             ModelState.Remove("Lugar");
             ModelState.Remove("Direccion");
 
-            // 4. 🛡️ PROCESO DE GUARDADO
             if (ModelState.IsValid)
             {
                 try
                 {
-                    // Validar choque de horario
                     bool lugarOcupado = await _context.Eventos.AnyAsync(e =>
                         e.LugarId == evento.LugarId &&
                         evento.FechaInicio < e.FechaFin &&
@@ -184,20 +204,120 @@ namespace Baratickets2._0.Controllers
                     else
                     {
                         var usuario = await _userManager.GetUserAsync(User);
-
-                        // ✅ CORRECCIÓN: Lógica unificada para OrganizadorTemporal
-                        bool esOrganizadorTemporal = User.IsInRole("OrganizadorTemporal") &&
-                            await _context.SolicitudesAlquiler.AnyAsync(s => s.ClienteId == usuario.Id && s.Estado == "Aprobado");
+                        bool esOrganizadorTemporal = User.IsInRole("OrganizadorTemporal");
 
                         if (esOrganizadorTemporal)
                         {
-                            var solicitudAprobada = await _context.SolicitudesAlquiler
-                                .FirstOrDefaultAsync(s => s.ClienteId == usuario.Id && s.Estado == "Aprobado");
+                            IQueryable<SolicitudAlquiler> baseQuery = _context.SolicitudesAlquiler
+                                .Where(s => s.ClienteId == usuario.Id
+                                            && s.Estado == "Aprobado"
+                                            && s.TipoEventoAlquiler == "Publico"
+                                            && s.FechaFin >= ahora);
 
-                            // Verificar que no haya creado ya un evento
-                            if (solicitudAprobada != null && solicitudAprobada.EventoId != null)
+                            var solicitudAprobadaVigente = solicitudAlquilerId.HasValue
+                                ? await baseQuery.FirstOrDefaultAsync(s => s.Id == solicitudAlquilerId.Value)
+                                : await baseQuery.OrderBy(s => s.FechaInicio).FirstOrDefaultAsync();
+
+                            if (solicitudAprobadaVigente == null)
                             {
-                                TempData["Error"] = "Ya tienes un evento creado para tu alquiler aprobado.";
+                                TempData["Error"] = "No tienes un alquiler aprobado y vigente para crear evento.";
+                                ViewBag.LugarId = new SelectList(_context.Lugares.Where(l => l.EstaActivo), "Id", "Nombre", evento.LugarId);
+                                return View(evento);
+                            }
+
+                            // ✅ Siempre permitir actualizar método de cobro en este paso
+                            string? cuentaFormateada = null;
+                            switch (metodoGanancia)
+                            {
+                                case "Transferencia":
+                                    if (string.IsNullOrWhiteSpace(titular) || string.IsNullOrWhiteSpace(banco) || string.IsNullOrWhiteSpace(tipoCuenta) || string.IsNullOrWhiteSpace(numeroCuenta))
+                                    {
+                                        TempData["Error"] = "Completa todos los datos bancarios para transferencia.";
+                                        ViewBag.LugarId = new SelectList(_context.Lugares.Where(l => l.EstaActivo), "Id", "Nombre", evento.LugarId);
+                                        ViewBag.EsDesdeAlquiler = true;
+                                        ViewBag.SolicitudAlquilerId = solicitudAprobadaVigente.Id;
+                                        ViewBag.RequiereConfigCobro = true;
+                                        return View(evento);
+                                    }
+
+                                    var bancosPermitidos = new[]
+                                    {
+                                        "Banreservas", "Banco Popular", "Banco BHD", "Scotiabank", "Banco Santa Cruz", "Banco Caribe"
+                                    };
+
+                                    if (!bancosPermitidos.Contains(banco))
+                                    {
+                                        TempData["Error"] = "Selecciona un banco válido de República Dominicana.";
+                                        ViewBag.LugarId = new SelectList(_context.Lugares.Where(l => l.EstaActivo), "Id", "Nombre", evento.LugarId);
+                                        ViewBag.EsDesdeAlquiler = true;
+                                        ViewBag.SolicitudAlquilerId = solicitudAprobadaVigente.Id;
+                                        ViewBag.RequiereConfigCobro = true;
+                                        return View(evento);
+                                    }
+
+                                    cuentaFormateada = $"Transferencia | Titular: {titular} | Banco: {banco} | Tipo: {tipoCuenta} | Cuenta: {numeroCuenta}";
+                                    break;
+
+                                case "PagoMovil":
+                                    if (string.IsNullOrWhiteSpace(titular) || string.IsNullOrWhiteSpace(telefonoPagoMovil))
+                                    {
+                                        TempData["Error"] = "Completa titular y teléfono para pago móvil.";
+                                        ViewBag.LugarId = new SelectList(_context.Lugares.Where(l => l.EstaActivo), "Id", "Nombre", evento.LugarId);
+                                        ViewBag.EsDesdeAlquiler = true;
+                                        ViewBag.SolicitudAlquilerId = solicitudAprobadaVigente.Id;
+                                        ViewBag.RequiereConfigCobro = true;
+                                        return View(evento);
+                                    }
+                                    cuentaFormateada = $"Pago Móvil | Titular: {titular} | Teléfono: {telefonoPagoMovil}";
+                                    break;
+
+                                case "PayPal":
+                                    if (string.IsNullOrWhiteSpace(titular) || string.IsNullOrWhiteSpace(correoPayPal))
+                                    {
+                                        TempData["Error"] = "Completa titular y correo de PayPal.";
+                                        ViewBag.LugarId = new SelectList(_context.Lugares.Where(l => l.EstaActivo), "Id", "Nombre", evento.LugarId);
+                                        ViewBag.EsDesdeAlquiler = true;
+                                        ViewBag.SolicitudAlquilerId = solicitudAprobadaVigente.Id;
+                                        ViewBag.RequiereConfigCobro = true;
+                                        return View(evento);
+                                    }
+
+                                    if (!EsCorreoPayPalValido(correoPayPal))
+                                    {
+                                        TempData["Error"] = "Ingresa un correo de PayPal válido (ej: usuario@gmail.com).";
+                                        ViewBag.LugarId = new SelectList(_context.Lugares.Where(l => l.EstaActivo), "Id", "Nombre", evento.LugarId);
+                                        ViewBag.EsDesdeAlquiler = true;
+                                        ViewBag.SolicitudAlquilerId = solicitudAprobadaVigente.Id;
+                                        ViewBag.RequiereConfigCobro = true;
+                                        return View(evento);
+                                    }
+
+                                    cuentaFormateada = $"PayPal | Titular: {titular} | Correo: {correoPayPal}";
+                                    break;
+
+                                default:
+                                    TempData["Error"] = "Selecciona un método de cobro para continuar.";
+                                    ViewBag.LugarId = new SelectList(_context.Lugares.Where(l => l.EstaActivo), "Id", "Nombre", evento.LugarId);
+                                    ViewBag.EsDesdeAlquiler = true;
+                                    ViewBag.SolicitudAlquilerId = solicitudAprobadaVigente.Id;
+                                    ViewBag.RequiereConfigCobro = true;
+                                    return View(evento);
+                            }
+
+                            solicitudAprobadaVigente.CuentaGanancias = cuentaFormateada;
+                            _context.Update(solicitudAprobadaVigente);
+                            await _context.SaveChangesAsync();
+
+                            if (solicitudAprobadaVigente.EventoId != null)
+                            {
+                                TempData["Error"] = "Ya tienes un evento creado para tu alquiler aprobado vigente.";
+                                ViewBag.LugarId = new SelectList(_context.Lugares.Where(l => l.EstaActivo), "Id", "Nombre", evento.LugarId);
+                                return View(evento);
+                            }
+
+                            if (evento.FechaInicio < solicitudAprobadaVigente.FechaInicio || evento.FechaFin > solicitudAprobadaVigente.FechaFin)
+                            {
+                                TempData["Error"] = "El horario del evento debe estar dentro del rango aprobado del alquiler.";
                                 ViewBag.LugarId = new SelectList(_context.Lugares.Where(l => l.EstaActivo), "Id", "Nombre", evento.LugarId);
                                 return View(evento);
                             }
@@ -206,13 +326,9 @@ namespace Baratickets2._0.Controllers
                             _context.Add(evento);
                             await _context.SaveChangesAsync();
 
-                            // Vincular el evento a la solicitud
-                            if (solicitudAprobada != null)
-                            {
-                                solicitudAprobada.EventoId = evento.Id;
-                                _context.Update(solicitudAprobada);
-                                await _context.SaveChangesAsync();
-                            }
+                            solicitudAprobadaVigente.EventoId = evento.Id;
+                            _context.Update(solicitudAprobadaVigente);
+                            await _context.SaveChangesAsync();
                         }
                         else
                         {
@@ -230,7 +346,6 @@ namespace Baratickets2._0.Controllers
                 }
             }
 
-            // 5. 🔄 RECARGA DE SEGURIDAD
             ViewBag.LugarId = new SelectList(_context.Lugares.Where(l => l.EstaActivo), "Id", "Nombre", evento.LugarId);
             return View(evento);
         }
@@ -239,18 +354,24 @@ namespace Baratickets2._0.Controllers
         public async Task<IActionResult> MiEvento()
         {
             var userId = _userManager.GetUserId(User);
+            var ahora = DateTime.Now;
 
+            // Solo evento creado desde un alquiler aprobado y vigente
             var eventos = await _context.Eventos
                 .Include(e => e.Organizador)
                 .Include(e => e.Lugar)
                 .Include(e => e.CategoriasTickets)
-                .Where(e => e.OrganizadorId == userId)
+                .Where(e => e.OrganizadorId == userId
+                            && e.EstadoEvento != "Terminado"
+                            && _context.SolicitudesAlquiler.Any(s =>
+                                s.EventoId == e.Id &&
+                                s.ClienteId == userId &&
+                                s.Estado == "Aprobado" &&
+                                s.TipoEventoAlquiler == "Publico" &&
+                                s.FechaFin >= ahora))
                 .ToListAsync();
 
-            ViewBag.TieneEventoAlquiler = await _context.SolicitudesAlquiler
-                .AnyAsync(s => s.ClienteId == userId &&
-                          s.Estado == "Aprobado" &&
-                          s.EventoId != null);
+            ViewBag.TieneEventoAlquiler = eventos.Any();
 
             return View(eventos);
         }
@@ -410,14 +531,23 @@ namespace Baratickets2._0.Controllers
 
             if (evento == null) return NotFound();
 
+            // ✅ Seguridad: solo Admin o dueño del evento
+            var userId = _userManager.GetUserId(User);
+            if (!User.IsInRole("Admin") && evento.OrganizadorId != userId)
+                return Forbid();
+
+            // ✅ Regla: solo Admin puede cambiar fecha/hora/recinto
+            var bloquearHorarioRecinto = !User.IsInRole("Admin");
+            ViewBag.BloquearHorarioRecinto = bloquearHorarioRecinto;
+
             // Cargar los lugares para el Dropdown
             ViewBag.LugarId = new SelectList(_context.Lugares.Where(l => l.EstaActivo), "Id", "Nombre", evento.LugarId);
 
             return View(evento);
         }
+
         [HttpPost]
         [ValidateAntiForgeryToken]
-        // 1. Agregamos los 3 strings al paréntesis para recibir los datos del formulario
         public async Task<IActionResult> Edit(int id, Evento evento, string fechaSolo, string horaInicio, string horaFin)
         {
             if (id != evento.Id) return NotFound();
@@ -429,32 +559,44 @@ namespace Baratickets2._0.Controllers
 
             if (eventoOriginal == null) return NotFound();
 
-            // 2. Limpieza de validaciones obsoletas (Evita el error del 0001)
+            // ✅ Seguridad: solo Admin o dueño del evento
+            var userId = _userManager.GetUserId(User);
+            if (!User.IsInRole("Admin") && eventoOriginal.OrganizadorId != userId)
+                return Forbid();
+
+            // ✅ Regla: solo Admin puede cambiar fecha/hora/recinto
+            var bloquearHorarioRecinto = !User.IsInRole("Admin");
+            ViewBag.BloquearHorarioRecinto = bloquearHorarioRecinto;
+
+            // 2. Limpieza de validaciones obsoletas
             ModelState.Remove("Organizador");
             ModelState.Remove("Tickets");
-            ModelState.Remove("FechaEvento"); // Quitamos la validación del campo viejo
+            ModelState.Remove("FechaEvento");
 
             if (ModelState.IsValid)
             {
                 try
                 {
-                    // 3. RECONSTRUCCIÓN: Unimos los pedazos editados
-                    if (!string.IsNullOrEmpty(fechaSolo) && !string.IsNullOrEmpty(horaInicio))
+                    if (!bloquearHorarioRecinto)
                     {
-                        eventoOriginal.FechaInicio = DateTime.Parse($"{fechaSolo} {horaInicio}");
-                        eventoOriginal.FechaFin = DateTime.Parse($"{fechaSolo} {horaFin}");
-                        // Si aún usas FechaEvento para algo, actualízalo también:
-                        eventoOriginal.FechaEvento = eventoOriginal.FechaInicio;
+                        // Solo Admin puede modificar fecha/hora/lugar
+                        if (!string.IsNullOrEmpty(fechaSolo) && !string.IsNullOrEmpty(horaInicio))
+                        {
+                            eventoOriginal.FechaInicio = DateTime.Parse($"{fechaSolo} {horaInicio}");
+                            eventoOriginal.FechaFin = DateTime.Parse($"{fechaSolo} {horaFin}");
+                            eventoOriginal.FechaEvento = eventoOriginal.FechaInicio;
+                        }
+
+                        eventoOriginal.LugarId = evento.LugarId;
                     }
 
-                    // 4. ACTUALIZACIÓN de los demás campos
+                    // Campos permitidos para todos (dueño/admin)
                     eventoOriginal.Nombre = evento.Nombre;
                     eventoOriginal.Organizacion = evento.Organizacion;
                     eventoOriginal.Descripcion = evento.Descripcion;
-                    eventoOriginal.LugarId = evento.LugarId;
                     eventoOriginal.ImagenUrl = evento.ImagenUrl;
 
-                    // 5. Sincronizamos las categorías
+                    // Sincronizamos categorías
                     if (evento.CategoriasTickets != null)
                     {
                         _context.CategoriasTickets.RemoveRange(eventoOriginal.CategoriasTickets);
@@ -474,7 +616,9 @@ namespace Baratickets2._0.Controllers
                     ModelState.AddModelError("", "Error al actualizar: " + ex.Message);
                 }
             }
-            return View(evento);
+
+            ViewBag.LugarId = new SelectList(_context.Lugares.Where(l => l.EstaActivo), "Id", "Nombre", eventoOriginal.LugarId);
+            return View(eventoOriginal);
         }
         // GET: Eventos/Delete/5
         [Authorize(Roles = "Admin,Organizador,OrganizadorTemporal")]

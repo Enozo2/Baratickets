@@ -33,6 +33,11 @@ namespace Baratickets2._0.Models
         public string? NombreEvento { get; set; }      // Nombre tentativo del evento
         public string? DescripcionEvento { get; set; } // Descripción tentativa
 
+        [Required]
+        public string TipoEventoAlquiler { get; set; } = "Publico"; // "Publico" o "Privado"
+
+        public string? CuentaGanancias { get; set; } // Solo aplica cuando es público
+
         // Navegación
         public ApplicationUser Cliente { get; set; }
         public Lugar Lugar { get; set; }

@@ -66,7 +66,7 @@
 <div class="event-hero shadow-lg">
     <div class="event-hero-overlay d-flex align-items-end pb-5">
         <div class="container">
-            <span class="badge bg-info text-dark mb-2 px-3 rounded-pill">Evento Verificado</span>
+            <span class="badge bg-info text-dark mb-2 px-3 rounded-pill">Evento verificado</span>
             <h1 class="display-4 fw-bold text-white">@Model.Nombre</h1>
 
             <div class="location-badge-hero shadow-sm">
@@ -139,7 +139,7 @@
             </div>
         </div>
 
-@* --- COLUMNA DERECHA: TICKET SHOP --- *@
+@* --- COLUMNA DERECHA: COMPRA DE BOLETAS --- *@
         <div class="col-lg-5">
             <div class="sticky-shop">
                 <div class="card content-card shadow-lg p-4 border-0 bg-light">
@@ -147,7 +147,7 @@
                         <div class="bg-dark text-white p-2 rounded-circle me-3">
                             <i class="bi bi-ticket-perforated fs-4"></i>
                         </div>
-                        <h4 class="fw-bold mb-0">Ticket Shop</h4>
+                        <h4 class="fw-bold mb-0">Compra de boletas</h4>
                     </div>
 
                     @if (Model.CategoriasTickets == null || !Model.CategoriasTickets.Any())
@@ -178,10 +178,10 @@
                                             {
                                                 <div class="text-center">
                                                     <button class="btn btn-outline-secondary btn-sm rounded-pill px-3 disabled mb-1">
-                                                        <i class="bi bi-shield-lock-fill me-1"></i> Acceso Staff
+                                                        <i class="bi bi-shield-lock-fill me-1"></i> Acceso de personal
                                                     </button>
                                                     <br />
-                                                    <small class="text-muted" style="font-size: 0.65rem;">Restringido para Admins/Organizadores</small>
+                                                    <small class="text-muted" style="font-size: 0.65rem;">Restringido para administradores y organizadores</small>
                                                 </div>
                                             }
                                             else

@@ -8,7 +8,7 @@
     }
 }
 <!DOCTYPE html>
-<html lang="en">
+<html lang="es">
 <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
@@ -97,8 +97,13 @@
                         @if (User.IsInRole("OrganizadorTemporal"))
                         {
                             var userId = _userManager.GetUserId(User);
+                            var ahora = DateTime.Now;
                             var tieneSolicitudActiva = _dbContext.SolicitudesAlquiler
-                            .Any(s => s.ClienteId == userId && s.Estado == "Aprobado");
+                            .Any(s => s.ClienteId == userId
+                                   && s.Estado == "Aprobado"
+                                   && s.TipoEventoAlquiler == "Publico"
+                                   && s.EventoId != null
+                                   && s.FechaFin >= ahora);
 
                             @if (tieneSolicitudActiva)
                             {

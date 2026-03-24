@@ -1,0 +1,104 @@
+@model Baratickets2._0.Models.SolicitudAlquiler
+
+@{
+    ViewData["Title"] = "Configurar Cobro de Ganancias";
+}
+
+<div class="container mt-4">
+    <div class="row justify-content-center">
+        <div class="col-md-8">
+            <div class="card shadow border-0" style="border-radius: 16px;">
+                <div class="card-header bg-primary text-white" style="border-radius: 16px 16px 0 0;">
+                    <h4 class="mb-0"><i class="bi bi-wallet2 me-2"></i>Configurar Método de Cobro</h4>
+                </div>
+                <div class="card-body p-4">
+                    <div class="alert alert-info">
+                        <strong>Evento:</strong> @Model.NombreEvento <br />
+                        <strong>Recinto:</strong> @Model.Lugar?.Nombre
+                    </div>
+
+                    <form asp-action="ConfigurarGanancias" method="post">
+                        @Html.AntiForgeryToken()
+                        <input type="hidden" name="id" value="@Model.Id" />
+
+                        <div class="mb-3">
+                            <label class="form-label fw-bold">Método de cobro</label>
+                            <select id="metodoGanancia" name="metodoGanancia" class="form-select" required>
+                                <option value="">-- Selecciona método --</option>
+                                <option value="Transferencia">Transferencia Bancaria</option>
+                                <option value="PagoMovil">Pago Móvil</option>
+                                <option value="PayPal">PayPal</option>
+                            </select>
+                        </div>
+
+                        <div class="mb-3">
+                            <label class="form-label fw-bold">Titular</label>
+                            <input type="text" name="titular" class="form-control" placeholder="Nombre completo del titular" required />
+                        </div>
+
+                        <div id="bloqueTransferencia" style="display:none;">
+                            <div class="row">
+                                <div class="col-md-6 mb-3">
+                                    <label class="form-label fw-bold">Banco</label>
+                                    <input type="text" name="banco" class="form-control" placeholder="Ej: Banreservas" />
+                                </div>
+                                <div class="col-md-6 mb-3">
+                                    <label class="form-label fw-bold">Tipo de cuenta</label>
+                                    <select name="tipoCuenta" class="form-select">
+                                        <option value="">-- Selecciona --</option>
+                                        <option value="Ahorros">Ahorros</option>
+                                        <option value="Corriente">Corriente</option>
+                                    </select>
+                                </div>
+                            </div>
+                            <div class="mb-3">
+                                <label class="form-label fw-bold">Número de cuenta</label>
+                                <input type="text" name="numeroCuenta" class="form-control" placeholder="0000000000" />
+                            </div>
+                        </div>
+
+                        <div id="bloquePagoMovil" style="display:none;">
+                            <div class="mb-3">
+                                <label class="form-label fw-bold">Teléfono pago móvil</label>
+                                <input type="text" name="telefonoPagoMovil" class="form-control" placeholder="809-000-0000" />
+                            </div>
+                        </div>
+
+                        <div id="bloquePayPal" style="display:none;">
+                            <div class="mb-3">
+                                <label class="form-label fw-bold">Correo de PayPal</label>
+                                <input type="email" name="correoPayPal" class="form-control" placeholder="correo@paypal.com" />
+                            </div>
+                        </div>
+
+                        <div class="d-flex gap-2">
+                            <button type="submit" class="btn btn-primary rounded-pill px-4">
+                                <i class="bi bi-check-circle me-1"></i> Guardar Método
+                            </button>
+                            <a asp-action="MisSolicitudes" class="btn btn-light rounded-pill px-4">Cancelar</a>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+    <script>
+        const metodoSelect = document.getElementById('metodoGanancia');
+        const bloqueTransferencia = document.getElementById('bloqueTransferencia');
+        const bloquePagoMovil = document.getElementById('bloquePagoMovil');
+        const bloquePayPal = document.getElementById('bloquePayPal');
+
+        function toggleBloques() {
+            const metodo = metodoSelect.value;
+            bloqueTransferencia.style.display = metodo === 'Transferencia' ? 'block' : 'none';
+            bloquePagoMovil.style.display = metodo === 'PagoMovil' ? 'block' : 'none';
+            bloquePayPal.style.display = metodo === 'PayPal' ? 'block' : 'none';
+        }
+
+        metodoSelect.addEventListener('change', toggleBloques);
+        toggleBloques();
+    </script>
+}

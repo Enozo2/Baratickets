@@ -5,6 +5,7 @@
 }
 
 <div class="container mt-5">
+    @Html.AntiForgeryToken()
     <h2 class="mb-4"><i class="bi bi-ticket-perforated"></i> Mis Entradas Compradas</h2>
 
     @if (Model == null || !Model.Any())
@@ -180,6 +181,15 @@
             inputMetodo.type = 'hidden';
             inputMetodo.name = 'tipoDevolucion';
             inputMetodo.value = metodo;
+
+            const antiForgerySource = document.querySelector('input[name="__RequestVerificationToken"]');
+            if (antiForgerySource) {
+                const antiForgery = document.createElement('input');
+                antiForgery.type = 'hidden';
+                antiForgery.name = '__RequestVerificationToken';
+                antiForgery.value = antiForgerySource.value;
+                form.appendChild(antiForgery);
+            }
 
             form.appendChild(inputId);
             form.appendChild(inputMetodo);

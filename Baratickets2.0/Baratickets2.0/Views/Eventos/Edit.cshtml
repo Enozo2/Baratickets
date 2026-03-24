@@ -2,6 +2,7 @@
 
 @{
     ViewData["Title"] = "Editar Evento";
+    bool bloquearHorarioRecinto = ViewBag.BloquearHorarioRecinto == true;
 }
 
 @* FullCalendar CSS *@
@@ -30,6 +31,14 @@
         <input type="hidden" asp-for="Id" />
         <input type="hidden" asp-for="OrganizadorId" />
 
+        @if (bloquearHorarioRecinto)
+        {
+            <div class="alert alert-warning py-2">
+                <i class="bi bi-lock-fill me-1"></i>
+                Solo el `Admin` puede modificar recinto, fecha y horario de este evento.
+            </div>
+        }
+
         <div class="row">
             @* --- COLUMNA IZQUIERDA: DATOS BÁSICOS --- *@
             <div class="col-md-5">
@@ -53,9 +62,13 @@
 
                     <div class="mb-3">
                         <label class="form-label fw-bold"><i class="bi bi-building-geo me-2"></i>Recinto Villa Olímpica</label>
-                        <select asp-for="LugarId" class="form-select shadow-sm border-2" asp-items="ViewBag.LugarId" id="selectLugar">
+                        <select asp-for="LugarId" class="form-select shadow-sm border-2" asp-items="ViewBag.LugarId" id="selectLugar" disabled="@(bloquearHorarioRecinto)">
                             <option value="">-- Selecciona el Pabellón/Recinto --</option>
                         </select>
+                        @if (bloquearHorarioRecinto)
+                        {
+                            <input type="hidden" asp-for="LugarId" />
+                        }
                         <span asp-validation-for="LugarId" class="text-danger small"></span>
                         <p class="text-muted small mt-1">Selecciona el lugar específico dentro de la Villa Olímpica.</p>
                     </div>
@@ -63,19 +76,19 @@
                     <div class="mb-3">
                         <label>Fecha</label>
                         <input type="date" name="fechaSolo" id="fechaSolo" class="form-control"
-                               value="@Model.FechaInicio.ToString("yyyy-MM-dd")" required />
+                               value="@Model.FechaInicio.ToString("yyyy-MM-dd")" required readonly="@(bloquearHorarioRecinto)" />
                     </div>
 
                     <div class="row">
                         <div class="col-6">
                             <label>Hora Inicio</label>
                             <input type="time" name="horaInicio" class="form-control"
-                                   value="@Model.FechaInicio.ToString("HH:mm")" required />
+                                   value="@Model.FechaInicio.ToString("HH:mm")" required readonly="@(bloquearHorarioRecinto)" />
                         </div>
                         <div class="col-6">
                             <label>Hora Fin</label>
                             <input type="time" name="horaFin" class="form-control"
-                                   value="@Model.FechaFin.ToString("HH:mm")" required />
+                                   value="@Model.FechaFin.ToString("HH:mm")" required readonly="@(bloquearHorarioRecinto)" />
                         </div>
                     </div>
 
@@ -169,6 +182,8 @@
     }
 
     <script>
+        const bloquearHorarioRecinto = @bloquearHorarioRecinto.ToString().ToLower();
+
         // --- CALENDARIO ---
         const selectLugar = document.getElementById('selectLugar');
         let calendar;
@@ -195,6 +210,7 @@
                 slotDuration: '00:30:00',
                 events: `/Alquileres/EventosOcupados?lugarId=${lugarId}`,
                 dateClick: function(info) {
+                    if (bloquearHorarioRecinto) return;
                     calendar.changeView('timeGridDay', info.dateStr);
                     document.getElementById('fechaSolo').value = info.dateStr;
                 },
@@ -210,6 +226,7 @@
                 },
                 // ✅ Click en slot vacío — primero selecciona inicio, segundo click selecciona fin
                 dateClick: function(info) {
+                    if (bloquearHorarioRecinto) return;
                     if (info.view.type === 'dayGridMonth') {
                         calendar.changeView('timeGridDay', info.dateStr);
                         document.getElementById('fechaSolo').value = info.dateStr;
@@ -289,7 +306,7 @@
 
             calendar.render();
         }
-        if (selectLugar) {
+        if (selectLugar && !bloquearHorarioRecinto) {
             selectLugar.addEventListener('change', function() {
                 if (this.value) iniciarCalendario(this.value);
             });

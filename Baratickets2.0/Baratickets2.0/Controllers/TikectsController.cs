@@ -10,8 +10,12 @@ using Microsoft.EntityFrameworkCore;
 namespace Baratickets2._0.Controllers
 {
     [Authorize] // <--- Esto obliga a que el usuario esté logueado para entrar a cualquier vista de este controlador
+    [Route("Tickets/[action]/{id?}")]
+    [Route("Tikects/[action]/{id?}")] // alias por compatibilidad con typo histórico
     public class TicketsController : Controller
     {
+        private const string EstadoTicketActivo = "Activo";
+        private const string EstadoTicketDevuelto = "Devuelto";
         private readonly ApplicationDbContext _context;
         private readonly UserManager<ApplicationUser> _userManager;
         private readonly QrService _qrService;
@@ -30,16 +34,26 @@ namespace Baratickets2._0.Controllers
 
         [HttpPost]
         [Authorize]
+        [ValidateAntiForgeryToken]
         public async Task<IActionResult> ComprarTicket(int eventoId, int categoriaId, string emailConfirmacion, string? tokenSeguridad)
         {
             var userId = _userManager.GetUserId(User);
-            var evento = await _context.Eventos.FindAsync(eventoId);
-            var categoria = await _context.CategoriasTickets.FindAsync(categoriaId);
-            if (evento == null || categoria == null) return NotFound();
+            if (string.IsNullOrWhiteSpace(userId))
+                return Challenge();
 
-            if (categoria.Capacidad <= 0)
+            var evento = await _context.Eventos.FindAsync(eventoId);
+
+            var categoriaData = await _context.CategoriasTickets
+                .Where(c => c.Id == categoriaId)
+                .Select(c => new { c.Id, c.Nombre, c.Precio })
+                .FirstOrDefaultAsync();
+
+            if (evento == null || categoriaData == null) return NotFound();
+
+            // No permitir compra en eventos no publicados
+            if (evento.EstadoEvento != "Publicado")
             {
-                TempData["Error"] = "Lo sentimos, ya no quedan boletas.";
+                TempData["Error"] = "Este evento no está disponible para compras.";
                 return RedirectToAction("Index", "Home");
             }
 
@@ -51,8 +65,12 @@ namespace Baratickets2._0.Controllers
             {
                 if (esCupon)
                 {
+                    var ahora = DateTime.Now;
                     var cupon = await _context.Devoluciones
-                        .FirstOrDefaultAsync(c => c.CodigoCupon == tokenSeguridad && c.MontoRestante > 0);
+                        .FirstOrDefaultAsync(c => c.CodigoCupon == tokenSeguridad
+                                               && c.UsuarioId == userId
+                                               && c.MontoRestante > 0
+                                               && !c.CuponUsado);
 
                     if (cupon == null)
                     {
@@ -62,27 +80,50 @@ namespace Baratickets2._0.Controllers
                     }
 
                     // ✅ Validar expiración en backend también
-                    if (cupon.FechaExpiracion.HasValue && cupon.FechaExpiracion < DateTime.Now)
+                    if (cupon.FechaExpiracion.HasValue && cupon.FechaExpiracion < ahora)
                     {
                         TempData["Error"] = $"Este cupón expiró el {cupon.FechaExpiracion.Value:dd/MM/yyyy}.";
                         await transaction.RollbackAsync();
                         return RedirectToAction("MisTickets");
                     }
 
-
                     // ✅ Descuenta solo lo que cubre el cupón
-                    montoDescuento = Math.Min(cupon.MontoRestante, categoria.Precio);
+                    montoDescuento = Math.Min(cupon.MontoRestante, categoriaData.Precio);
                     decimal nuevoSaldo = cupon.MontoRestante - montoDescuento;
 
-                    await _context.Devoluciones
-                        .Where(c => c.Id == cupon.Id)
+                    // Update atómico del cupón para evitar uso concurrente
+                    var filasCupon = await _context.Devoluciones
+                        .Where(c => c.Id == cupon.Id
+                                 && c.UsuarioId == userId
+                                 && !c.CuponUsado
+                                 && c.MontoRestante > 0
+                                 && (!c.FechaExpiracion.HasValue || c.FechaExpiracion >= ahora))
                         .ExecuteUpdateAsync(s => s
                             .SetProperty(c => c.MontoRestante, nuevoSaldo)
                             .SetProperty(c => c.CuponUsado, nuevoSaldo <= 0)
                         );
+
+                    if (filasCupon == 0)
+                    {
+                        TempData["Error"] = "No se pudo aplicar el cupón. Intenta nuevamente.";
+                        await transaction.RollbackAsync();
+                        return RedirectToAction("MisTickets");
+                    }
                 }
 
-                decimal precioFinal = Math.Max(0, categoria.Precio - montoDescuento);
+                // ✅ DECREMENTO ATÓMICO: evita sobreventa por concurrencia
+                var filasAfectadas = await _context.CategoriasTickets
+                    .Where(c => c.Id == categoriaId && c.Capacidad > 0)
+                    .ExecuteUpdateAsync(s => s.SetProperty(c => c.Capacidad, c => c.Capacidad - 1));
+
+                if (filasAfectadas == 0)
+                {
+                    TempData["Error"] = "Lo sentimos, ya no quedan boletas.";
+                    await transaction.RollbackAsync();
+                    return RedirectToAction("Index", "Home");
+                }
+
+                decimal precioFinal = Math.Max(0, categoriaData.Precio - montoDescuento);
 
                 var nuevoTicket = new Ticket
                 {
@@ -90,16 +131,14 @@ namespace Baratickets2._0.Controllers
                     EventoId = eventoId,
                     UsuarioId = userId,
                     FechaCompra = DateTime.Now,
-                    Tipo = categoria.Nombre,
+                    Tipo = categoriaData.Nombre,
                     PrecioPagado = precioFinal,
                     FueUsado = false,
-                    Estado = "Valido",
+                    Estado = EstadoTicketActivo,
                     UsoCupon = esCupon
                 };
 
-                categoria.Capacidad -= 1;
                 _context.Tickets.Add(nuevoTicket);
-
                 await _context.SaveChangesAsync();
                 await transaction.CommitAsync();
 
@@ -156,13 +195,61 @@ namespace Baratickets2._0.Controllers
             });
         }
         [HttpPost]
+        [Authorize]
+        [ValidateAntiForgeryToken]
         public async Task<IActionResult> SolicitarDevolucion(Guid ticketId, string tipoDevolucion)
         {
-            // 1. Buscamos el ticket e incluimos la categoría para saber cuál actualizar
-            var ticket = await _context.Tickets.FindAsync(ticketId);
+            return await ProcesarDevolucionInterna(ticketId, tipoDevolucion, enviarCorreo: false);
+        }
+
+        [HttpPost]
+        [ValidateAntiForgeryToken]
+        [Authorize]
+        public async Task<IActionResult> DevolverTicket(Guid id)
+        {
+            // compatibilidad con endpoints existentes (devuelve a cuenta por defecto)
+            return await ProcesarDevolucionInterna(id, "Cuenta", enviarCorreo: true);
+        }
+
+        private async Task<IActionResult> ProcesarDevolucionInterna(Guid ticketId, string tipoDevolucion, bool enviarCorreo)
+        {
+            var userId = _userManager.GetUserId(User);
+            if (string.IsNullOrWhiteSpace(userId))
+                return Challenge();
+
+            if (tipoDevolucion != "Cuenta" && tipoDevolucion != "Cupon")
+            {
+                TempData["Error"] = "Tipo de devolución inválido.";
+                return RedirectToAction("MisTickets");
+            }
+
+            var ticket = await _context.Tickets
+                .Include(t => t.Evento)
+                .Include(t => t.Usuario)
+                .Include(t => t.Devolucion)
+                .FirstOrDefaultAsync(t => t.Id == ticketId && t.UsuarioId == userId);
+
             if (ticket == null) return NotFound();
 
-            // 2. Validamos el tiempo (24h)
+            if (ticket.FueUsado || ticket.Estado == EstadoTicketDevuelto)
+            {
+                TempData["Error"] = "Este ticket no puede ser devuelto.";
+                return RedirectToAction("MisTickets");
+            }
+
+            if (ticket.PrecioPagado == 0 || ticket.UsoCupon)
+            {
+                TempData["Error"] = "Los tickets adquiridos con cupón de devolución no pueden ser devueltos.";
+                return RedirectToAction("MisTickets");
+            }
+
+            // evitar doble registro de devolución
+            if (ticket.Devolucion != null)
+            {
+                TempData["Error"] = "Este ticket ya tiene una devolución registrada.";
+                return RedirectToAction("MisTickets");
+            }
+
             var tiempoTranscurrido = DateTime.Now - ticket.FechaCompra;
             if (tiempoTranscurrido.TotalHours > 24)
             {
@@ -170,114 +257,75 @@ namespace Baratickets2._0.Controllers
                 return RedirectToAction("MisTickets");
             }
 
-            // --- NUEVA LÓGICA DE ACTUALIZACIÓN DE STOCK ---
-            // Buscamos la categoría que corresponde a este ticket en este evento
-            var categoria = await _context.CategoriasTickets
-                .FirstOrDefaultAsync(c => c.EventoId == ticket.EventoId && c.Nombre == ticket.Tipo);
-            if (ticket.PrecioPagado == 0 || ticket.UsoCupon)
-            {
-                TempData["Error"] = "Los tickets adquiridos con cupón de devolución no pueden ser devueltos.";
-                return RedirectToAction("MisTickets");
-            }
-
-            if (categoria != null)
-            {
-                // LE DEVOLVEMOS EL CUPO AL EVENTO
-                categoria.Capacidad += 1;
-                _context.Update(categoria);
-            }
-            // ----------------------------------------------
-
-            // 3. Creamos la reclamación con el Motivo (para que no de error SQL)
-            var devolucion = new Devolucion
-            {
-                TicketId = ticketId,
-                UsuarioId = _userManager.GetUserId(User),
-                TipoDevolucion = tipoDevolucion,
-                Estado = "Completada",
-                FechaSolicitud = DateTime.Now,
-                Motivo = "Devolución y liberación de cupo (" + tipoDevolucion + ")"
-            };
-
-            // 4. Inhabilitamos el ticket
-            ticket.Estado = "Devuelto";
-
-            if (tipoDevolucion == "Cupon")
-            {
-                devolucion.CodigoCupon = "REFUND-" + Guid.NewGuid().ToString().Substring(0, 8).ToUpper();
-                devolucion.MontoOriginal = ticket.PrecioPagado;
-                devolucion.MontoRestante = ticket.PrecioPagado;  // ✅ Saldo inicial = precio pagado
-                devolucion.FechaExpiracion = DateTime.Now.AddDays(30); // ✅ Expira en 30 días
-            }
-
-            _context.Devoluciones.Add(devolucion);
-            await _context.SaveChangesAsync();
-
-            TempData["Success"] = "Ticket devuelto. El cupo ha sido liberado para la venta.";
-            return RedirectToAction("MisTickets");
-        }
-        [HttpPost]
-        [ValidateAntiForgeryToken]
-        [Authorize]
-        public async Task<IActionResult> DevolverTicket(Guid id)
-        {
-            var userId = _userManager.GetUserId(User);
-
-            var ticket = await _context.Tickets
-                .Include(t => t.Evento)
-                .Include(t => t.Usuario)
-                .FirstOrDefaultAsync(t => t.Id == id && t.UsuarioId == userId);
-
-            if (ticket == null) return NotFound();
-
-            if (ticket.FueUsado || ticket.Estado == "Devuelto")
-            {
-                TempData["Error"] = "Este ticket no puede ser devuelto.";
-                return RedirectToAction("MisTickets");
-            }
-            if (ticket.PrecioPagado == 0)
-            {
-                TempData["Error"] = "Los tickets adquiridos con cupón de devolución no pueden ser devueltos.";
-                return RedirectToAction("MisTickets");
-            }
-            // BUSCAMOS LA CATEGORÍA DINÁMICA
-            // Buscamos la categoría que coincida con el nombre guardado en el ticket para este evento
-            var categoria = await _context.CategoriasTickets
-                .FirstOrDefaultAsync(c => c.EventoId == ticket.EventoId && c.Nombre == ticket.Tipo);
-
-            if (categoria != null)
-            {
-                // Devolvemos el cupo a la categoría correspondiente (sea VIP, Lado Izquierdo, etc.)
-                categoria.Capacidad += 1;
-                _context.Update(categoria);
-            }
-
-            ticket.Estado = "Devuelto";
-            ticket.FechaUso = DateTime.Now; // Usamos esto como marca de tiempo de la devolución
-
-            _context.Update(ticket);
-            await _context.SaveChangesAsync();
-
-            // NOTIFICACIÓN
+            using var tx = await _context.Database.BeginTransactionAsync();
             try
             {
-                await _emailService.EnviarNotificacionDevolucionAsync(ticket.Usuario.Email, ticket.Usuario.NombreCompleto, ticket.Evento.Nombre);
-            }
-            catch (Exception ex)
-            {
-                System.Diagnostics.Debug.WriteLine("Error enviando correo: " + ex.Message);
-            }
+                var categoria = await _context.CategoriasTickets
+                    .FirstOrDefaultAsync(c => c.EventoId == ticket.EventoId && c.Nombre == ticket.Tipo);
 
-            TempData["CompraExitosa"] = "Ticket devuelto correctamente. El cupo ha sido liberado.";
-            return RedirectToAction("MisTickets");
+                if (categoria != null)
+                {
+                    categoria.Capacidad += 1;
+                    _context.Update(categoria);
+                }
+
+                var devolucion = new Devolucion
+                {
+                    TicketId = ticketId,
+                    UsuarioId = userId,
+                    TipoDevolucion = tipoDevolucion,
+                    Estado = "Completada",
+                    FechaSolicitud = DateTime.Now,
+                    Motivo = "Devolución y liberación de cupo (" + tipoDevolucion + ")",
+                    MontoOriginal = ticket.PrecioPagado,
+                    MontoRestante = tipoDevolucion == "Cupon" ? ticket.PrecioPagado : 0
+                };
+
+                if (tipoDevolucion == "Cupon")
+                {
+                    devolucion.CodigoCupon = "REFUND-" + Guid.NewGuid().ToString().Substring(0, 8).ToUpper();
+                    devolucion.FechaExpiracion = DateTime.Now.AddDays(30);
+                }
+
+                ticket.Estado = EstadoTicketDevuelto;
+                ticket.FechaUso = DateTime.Now;
+
+                _context.Devoluciones.Add(devolucion);
+                _context.Update(ticket);
+                await _context.SaveChangesAsync();
+                await tx.CommitAsync();
+
+                if (enviarCorreo)
+                {
+                    try
+                    {
+                        if (ticket.Usuario?.Email is not null && ticket.Usuario?.NombreCompleto is not null && ticket.Evento?.Nombre is not null)
+                        {
+                            await _emailService.EnviarNotificacionDevolucionAsync(ticket.Usuario.Email, ticket.Usuario.NombreCompleto, ticket.Evento.Nombre);
+                        }
+                    }
+                    catch (Exception ex)
+                    {
+                        System.Diagnostics.Debug.WriteLine("Error enviando correo: " + ex.Message);
+                    }
+                }
+
+                TempData["Success"] = "Ticket devuelto. El cupo ha sido liberado para la venta.";
+                return RedirectToAction("MisTickets");
+            }
+            catch
+            {
+                await tx.RollbackAsync();
+                TempData["Error"] = "No se pudo completar la devolución. Intenta nuevamente.";
+                return RedirectToAction("MisTickets");
+            }
         }
+        [HttpGet]
         [Authorize(Roles = "Admin,Validador")]
         public IActionResult Escanear()
         {
-            
             return View("EscanearTicket");
         }
-
 
         [HttpGet]
         [Authorize]
@@ -288,12 +336,12 @@ namespace Baratickets2._0.Controllers
 
             if (evento == null || categoria == null) return NotFound();
 
-            // Pasamos los datos dinámicos a la vista mediante ViewBag o ViewModel
             ViewBag.Tipo = categoria.Nombre;
             ViewBag.Precio = categoria.Precio;
-            ViewBag.CategoriaId = categoriaId; // Importante para el POST final
-            return View(await _context.Eventos.FindAsync(eventoId));
+            ViewBag.CategoriaId = categoriaId;
+            return View(evento);
         }
+
         [HttpGet]
         [Authorize]
         public async Task<IActionResult> ValidarEntrada(Guid id)
@@ -305,11 +353,18 @@ namespace Baratickets2._0.Controllers
             if (ticket == null)
             {
                 TempData["Error"] = "El ticket no existe en la base de datos.";
-                return RedirectToAction("Index", "Home"); 
+                return RedirectToAction("Index", "Home");
             }
 
-            return View(ticket); 
+            var userId = _userManager.GetUserId(User);
+            if (!User.IsInRole("Admin") && !User.IsInRole("Validador") && ticket.UsuarioId != userId)
+                return Forbid();
+
+            return View(ticket);
         }
+
+        [HttpGet]
+        [Authorize]
         public async Task<IActionResult> VerTicket(Guid id)
         {
             var ticket = await _context.Tickets
@@ -318,23 +373,30 @@ namespace Baratickets2._0.Controllers
 
             if (ticket == null) return NotFound();
 
+            var userId = _userManager.GetUserId(User);
+            if (!User.IsInRole("Admin") && ticket.UsuarioId != userId)
+                return Forbid();
+
             ViewBag.QrCode = _qrService.GenerarQrBase64(ticket.Id.ToString());
             return View(ticket);
         }
 
+        [HttpGet]
+        [Authorize]
         public async Task<IActionResult> MisTickets()
         {
             var userId = _userManager.GetUserId(User);
 
             var tickets = await _context.Tickets
                 .Include(t => t.Evento)
-                .Include(t => t.Devolucion) // <--- ESTA LÍNEA ES LA QUE HACE QUE SE VEA EL CUPÓN
+                .Include(t => t.Devolucion)
                 .Where(t => t.UsuarioId == userId)
                 .OrderByDescending(t => t.FechaCompra)
                 .ToListAsync();
 
             return View(tickets);
         }
+
         [HttpPost]
         [Authorize(Roles = "Admin,Validador")]
         public async Task<IActionResult> ProcesarEscaneo(Guid id)
@@ -349,6 +411,9 @@ namespace Baratickets2._0.Controllers
             if (ticket.FueUsado)
                 return Json(new { success = false, message = "ESTE TICKET YA FUE USADO." });
 
+            if (ticket.Estado == EstadoTicketDevuelto)
+                return Json(new { success = false, message = "ESTE TICKET FUE DEVUELTO." });
+
             ticket.FueUsado = true;
             ticket.FechaUso = DateTime.Now;
             await _context.SaveChangesAsync();
@@ -357,7 +422,7 @@ namespace Baratickets2._0.Controllers
             {
                 success = true,
                 message = "ACCESO CONCEDIDO",
-                evento = ticket.Evento.Nombre,
+                evento = ticket.Evento?.Nombre,
                 tipo = ticket.Tipo
             });
         }

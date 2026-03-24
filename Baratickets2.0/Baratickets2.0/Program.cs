@@ -23,7 +23,7 @@ builder.Services.AddIdentity<ApplicationUser, IdentityRole>(options => {
     options.SignIn.RequireConfirmedEmail = false;
     options.Password.RequireDigit = false;
     options.Password.RequiredLength = 6;
-    options.Password.RequireNonAlphanumeric = false;
+    options.Password.RequireNonAlphanumeric = false;                  
     options.Password.RequireUppercase = false;
     options.Lockout.DefaultLockoutTimeSpan = TimeSpan.FromMinutes(15); 
     options.Lockout.MaxFailedAccessAttempts = 5; 
@@ -40,7 +40,7 @@ builder.Services.AddTransient<IEmailSender, EmailSender>();
 // Redirección de Cookies para Identity
 builder.Services.ConfigureApplicationCookie(options =>
 {
-    options.ExpireTimeSpan = TimeSpan.FromMinutes(15); 
+    options.ExpireTimeSpan = TimeSpan.FromMinutes(30); 
     options.SlidingExpiration = true;
     options.LoginPath = "/Identity/Account/Login";
 });
@@ -62,6 +62,9 @@ app.UseRouting();
 
 app.UseAuthentication();
 app.UseAuthorization();
+
+// Soporte para controladores con rutas por atributo ([Route])
+app.MapControllers();
 
 app.MapControllerRoute(
     name: "default",

@@ -4,17 +4,23 @@
     ViewData["Title"] = "Gestión de Solicitudes";
 }
 
-<div class="container mt-4">
-    <h2 class="fw-bold mb-4"><i class="bi bi-building-gear"></i> Gestión de Solicitudes de Alquiler</h2>
+<div class="container mt-4 gestion-solicitudes-ui">
+    <div class="d-flex flex-wrap justify-content-between align-items-center gap-3 mb-3">
+        <div>
+            <h2 class="fw-bold mb-1"><i class="bi bi-building-gear me-2"></i>Gestión de solicitudes de alquiler</h2>
+            <p class="text-muted mb-0">Aprueba, rechaza o finaliza solicitudes con estado y contexto del cliente.</p>
+        </div>
+        <span class="badge bg-light text-dark border rounded-pill px-3 py-2">Total: @Model.Count()</span>
+    </div>
 
     @if (TempData["Success"] != null)
     {
-        <div class="alert alert-success rounded-3">
+        <div class="alert alert-success rounded-3 shadow-sm border-0">
             <i class="bi bi-check-circle me-2"></i> @TempData["Success"]
         </div>
     }
 
-    <div class="card shadow border-0" style="border-radius: 15px;">
+    <div class="card shadow-sm border-0 rounded-4">
         <div class="table-responsive">
             <table class="table table-hover align-middle mb-0">
                 <thead class="table-light">
@@ -22,6 +28,8 @@
                         <th>Cliente</th>
                         <th>Evento</th>
                         <th>Recinto</th>
+                        <th class="text-center">Tipo</th>
+                        <th>Cobro de ganancias</th>
                         <th class="text-center">Fecha</th>
                         <th class="text-center">Horas</th>
                         <th class="text-end">Monto</th>
@@ -34,20 +42,20 @@
                     {
                         @foreach (var s in Model)
                         {
-                            // Lógica de colores de Badge actualizada
-                            var badgeColor = s.Estado == "Aprobado" ? "success" :
-                            s.Estado == "Rechazado" ? "danger" :
-                            s.Estado == "Terminado" ? "secondary" : "warning text-dark";
+                            var estadoClass = s.Estado == "Aprobado" ? "estado-aprobado" :
+                                              s.Estado == "Rechazado" ? "estado-rechazado" :
+                                              s.Estado == "Terminado" ? "estado-terminado" : "estado-pendiente";
+
                             <tr>
                                 <td>
                                     <div class="d-flex align-items-center">
                                         <div class="rounded-circle bg-primary text-white d-flex align-items-center justify-content-center me-2"
-                                             style="width: 32px; height: 32px; font-size: 0.8rem; font-weight: bold;">
+                                             style="width: 34px; height: 34px; font-size: 0.8rem; font-weight: bold;">
                                             @(s.Cliente?.NombreCompleto?.Substring(0, 1).ToUpper() ?? "U")
                                         </div>
                                         <div>
                                             <span class="small fw-bold d-block">@s.Cliente?.NombreCompleto</span>
-                                            <span class="text-muted" style="font-size: 0.7rem;">@s.Cliente?.Email</span>
+                                            <span class="text-muted" style="font-size: 0.75rem;">@s.Cliente?.Email</span>
                                         </div>
                                     </div>
                                 </td>
@@ -56,17 +64,41 @@
                                     <small class="text-muted d-block">@s.DescripcionEvento</small>
                                 </td>
                                 <td><span class="badge bg-info text-dark">@s.Lugar?.Nombre</span></td>
+                                <td class="text-center">
+                                    @if (s.TipoEventoAlquiler == "Privado")
+                                    {
+                                        <span class="badge bg-secondary"><i class="bi bi-shield-lock me-1"></i>Privado</span>
+                                    }
+                                    else
+                                    {
+                                        <span class="badge bg-primary"><i class="bi bi-megaphone me-1"></i>Público</span>
+                                    }
+                                </td>
+                                <td>
+                                    @if (s.TipoEventoAlquiler == "Publico" && !string.IsNullOrWhiteSpace(s.CuentaGanancias))
+                                    {
+                                        <small class="fw-semibold"><i class="bi bi-wallet2 me-1"></i>@s.CuentaGanancias</small>
+                                    }
+                                    else if (s.TipoEventoAlquiler == "Publico" && s.Estado == "Aprobado")
+                                    {
+                                        <span class="text-warning small"><i class="bi bi-exclamation-triangle me-1"></i>Pendiente por cliente</span>
+                                    }
+                                    else if (s.TipoEventoAlquiler == "Privado")
+                                    {
+                                        <span class="text-muted small">Actividad privada (sin cartelera)</span>
+                                    }
+                                    else
+                                    {
+                                        <span class="text-muted small">—</span>
+                                    }
+                                </td>
                                 <td class="text-center small">
                                     @s.FechaInicio.ToString("dd/MM/yyyy")<br />
                                     <span class="text-muted">@s.FechaInicio.ToString("HH:mm") - @s.FechaFin.ToString("HH:mm")</span>
                                 </td>
-                                <td class="text-center">
-                                    @((s.FechaFin - s.FechaInicio).TotalHours.ToString("0.0"))h
-                                </td>
+                                <td class="text-center">@((s.FechaFin - s.FechaInicio).TotalHours.ToString("0.0"))h</td>
                                 <td class="text-end fw-bold">RD$ @s.MontoAlquiler.ToString("N0")</td>
-                                <td class="text-center">
-                                    <span class="badge bg-@badgeColor">@s.Estado</span>
-                                </td>
+                                <td class="text-center"><span class="badge estado-badge @estadoClass">@s.Estado</span></td>
                                 <td class="text-center">
                                     <div class="d-flex gap-1 justify-content-center">
                                         @if (s.Estado == "Pendiente")
@@ -78,12 +110,10 @@
                                                     <i class="bi bi-check-lg"></i> Aprobar
                                                 </button>
                                             </form>
-                                            <button type="button" class="btn btn-danger btn-sm rounded-pill"
-                                                    onclick="rechazarSolicitud(@s.Id)">
+                                            <button type="button" class="btn btn-danger btn-sm rounded-pill" onclick="rechazarSolicitud(@s.Id)">
                                                 <i class="bi bi-x-lg"></i> Rechazar
                                             </button>
                                         }
-                                        @* Nueva acción: Terminar (solo si ya está aprobado) *@
                                         else if (s.Estado == "Aprobado")
                                         {
                                             <form asp-action="Terminar" method="post">
@@ -106,9 +136,9 @@
                     else
                     {
                         <tr>
-                            <td colspan="8" class="text-center py-5">
+                            <td colspan="10" class="text-center py-5">
                                 <i class="bi bi-inbox text-muted d-block mb-2" style="font-size: 2rem;"></i>
-                                <p class="text-muted">No hay solicitudes registradas.</p>
+                                <p class="text-muted mb-0">No hay solicitudes registradas.</p>
                             </td>
                         </tr>
                     }
@@ -118,12 +148,11 @@
     </div>
 </div>
 
-@* Modal para rechazar con motivo *@
 <div class="modal fade" id="modalRechazar" tabindex="-1">
     <div class="modal-dialog modal-dialog-centered">
-        <div class="modal-content border-0 shadow" style="border-radius: 15px;">
-            <div class="modal-header bg-danger text-white border-0" style="border-radius: 15px 15px 0 0;">
-                <h5 class="modal-title fw-bold"><i class="bi bi-x-circle me-2"></i> Rechazar Solicitud</h5>
+        <div class="modal-content border-0 shadow rounded-4">
+            <div class="modal-header bg-danger text-white border-0 rounded-top-4">
+                <h5 class="modal-title fw-bold"><i class="bi bi-x-circle me-2"></i>Rechazar solicitud</h5>
                 <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
             </div>
             <div class="modal-body p-4">
@@ -132,18 +161,27 @@
                     <input type="hidden" id="rechazarId" name="id" />
                     <div class="mb-3">
                         <label class="form-label fw-bold small">Motivo del rechazo</label>
-                        <textarea name="motivoRechazo" class="form-control" rows="3"
-                                  style="border-radius: 10px;"
-                                  placeholder="Explica por qué se rechaza la solicitud..." required></textarea>
+                        <textarea name="motivoRechazo" class="form-control" rows="3" style="border-radius: 10px;" placeholder="Explica por qué se rechaza la solicitud..." required></textarea>
                     </div>
-                    <button type="submit" class="btn btn-danger w-100 rounded-pill fw-bold">
-                        Confirmar Rechazo
-                    </button>
+                    <button type="submit" class="btn btn-danger w-100 rounded-pill fw-bold">Confirmar rechazo</button>
                 </form>
             </div>
         </div>
     </div>
 </div>
+
+<style>
+    .gestion-solicitudes-ui .estado-badge {
+        font-weight: 600;
+        border-radius: 999px;
+        padding: .4rem .75rem;
+    }
+
+    .gestion-solicitudes-ui .estado-aprobado { background: #198754; color: #fff; }
+    .gestion-solicitudes-ui .estado-rechazado { background: #dc3545; color: #fff; }
+    .gestion-solicitudes-ui .estado-terminado { background: #6c757d; color: #fff; }
+    .gestion-solicitudes-ui .estado-pendiente { background: #ffc107; color: #212529; }
+</style>
 
 <script>
     function rechazarSolicitud(id) {

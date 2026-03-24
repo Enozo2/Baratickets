@@ -55,56 +55,86 @@ namespace Baratickets2._0.Controllers
             var mesActual = mes ?? DateTime.Now.Month;
             var anioActual = anio ?? DateTime.Now.Year;
             var inicioMes = new DateTime(anioActual, mesActual, 1);
-            var finMes = inicioMes.AddMonths(1).AddDays(-1);
+            var inicioMesSiguiente = inicioMes.AddMonths(1);
 
             ViewBag.MesSeleccionado = mesActual;
             ViewBag.AnioSeleccionado = anioActual;
 
-            // ✅ Obtener IDs de eventos vinculados a alquileres
-            var eventosDeAlquiler = await _context.SolicitudesAlquiler
-                .Where(s => s.EventoId != null)
-                .Select(s => s.EventoId)
+            var lugares = await _context.Lugares.ToListAsync();
+
+            var eventosMes = await _context.Eventos
+                .Include(e => e.Tickets)
+                .Where(e => e.FechaInicio >= inicioMes
+                         && e.FechaInicio < inicioMesSiguiente
+                         && e.EstadoEvento == "Publicado")
                 .ToListAsync();
 
-            var reporte = await _context.Lugares
-                .Select(l => new {
+            var solicitudesAprobadas = await _context.SolicitudesAlquiler
+                .Where(s => s.Estado == "Aprobado")
+                .ToListAsync();
+
+            var solicitudesAprobadasMes = solicitudesAprobadas
+                .Where(s => s.FechaInicio >= inicioMes && s.FechaInicio < inicioMesSiguiente)
+                .ToList();
+
+            // Eventos explícitamente vinculados a alquiler (cuando EventoId está presente)
+            var eventosDeAlquilerIds = solicitudesAprobadas
+                .Where(s => s.EventoId.HasValue)
+                .Select(s => s.EventoId!.Value)
+                .ToHashSet();
+
+            // Respaldo: detectar eventos creados desde alquiler aunque EventoId se haya limpiado
+            var eventosDetectadosComoAlquilerIds = eventosMes
+                .Where(e => solicitudesAprobadas.Any(s =>
+                    s.TipoEventoAlquiler == "Publico" &&
+                    s.ClienteId == e.OrganizadorId &&
+                    s.LugarId == e.LugarId &&
+                    e.FechaInicio >= s.FechaInicio &&
+                    e.FechaFin <= s.FechaFin))
+                .Select(e => e.Id)
+                .ToHashSet();
+
+            var reporteFinal = lugares.Select(l =>
+            {
+                var eventosPropios = eventosMes
+                    .Where(e => e.LugarId == l.Id
+                             && !eventosDeAlquilerIds.Contains(e.Id)
+                             && !eventosDetectadosComoAlquilerIds.Contains(e.Id))
+                    .Select(e => new { e.Id, Nombre = e.Nombre })
+                    .DistinctBy(e => e.Id)
+                    .ToList();
+
+                var alquileresAprobados = solicitudesAprobadasMes
+                    .Where(s => s.LugarId == l.Id)
+                    .Select(s => new { s.Id, Nombre = s.NombreEvento })
+                    .DistinctBy(s => s.Id)
+                    .ToList();
+
+                var eventosPropiosIds = eventosPropios.Select(e => e.Id).ToHashSet();
+
+                var gananciaTickets = eventosMes
+                    .Where(e => eventosPropiosIds.Contains(e.Id))
+                    .SelectMany(e => e.Tickets ?? new List<Ticket>())
+                    .Where(t => t.Estado != "Devuelto"
+                             && t.FechaCompra >= inicioMes
+                             && t.FechaCompra < inicioMesSiguiente)
+                    .Sum(t => t.PrecioPagado);
+
+                var gananciaAlquileres = solicitudesAprobadasMes
+                    .Where(s => s.LugarId == l.Id)
+                    .Sum(s => s.MontoAlquiler);
+
+                return new
+                {
                     NombreRecinto = l.Nombre,
-                    // ✅ Excluir eventos del organizador temporal
-                    EventosPropios = l.Eventos
-                        .Where(e => e.FechaInicio >= inicioMes && e.FechaInicio <= finMes
-                            && !eventosDeAlquiler.Contains(e.Id))
-                        .Select(e => new { Nombre = e.Nombre })
-                        .ToList(),
-                    AlquileresAprobados = l.SolicitudesAlquiler
-                        .Where(s => s.Estado == "Aprobado" &&
-                               s.FechaInicio >= inicioMes &&
-                               s.FechaInicio <= finMes)
-                        .Select(s => new { Nombre = s.NombreEvento })
-                        .ToList(),
-                    // ✅ Ganancias de tickets solo de eventos propios
-                    GananciaTickets = l.Eventos
-                        .Where(e => e.FechaInicio >= inicioMes && e.FechaInicio <= finMes
-                            && !eventosDeAlquiler.Contains(e.Id))
-                        .SelectMany(e => e.Tickets)
-                        .Where(t => t.Estado != "Devuelto")
-                        .Sum(t => (decimal?)t.PrecioPagado) ?? 0,
-                    GananciaAlquileres = l.SolicitudesAlquiler
-                        .Where(s => s.Estado == "Aprobado" &&
-                               s.FechaInicio >= inicioMes &&
-                               s.FechaInicio <= finMes)
-                        .Sum(s => (decimal?)s.MontoAlquiler) ?? 0
-                })
-                .ToListAsync();
-
-            var reporteFinal = reporte.Select(r => new {
-                r.NombreRecinto,
-                r.EventosPropios,
-                r.AlquileresAprobados,
-                CantidadEventos = r.EventosPropios.Count,
-                CantidadAlquileres = r.AlquileresAprobados.Count,
-                r.GananciaTickets,
-                r.GananciaAlquileres,
-                GananciaTotal = r.GananciaTickets + r.GananciaAlquileres
+                    EventosPropios = eventosPropios,
+                    AlquileresAprobados = alquileresAprobados,
+                    CantidadEventos = eventosPropios.Count,
+                    CantidadAlquileres = alquileresAprobados.Count,
+                    GananciaTickets = gananciaTickets,
+                    GananciaAlquileres = gananciaAlquileres,
+                    GananciaTotal = gananciaTickets + gananciaAlquileres
+                };
             }).ToList();
 
             ViewBag.GananciaEventos = reporteFinal.Sum(r => r.GananciaTickets);
