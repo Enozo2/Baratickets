@@ -95,7 +95,7 @@ using (var scope = app.Services.CreateScope())
         }
 
         // 2. Crear Admin predeterminado si no existe
-        var adminEmail = "Enocr28@gmail.com";
+        var adminEmail = "Admin@gmail.com";
         var adminExistente = userManager.FindByEmailAsync(adminEmail).Result;
 
         if (adminExistente == null)
