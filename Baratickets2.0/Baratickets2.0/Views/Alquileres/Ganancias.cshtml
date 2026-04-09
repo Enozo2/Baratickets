@@ -1,0 +1,81 @@
+@model IEnumerable<Baratickets2._0.Models.SolicitudAlquiler>
+
+@{
+    ViewData["Title"] = "Ganancias de Eventos";
+    var ahora = DateTime.Now;
+}
+
+<div class="container mt-4">
+    <h2 class="fw-bold mb-3"><i class="bi bi-cash-coin me-2"></i>Ganancias de eventos públicos</h2>
+
+    @if (TempData["Success"] != null)
+    {
+        <div class="alert alert-success rounded-3">@TempData["Success"]</div>
+    }
+    @if (TempData["Error"] != null)
+    {
+        <div class="alert alert-danger rounded-3">@TempData["Error"]</div>
+    }
+
+    @if (!Model.Any())
+    {
+        <div class="alert alert-info rounded-3">No tienes eventos públicos con ganancias para mostrar.</div>
+    }
+    else
+    {
+        <div class="row g-3">
+            @foreach (var s in Model)
+            {
+                var totalGanado = s.Evento?.Tickets?.Where(t => t.Estado != "Devuelto").Sum(t => t.PrecioPagado) ?? 0;
+                var puedeCobrar = !s.GananciasCobradas
+                                  && s.FechaFin <= ahora
+                                  && totalGanado > 0
+                                  && !string.IsNullOrWhiteSpace(s.CuentaGanancias)
+                                  && s.Estado != "Cancelado"
+                                  && s.Estado != "Rechazado";
+
+                <div class="col-md-6">
+                    <div class="card shadow-sm border-0 rounded-4 h-100">
+                        <div class="card-body">
+                            <div class="d-flex justify-content-between align-items-start mb-2">
+                                <h5 class="fw-bold mb-0">@s.NombreEvento</h5>
+                                <span class="badge bg-primary">@s.Estado</span>
+                            </div>
+
+                            <p class="text-muted small mb-1"><i class="bi bi-geo-alt me-1"></i>@s.Lugar?.Nombre</p>
+                            <p class="text-muted small mb-1"><i class="bi bi-calendar me-1"></i>@s.FechaInicio.ToString("dd/MM/yyyy HH:mm")</p>
+                            <p class="text-muted small mb-3"><i class="bi bi-wallet2 me-1"></i>@(string.IsNullOrWhiteSpace(s.CuentaGanancias) ? "Método de cobro no configurado" : s.CuentaGanancias)</p>
+
+                            <h4 class="fw-bold text-success mb-3">Ganancia: RD$ @totalGanado.ToString("N2")</h4>
+
+                            @if (s.GananciasCobradas)
+                            {
+                                <div class="alert alert-success py-2 mb-0">
+                                    Cobrado: RD$ @s.MontoGananciasCobradas.ToString("N2")
+                                    <br />
+                                    <small>Fecha: @s.FechaCobroGanancias?.ToString("dd/MM/yyyy HH:mm")</small>
+                                </div>
+                            }
+                            else if (puedeCobrar)
+                            {
+                                <form asp-action="CobrarGanancias" method="post">
+                                    @Html.AntiForgeryToken()
+                                    <input type="hidden" name="id" value="@s.Id" />
+                                    <button type="submit" class="btn btn-success rounded-pill px-4">
+                                        <i class="bi bi-cash-stack me-1"></i>Cobrar ganancias
+                                    </button>
+                                </form>
+                            }
+                            else
+                            {
+                                <small class="text-muted">
+                                    Disponible para cobro al finalizar evento, con método de cobro configurado y ganancias positivas.
+                                </small>
+                            }
+                        </div>
+                    </div>
+                </div>
+            }
+        </div>
+    }
+</div>

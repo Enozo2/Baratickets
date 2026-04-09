@@ -349,6 +349,9 @@ namespace Baratickets2._0.Migrations
                     b.Property<int?>("EventoId")
                         .HasColumnType("int");
 
+                    b.Property<DateTime?>("FechaCobroGanancias")
+                        .HasColumnType("datetime2");
+
                     b.Property<DateTime>("FechaFin")
                         .HasColumnType("datetime2");
 
@@ -358,10 +361,16 @@ namespace Baratickets2._0.Migrations
                     b.Property<DateTime>("FechaSolicitud")
                         .HasColumnType("datetime2");
 
+                    b.Property<bool>("GananciasCobradas")
+                        .HasColumnType("bit");
+
                     b.Property<int>("LugarId")
                         .HasColumnType("int");
 
                     b.Property<decimal>("MontoAlquiler")
+                        .HasColumnType("decimal(18,2)");
+
+                    b.Property<decimal>("MontoGananciasCobradas")
                         .HasColumnType("decimal(18,2)");
 
                     b.Property<string>("MotivoRechazo")

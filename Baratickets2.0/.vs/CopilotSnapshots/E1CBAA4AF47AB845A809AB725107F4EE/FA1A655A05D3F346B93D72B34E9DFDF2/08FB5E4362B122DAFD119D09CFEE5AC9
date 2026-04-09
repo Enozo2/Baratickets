@@ -1,0 +1,171 @@
+﻿@model IEnumerable<Baratickets2._0.Models.SolicitudAlquiler>
+
+@{
+    ViewData["Title"] = "Mis Solicitudes";
+    bool tieneSolicitudActiva = Model.Any(s => s.Estado == "Pendiente" || s.Estado == "Aprobado");
+    var ahora = DateTime.Now;
+}
+
+<div class="container mt-5 solicitudes-ui">
+    <div class="d-flex flex-wrap justify-content-between align-items-center gap-3 mb-4">
+        <div>
+            <h2 class="fw-bold mb-1"><i class="bi bi-building me-2"></i>Mis solicitudes de alquiler</h2>
+            <p class="text-muted mb-0">Revisa estados, pagos y próximos pasos de cada solicitud.</p>
+        </div>
+        @if (!tieneSolicitudActiva)
+        {
+            <a asp-action="Solicitar" class="btn btn-primary rounded-pill px-4">
+                <i class="bi bi-plus-circle me-2"></i>Nueva solicitud
+            </a>
+        }
+    </div>
+
+    @if (TempData["Success"] != null)
+    {
+        <div class="alert alert-success rounded-3 shadow-sm border-0">
+            <i class="bi bi-check-circle me-2"></i> @TempData["Success"]
+        </div>
+    }
+
+    @if (TempData["Error"] != null)
+    {
+        <div class="alert alert-danger rounded-3 shadow-sm border-0">
+            <i class="bi bi-exclamation-triangle me-2"></i> @TempData["Error"]
+        </div>
+    }
+
+    @if (!Model.Any())
+    {
+        <div class="alert alert-info text-center rounded-4 py-4 border-0 shadow-sm">
+            <h5 class="mb-2">No tienes solicitudes todavía.</h5>
+            <p class="mb-3">Cuando solicites un recinto, lo verás aquí con su estado y acciones.</p>
+            <a asp-action="Solicitar" class="btn btn-primary rounded-pill px-4">Solicitar un espacio</a>
+        </div>
+    }
+    else
+    {
+        <div class="row g-3">
+            @foreach (var s in Model)
+            {
+                var badgeClass = s.Estado == "Aprobado" ? "estado-aprobado" :
+                                s.Estado == "Rechazado" ? "estado-rechazado" :
+                                s.Estado == "Terminado" ? "estado-terminado" :
+                                s.Estado == "Cancelado" ? "estado-cancelado" : "estado-pendiente";
+                var puedeCancelar = s.Estado == "Aprobado" && s.EventoId == null && s.FechaInicio >= ahora.AddDays(5);
+
+                <div class="col-md-6">
+                    <div class="card shadow-sm border-0 h-100 rounded-4">
+                        <div class="card-body p-4 d-flex flex-column">
+                            <div class="d-flex justify-content-between align-items-start mb-3">
+                                <h5 class="fw-bold mb-0">@s.NombreEvento</h5>
+                                <span class="badge estado-badge @badgeClass">@s.Estado</span>
+                            </div>
+
+                            <div class="small text-muted mb-2 d-flex flex-wrap align-items-center gap-2">
+                                <span class="badge @(s.TipoEventoAlquiler == "Privado" ? "bg-secondary" : "bg-primary")">@s.TipoEventoAlquiler</span>
+                                @if (s.TipoEventoAlquiler == "Publico" && !string.IsNullOrWhiteSpace(s.CuentaGanancias))
+                                {
+                                    <span><i class="bi bi-wallet2 me-1"></i>@s.CuentaGanancias</span>
+                                }
+                                else if (s.TipoEventoAlquiler == "Publico" && s.Estado == "Aprobado")
+                                {
+                                    <span class="text-warning"><i class="bi bi-exclamation-triangle me-1"></i>Pendiente configurar cobro</span>
+                                }
+                            </div>
+
+                            <p class="text-muted small mb-2"><i class="bi bi-geo-alt-fill text-primary me-1"></i>@s.Lugar?.Nombre</p>
+                            <p class="text-muted small mb-2"><i class="bi bi-calendar me-1"></i>@s.FechaInicio.ToString("dd/MM/yyyy HH:mm") — @s.FechaFin.ToString("HH:mm")</p>
+                            <p class="text-muted small mb-3"><i class="bi bi-clock me-1"></i>@((s.FechaFin - s.FechaInicio).TotalHours.ToString("0.0")) horas</p>
+
+                            <div class="mt-auto d-flex justify-content-between align-items-center gap-2">
+                                <h5 class="fw-bold text-primary mb-0">RD$ @s.MontoAlquiler.ToString("N0")</h5>
+
+                                @if (s.Estado == "Aprobado" && s.TipoEventoAlquiler == "Publico")
+                                {
+                                    if (s.EventoId != null)
+                                    {
+                                        <a asp-controller="Eventos" asp-action="Dashboard" asp-route-id="@s.EventoId" class="btn btn-primary btn-sm rounded-pill px-3">
+                                            <i class="bi bi-graph-up me-1"></i>Dashboard
+                                        </a>
+                                    }
+                                    else
+                                    {
+                                        <div class="d-flex gap-2">
+                                            <a asp-controller="Eventos" asp-action="CrearDesdeAlquiler" asp-route-id="@s.Id" class="btn btn-warning btn-sm rounded-pill text-dark fw-bold px-3">
+                                                <i class="bi bi-plus-circle me-1"></i>Crear evento
+                                            </a>
+                                            @if (puedeCancelar)
+                                            {
+                                                <form asp-action="Cancelar" method="post" class="d-inline">
+                                                    @Html.AntiForgeryToken()
+                                                    <input type="hidden" name="id" value="@s.Id" />
+                                                    <button type="submit" class="btn btn-outline-danger btn-sm rounded-pill px-3">
+                                                        <i class="bi bi-x-circle me-1"></i>Cancelar
+                                                    </button>
+                                                </form>
+                                            }
+                                        </div>
+                                    }
+                                }
+                                else if (s.Estado == "Aprobado" && s.TipoEventoAlquiler == "Privado")
+                                {
+                                    <div class="d-flex align-items-center gap-2">
+                                        <span class="badge bg-secondary">Privado (sin cartelera)</span>
+                                        @if (puedeCancelar)
+                                        {
+                                            <form asp-action="Cancelar" method="post" class="d-inline">
+                                                @Html.AntiForgeryToken()
+                                                <input type="hidden" name="id" value="@s.Id" />
+                                                <button type="submit" class="btn btn-outline-danger btn-sm rounded-pill px-3">
+                                                    <i class="bi bi-x-circle me-1"></i>Cancelar
+                                                </button>
+                                            </form>
+                                        }
+                                    </div>
+                                }
+                            </div>
+
+                            @if (s.Estado == "Aprobado" && s.EventoId == null && !puedeCancelar)
+                            {
+                                <small class="text-muted mt-2 d-block">
+                                    La cancelación con reembolso (20%) solo está disponible hasta 5 días antes del inicio.
+                                </small>
+                            }
+
+                            @if (s.Estado == "Rechazado" && !string.IsNullOrEmpty(s.MotivoRechazo))
+                            {
+                                <div class="alert alert-danger mt-3 mb-0 py-2 px-3 rounded-3 small">
+                                    <i class="bi bi-info-circle me-1"></i><strong>Motivo:</strong> @s.MotivoRechazo
+                                </div>
+                            }
+
+                            @if (s.Estado == "Cancelado" && !string.IsNullOrEmpty(s.MotivoRechazo))
+                            {
+                                <div class="alert alert-warning mt-3 mb-0 py-2 px-3 rounded-3 small">
+                                    <i class="bi bi-cash-coin me-1"></i><strong>Reembolso:</strong> @s.MotivoRechazo
+                                </div>
+                            }
+                        </div>
+                        <div class="card-footer bg-white border-0 pt-0 pb-3 px-4">
+                            <small class="text-muted">Solicitado: @s.FechaSolicitud.ToString("dd/MM/yyyy HH:mm")</small>
+                        </div>
+                    </div>
+                </div>
+            }
+        </div>
+    }
+</div>
+
+<style>
+    .solicitudes-ui .estado-badge {
+        font-weight: 600;
+        border-radius: 999px;
+        padding: .4rem .75rem;
+    }
+
+    .solicitudes-ui .estado-aprobado { background: #198754; color: #fff; }
+    .solicitudes-ui .estado-rechazado { background: #dc3545; color: #fff; }
+    .solicitudes-ui .estado-terminado { background: #6c757d; color: #fff; }
+    .solicitudes-ui .estado-cancelado { background: #fd7e14; color: #fff; }
+    .solicitudes-ui .estado-pendiente { background: #ffc107; color: #212529; }
+</style>

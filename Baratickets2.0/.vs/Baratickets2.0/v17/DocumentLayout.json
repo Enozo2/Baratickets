@@ -3,6 +3,10 @@
   "WorkspaceRootPath": "C:\\Users\\Enocr\\OneDrive\\Escritorio\\Baratickets\\Baratickets2.0\\",
   "Documents": [
     {
+      "AbsoluteMoniker": "D:0:0:{EB57C89B-746E-4794-BCAB-10C01C17C109}|Baratickets2.0\\Baratickets2.0.csproj|c:\\users\\enocr\\onedrive\\escritorio\\baratickets\\baratickets2.0\\baratickets2.0\\views\\eventos\\mievento.cshtml||{40D31677-CBC0-4297-A9EF-89D907823A98}",
+      "RelativeMoniker": "D:0:0:{EB57C89B-746E-4794-BCAB-10C01C17C109}|Baratickets2.0\\Baratickets2.0.csproj|solutionrelative:baratickets2.0\\views\\eventos\\mievento.cshtml||{40D31677-CBC0-4297-A9EF-89D907823A98}"
+    },
+    {
       "AbsoluteMoniker": "D:0:0:{EB57C89B-746E-4794-BCAB-10C01C17C109}|Baratickets2.0\\Baratickets2.0.csproj|c:\\users\\enocr\\onedrive\\escritorio\\baratickets\\baratickets2.0\\baratickets2.0\\program.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
       "RelativeMoniker": "D:0:0:{EB57C89B-746E-4794-BCAB-10C01C17C109}|Baratickets2.0\\Baratickets2.0.csproj|solutionrelative:baratickets2.0\\program.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
     },
@@ -37,10 +41,6 @@
     {
       "AbsoluteMoniker": "D:0:0:{EB57C89B-746E-4794-BCAB-10C01C17C109}|Baratickets2.0\\Baratickets2.0.csproj|c:\\users\\enocr\\onedrive\\escritorio\\baratickets\\baratickets2.0\\baratickets2.0\\views\\eventos\\create.cshtml||{40D31677-CBC0-4297-A9EF-89D907823A98}",
       "RelativeMoniker": "D:0:0:{EB57C89B-746E-4794-BCAB-10C01C17C109}|Baratickets2.0\\Baratickets2.0.csproj|solutionrelative:baratickets2.0\\views\\eventos\\create.cshtml||{40D31677-CBC0-4297-A9EF-89D907823A98}"
-    },
-    {
-      "AbsoluteMoniker": "D:0:0:{EB57C89B-746E-4794-BCAB-10C01C17C109}|Baratickets2.0\\Baratickets2.0.csproj|c:\\users\\enocr\\onedrive\\escritorio\\baratickets\\baratickets2.0\\baratickets2.0\\views\\eventos\\mievento.cshtml||{40D31677-CBC0-4297-A9EF-89D907823A98}",
-      "RelativeMoniker": "D:0:0:{EB57C89B-746E-4794-BCAB-10C01C17C109}|Baratickets2.0\\Baratickets2.0.csproj|solutionrelative:baratickets2.0\\views\\eventos\\mievento.cshtml||{40D31677-CBC0-4297-A9EF-89D907823A98}"
     },
     {
       "AbsoluteMoniker": "D:0:0:{EB57C89B-746E-4794-BCAB-10C01C17C109}|Baratickets2.0\\Baratickets2.0.csproj|c:\\users\\enocr\\onedrive\\escritorio\\baratickets\\baratickets2.0\\baratickets2.0\\views\\eventos\\index.cshtml||{40D31677-CBC0-4297-A9EF-89D907823A98}",
@@ -216,6 +216,18 @@
     {
       "AbsoluteMoniker": "D:0:0:{EB57C89B-746E-4794-BCAB-10C01C17C109}|Baratickets2.0\\Baratickets2.0.csproj|c:\\users\\enocr\\onedrive\\escritorio\\baratickets\\baratickets2.0\\baratickets2.0\\views\\alquileres\\configurarganancias.cshtml||{40D31677-CBC0-4297-A9EF-89D907823A98}",
       "RelativeMoniker": "D:0:0:{EB57C89B-746E-4794-BCAB-10C01C17C109}|Baratickets2.0\\Baratickets2.0.csproj|solutionrelative:baratickets2.0\\views\\alquileres\\configurarganancias.cshtml||{40D31677-CBC0-4297-A9EF-89D907823A98}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{EB57C89B-746E-4794-BCAB-10C01C17C109}|Baratickets2.0\\Baratickets2.0.csproj|c:\\users\\enocr\\onedrive\\escritorio\\baratickets\\baratickets2.0\\baratickets2.0\\views\\alquileres\\facturas.cshtml||{40D31677-CBC0-4297-A9EF-89D907823A98}",
+      "RelativeMoniker": "D:0:0:{EB57C89B-746E-4794-BCAB-10C01C17C109}|Baratickets2.0\\Baratickets2.0.csproj|solutionrelative:baratickets2.0\\views\\alquileres\\facturas.cshtml||{40D31677-CBC0-4297-A9EF-89D907823A98}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{EB57C89B-746E-4794-BCAB-10C01C17C109}|Baratickets2.0\\Baratickets2.0.csproj|c:\\users\\enocr\\onedrive\\escritorio\\baratickets\\baratickets2.0\\baratickets2.0\\views\\alquileres\\ganancias.cshtml||{40D31677-CBC0-4297-A9EF-89D907823A98}",
+      "RelativeMoniker": "D:0:0:{EB57C89B-746E-4794-BCAB-10C01C17C109}|Baratickets2.0\\Baratickets2.0.csproj|solutionrelative:baratickets2.0\\views\\alquileres\\ganancias.cshtml||{40D31677-CBC0-4297-A9EF-89D907823A98}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{EB57C89B-746E-4794-BCAB-10C01C17C109}|Baratickets2.0\\Baratickets2.0.csproj|c:\\users\\enocr\\onedrive\\escritorio\\baratickets\\baratickets2.0\\baratickets2.0\\views\\alquileres\\facturadetalle.cshtml||{40D31677-CBC0-4297-A9EF-89D907823A98}",
+      "RelativeMoniker": "D:0:0:{EB57C89B-746E-4794-BCAB-10C01C17C109}|Baratickets2.0\\Baratickets2.0.csproj|solutionrelative:baratickets2.0\\views\\alquileres\\facturadetalle.cshtml||{40D31677-CBC0-4297-A9EF-89D907823A98}"
     }
   ],
   "DocumentGroupContainers": [
@@ -225,28 +237,47 @@
       "DocumentGroups": [
         {
           "DockedWidth": 200,
-          "SelectedChildIndex": 1,
+          "SelectedChildIndex": 11,
           "Children": [
             {
-              "$type": "Bookmark",
-              "Name": "ST:0:0:{56df62a4-05a3-4e5b-aa1a-99371ccfb997}"
+              "$type": "Document",
+              "DocumentIndex": 56,
+              "Title": "FacturaDetalle.cshtml",
+              "DocumentMoniker": "C:\\Users\\Enocr\\OneDrive\\Escritorio\\Baratickets\\Baratickets2.0\\Baratickets2.0\\Views\\Alquileres\\FacturaDetalle.cshtml",
+              "RelativeDocumentMoniker": "Baratickets2.0\\Views\\Alquileres\\FacturaDetalle.cshtml",
+              "ToolTip": "C:\\Users\\Enocr\\OneDrive\\Escritorio\\Baratickets\\Baratickets2.0\\Baratickets2.0\\Views\\Alquileres\\FacturaDetalle.cshtml",
+              "RelativeToolTip": "Baratickets2.0\\Views\\Alquileres\\FacturaDetalle.cshtml",
+              "ViewState": "AgIAAAAAAAAAAAAAAAAAAF0AAAABAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000759|",
+              "WhenOpened": "2026-04-08T12:26:26.156Z"
             },
             {
               "$type": "Document",
-              "DocumentIndex": 0,
+              "DocumentIndex": 54,
+              "Title": "Facturas.cshtml",
+              "DocumentMoniker": "C:\\Users\\Enocr\\OneDrive\\Escritorio\\Baratickets\\Baratickets2.0\\Baratickets2.0\\Views\\Alquileres\\Facturas.cshtml",
+              "RelativeDocumentMoniker": "Baratickets2.0\\Views\\Alquileres\\Facturas.cshtml",
+              "ToolTip": "C:\\Users\\Enocr\\OneDrive\\Escritorio\\Baratickets\\Baratickets2.0\\Baratickets2.0\\Views\\Alquileres\\Facturas.cshtml",
+              "RelativeToolTip": "Baratickets2.0\\Views\\Alquileres\\Facturas.cshtml",
+              "ViewState": "AgIAAEEAAAAAAAAAAIBJwEMAAAAGAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000759|",
+              "WhenOpened": "2026-04-08T12:14:12.282Z"
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 1,
               "Title": "Program.cs",
               "DocumentMoniker": "C:\\Users\\Enocr\\OneDrive\\Escritorio\\Baratickets\\Baratickets2.0\\Baratickets2.0\\Program.cs",
               "RelativeDocumentMoniker": "Baratickets2.0\\Program.cs",
               "ToolTip": "C:\\Users\\Enocr\\OneDrive\\Escritorio\\Baratickets\\Baratickets2.0\\Baratickets2.0\\Program.cs",
               "RelativeToolTip": "Baratickets2.0\\Program.cs",
-              "ViewState": "AgIAAEIAAAAAAAAAAAAYwG8AAABBAAAAAAAAAA==",
+              "ViewState": "AgIAAEIAAAAAAAAAAAAYwGEAAAApAAAAAAAAAA==",
               "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
-              "WhenOpened": "2026-03-20T08:09:26.14Z",
-              "EditorCaption": ""
+              "WhenOpened": "2026-03-20T08:09:26.14Z"
             },
             {
               "$type": "Document",
-              "DocumentIndex": 1,
+              "DocumentIndex": 2,
               "Title": "CategoriaTicket.cs",
               "DocumentMoniker": "C:\\Users\\Enocr\\OneDrive\\Escritorio\\Baratickets\\Baratickets2.0\\Baratickets2.0\\Models\\CategoriaTicket.cs",
               "RelativeDocumentMoniker": "Baratickets2.0\\Models\\CategoriaTicket.cs",
@@ -254,24 +285,23 @@
               "RelativeToolTip": "Baratickets2.0\\Models\\CategoriaTicket.cs",
               "ViewState": "AgIAAAAAAAAAAAAAAAAAAA8AAAAjAAAAAAAAAA==",
               "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
-              "WhenOpened": "2026-03-20T07:46:38.364Z",
-              "EditorCaption": ""
+              "WhenOpened": "2026-03-20T07:46:38.364Z"
             },
             {
               "$type": "Document",
-              "DocumentIndex": 6,
+              "DocumentIndex": 7,
               "Title": "TikectsController.cs",
               "DocumentMoniker": "C:\\Users\\Enocr\\OneDrive\\Escritorio\\Baratickets\\Baratickets2.0\\Baratickets2.0\\Controllers\\TikectsController.cs",
               "RelativeDocumentMoniker": "Baratickets2.0\\Controllers\\TikectsController.cs",
               "ToolTip": "C:\\Users\\Enocr\\OneDrive\\Escritorio\\Baratickets\\Baratickets2.0\\Baratickets2.0\\Controllers\\TikectsController.cs",
               "RelativeToolTip": "Baratickets2.0\\Controllers\\TikectsController.cs",
-              "ViewState": "AgIAAJYBAAAAAAAAAAAYwK0BAAABAAAAAAAAAA==",
+              "ViewState": "AgIAAMMBAAAAAAAAAIBZwMgBAAABAAAAAAAAAA==",
               "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
               "WhenOpened": "2026-03-20T04:47:07.275Z"
             },
             {
               "$type": "Document",
-              "DocumentIndex": 5,
+              "DocumentIndex": 6,
               "Title": "Devolucion.cs",
               "DocumentMoniker": "C:\\Users\\Enocr\\OneDrive\\Escritorio\\Baratickets\\Baratickets2.0\\Baratickets2.0\\Models\\Devolucion.cs",
               "RelativeDocumentMoniker": "Baratickets2.0\\Models\\Devolucion.cs",
@@ -283,19 +313,19 @@
             },
             {
               "$type": "Document",
-              "DocumentIndex": 3,
+              "DocumentIndex": 4,
               "Title": "SolicitudAlquiler.cs",
               "DocumentMoniker": "C:\\Users\\Enocr\\OneDrive\\Escritorio\\Baratickets\\Baratickets2.0\\Baratickets2.0\\Models\\SolicitudAlquiler.cs",
               "RelativeDocumentMoniker": "Baratickets2.0\\Models\\SolicitudAlquiler.cs",
               "ToolTip": "C:\\Users\\Enocr\\OneDrive\\Escritorio\\Baratickets\\Baratickets2.0\\Baratickets2.0\\Models\\SolicitudAlquiler.cs",
               "RelativeToolTip": "Baratickets2.0\\Models\\SolicitudAlquiler.cs",
-              "ViewState": "AgIAAAAAAAAAAAAAAAAUwAAAAAAAAAAAAAAAAA==",
+              "ViewState": "AgIAAC4AAAAAAAAAAIBXwAAAAAAAAAAAAAAAAA==",
               "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
               "WhenOpened": "2026-03-20T07:47:15.049Z"
             },
             {
               "$type": "Document",
-              "DocumentIndex": 4,
+              "DocumentIndex": 5,
               "Title": "User.cs",
               "DocumentMoniker": "C:\\Users\\Enocr\\OneDrive\\Escritorio\\Baratickets\\Baratickets2.0\\Baratickets2.0\\Models\\User.cs",
               "RelativeDocumentMoniker": "Baratickets2.0\\Models\\User.cs",
@@ -307,7 +337,7 @@
             },
             {
               "$type": "Document",
-              "DocumentIndex": 2,
+              "DocumentIndex": 3,
               "Title": "MiCuentaViewModel.cs",
               "DocumentMoniker": "C:\\Users\\Enocr\\OneDrive\\Escritorio\\Baratickets\\Baratickets2.0\\Baratickets2.0\\Models\\MiCuentaViewModel.cs",
               "RelativeDocumentMoniker": "Baratickets2.0\\Models\\MiCuentaViewModel.cs",
@@ -343,15 +373,32 @@
             },
             {
               "$type": "Document",
-              "DocumentIndex": 9,
+              "DocumentIndex": 0,
               "Title": "MiEvento.cshtml",
               "DocumentMoniker": "C:\\Users\\Enocr\\OneDrive\\Escritorio\\Baratickets\\Baratickets2.0\\Baratickets2.0\\Views\\Eventos\\MiEvento.cshtml",
               "RelativeDocumentMoniker": "Baratickets2.0\\Views\\Eventos\\MiEvento.cshtml",
               "ToolTip": "C:\\Users\\Enocr\\OneDrive\\Escritorio\\Baratickets\\Baratickets2.0\\Baratickets2.0\\Views\\Eventos\\MiEvento.cshtml",
               "RelativeToolTip": "Baratickets2.0\\Views\\Eventos\\MiEvento.cshtml",
-              "ViewState": "AgIAAAAAAAAAAAAAAAAAAAsAAAAKAAAAAAAAAA==",
+              "ViewState": "AgIAAAwAAAAAAAAAAAAAACAAAABrAAAAAAAAAA==",
               "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000759|",
-              "WhenOpened": "2026-03-21T03:33:40.999Z"
+              "WhenOpened": "2026-03-21T03:33:40.999Z",
+              "EditorCaption": ""
+            },
+            {
+              "$type": "Bookmark",
+              "Name": "ST:0:0:{56df62a4-05a3-4e5b-aa1a-99371ccfb997}"
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 55,
+              "Title": "Ganancias.cshtml",
+              "DocumentMoniker": "C:\\Users\\Enocr\\OneDrive\\Escritorio\\Baratickets\\Baratickets2.0\\Baratickets2.0\\Views\\Alquileres\\Ganancias.cshtml",
+              "RelativeDocumentMoniker": "Baratickets2.0\\Views\\Alquileres\\Ganancias.cshtml",
+              "ToolTip": "C:\\Users\\Enocr\\OneDrive\\Escritorio\\Baratickets\\Baratickets2.0\\Baratickets2.0\\Views\\Alquileres\\Ganancias.cshtml",
+              "RelativeToolTip": "Baratickets2.0\\Views\\Alquileres\\Ganancias.cshtml",
+              "ViewState": "AgIAAAAAAAAAAAAAAAAAAFAAAAAGAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000759|",
+              "WhenOpened": "2026-04-08T12:14:35.614Z"
             },
             {
               "$type": "Document",
@@ -367,7 +414,7 @@
             },
             {
               "$type": "Document",
-              "DocumentIndex": 8,
+              "DocumentIndex": 9,
               "Title": "Create.cshtml",
               "DocumentMoniker": "C:\\Users\\Enocr\\OneDrive\\Escritorio\\Baratickets\\Baratickets2.0\\Baratickets2.0\\Views\\Eventos\\Create.cshtml",
               "RelativeDocumentMoniker": "Baratickets2.0\\Views\\Eventos\\Create.cshtml",
@@ -391,7 +438,7 @@
             },
             {
               "$type": "Document",
-              "DocumentIndex": 7,
+              "DocumentIndex": 8,
               "Title": "LugaresController.cs",
               "DocumentMoniker": "C:\\Users\\Enocr\\OneDrive\\Escritorio\\Baratickets\\Baratickets2.0\\Baratickets2.0\\Controllers\\LugaresController.cs",
               "RelativeDocumentMoniker": "Baratickets2.0\\Controllers\\LugaresController.cs",
@@ -445,7 +492,7 @@
               "RelativeDocumentMoniker": "Baratickets2.0\\Controllers\\AlquileresController.cs",
               "ToolTip": "C:\\Users\\Enocr\\OneDrive\\Escritorio\\Baratickets\\Baratickets2.0\\Baratickets2.0\\Controllers\\AlquileresController.cs",
               "RelativeToolTip": "Baratickets2.0\\Controllers\\AlquileresController.cs",
-              "ViewState": "AgIAAGYBAAAAAAAAAABBwGcBAAABAAAAAAAAAA==",
+              "ViewState": "AgIAAGkCAAAAAAAAAEBVwG0CAAABAAAAAAAAAA==",
               "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
               "WhenOpened": "2026-03-20T08:01:52.82Z"
             },
@@ -469,7 +516,7 @@
               "RelativeDocumentMoniker": "Baratickets2.0\\Views\\Alquileres\\MisSolicitudes.cshtml",
               "ToolTip": "C:\\Users\\Enocr\\OneDrive\\Escritorio\\Baratickets\\Baratickets2.0\\Baratickets2.0\\Views\\Alquileres\\MisSolicitudes.cshtml",
               "RelativeToolTip": "Baratickets2.0\\Views\\Alquileres\\MisSolicitudes.cshtml",
-              "ViewState": "AgIAAHcAAAAAAAAAAIBJwHkAAAAIAAAAAAAAAA==",
+              "ViewState": "AgIAANUAAAAAAAAAAIBJwNcAAAAJAAAAAAAAAA==",
               "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000759|",
               "WhenOpened": "2026-03-20T08:22:46.653Z"
             },
@@ -493,7 +540,7 @@
               "RelativeDocumentMoniker": "Baratickets2.0\\Views\\Alquileres\\GestionSolicitudes.cshtml",
               "ToolTip": "C:\\Users\\Enocr\\OneDrive\\Escritorio\\Baratickets\\Baratickets2.0\\Baratickets2.0\\Views\\Alquileres\\GestionSolicitudes.cshtml",
               "RelativeToolTip": "Baratickets2.0\\Views\\Alquileres\\GestionSolicitudes.cshtml",
-              "ViewState": "AgIAALwAAAAAAAAAAIBJwL4AAAAJAAAAAAAAAA==",
+              "ViewState": "AgIAAPQAAAAAAAAAAIBJwPYAAAAJAAAAAAAAAA==",
               "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000759|",
               "WhenOpened": "2026-03-20T08:24:11.496Z"
             },
@@ -517,7 +564,7 @@
               "RelativeDocumentMoniker": "Baratickets2.0\\Views\\Shared\\_Layout.cshtml",
               "ToolTip": "C:\\Users\\Enocr\\OneDrive\\Escritorio\\Baratickets\\Baratickets2.0\\Baratickets2.0\\Views\\Shared\\_Layout.cshtml",
               "RelativeToolTip": "Baratickets2.0\\Views\\Shared\\_Layout.cshtml",
-              "ViewState": "AgIAANwAAAAAAAAAAABBwN0AAAAHAAAAAAAAAA==",
+              "ViewState": "AgIAAOUAAAAAAAAAAIBJwOcAAAAHAAAAAAAAAA==",
               "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000759|",
               "WhenOpened": "2026-03-20T04:47:07.264Z"
             },
